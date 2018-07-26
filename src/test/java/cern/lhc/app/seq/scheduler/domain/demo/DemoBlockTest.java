@@ -5,7 +5,6 @@
 package cern.lhc.app.seq.scheduler.domain.demo;
 
 import static cern.lhc.app.seq.scheduler.domain.attributes.Attributes.PARALLEL_CHILDREN;
-import static org.junit.Assert.*;
 
 import java.util.Optional;
 
@@ -13,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import cern.lhc.app.seq.scheduler.domain.attributes.Attributes;
 import cern.lhc.app.seq.scheduler.domain.attributes.ParallelChildren;
 import cern.lhc.app.seq.scheduler.domain.execution.demo.DemoBlock;
 
