@@ -7,14 +7,14 @@ package cern.lhc.app.seq.scheduler.adapter.seq;
 import cern.lhc.app.seq.scheduler.gui.commands.Open;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
-import io.reactivex.Flowable;
+import reactor.core.publisher.Flux;
 
 public interface ExecutableAdapter {
 
-    public Flowable<Open> openEvents();
+    public Flux<Open> openEvents();
 
-    public Flowable<ResultChange> resultChanges();
+    public Flux<ResultChange> resultChanges();
 
-    public Flowable<RunStateChange> runStateChanges();
+    public Flux<RunStateChange> runStateChanges();
 
 }

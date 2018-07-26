@@ -9,11 +9,12 @@ allprojects {
     group = "cern.molr"
 
     repositories {
+        mavenCentral()
+
         maven { url 'http://artifactory.cern.ch/gradle-plugins' }
         maven { url 'http://artifactory.cern.ch/ds-jcenter' }
         maven { url 'http://artifactory.cern.ch/development' }
 
-        mavenCentral()
         maven { url "https://repo.spring.io/snapshot" }
         maven { url "https://repo.spring.io/milestone" }
     }
@@ -21,10 +22,11 @@ allprojects {
 
     dependencies {
         compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-        compile "io.reactivex.rxjava2:rxjava:2.1.17"
+        compile group: 'io.projectreactor', name: 'reactor-core', version: '3.1.8.RELEASE'
+        compile group: 'com.github.shadskii', name: 'reactorfx', version:'1.8.0'
+
         compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: springBootVersion
         compile group: 'com.google.guava', name: 'guava', version: guavaVersion
-        compile 'io.reactivex.rxjava2:rxjavafx:2.2.+'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
         compile group: 'cern.org.minifx', name: 'minifx-workbench', version: '0.0.+'

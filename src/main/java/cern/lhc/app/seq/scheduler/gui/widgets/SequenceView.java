@@ -4,7 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import static io.reactivex.rxjavafx.schedulers.JavaFxScheduler.platform;
+import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 
 import org.minifx.workbench.annotations.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public abstract class SequenceView extends BorderPane {
     public SequenceView(@Autowired ExecutableAdapter executableAdapter) {
         tabPane = new TabPane();
         setCenter(tabPane);
-        executableAdapter.openEvents().observeOn(platform()).subscribe(this::update);
+        executableAdapter.openEvents().subscribeOn(fxThread()).subscribe(this::update);
     }
 
     public void update(Open openExecutable) {

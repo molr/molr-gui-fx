@@ -4,7 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import static io.reactivex.rxjavafx.schedulers.JavaFxScheduler.platform;
+import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toList;
@@ -19,6 +19,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.PostConstruct;
 
+import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -79,10 +80,11 @@ public class SequencePane extends BorderPane {
 
     @PostConstruct
     public void init() {
+
         TreeItem<ExecutableLine> root = createTree();
 
-        executableAdapter.runStateChanges().observeOn(platform()).subscribe(this::updateRunState);
-        executableAdapter.resultChanges().observeOn(platform()).subscribe(this::updateResult);
+        executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
+        executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
 
         TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("ExecutionBlock");
         executableColumn.setPrefWidth(600);
@@ -119,7 +121,7 @@ public class SequencePane extends BorderPane {
                     line.actualTimeProperty().set(now);
                 }
             });
-        } , 0, 500, MILLISECONDS);
+        }, 0, 500, MILLISECONDS);
 
     }
 

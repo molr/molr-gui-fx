@@ -7,30 +7,30 @@ package cern.lhc.app.seq.scheduler.adapter.seq;
 import cern.lhc.app.seq.scheduler.gui.commands.Open;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
-import io.reactivex.Flowable;
-import io.reactivex.processors.PublishProcessor;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 
 /**
  * @author kfuchsbe
  */
 public abstract class AbstractExecutableAdapter implements ExecutableAdapter {
 
-    protected final PublishProcessor<Open> opens = PublishProcessor.create();
-    protected final PublishProcessor<ResultChange> resultChanges = PublishProcessor.create();
-    protected final PublishProcessor<RunStateChange> runStateChanges = PublishProcessor.create();
+    protected final EmitterProcessor<Open> opens = EmitterProcessor.create();
+    protected final EmitterProcessor<ResultChange> resultChanges = EmitterProcessor.create();
+    protected final EmitterProcessor<RunStateChange> runStateChanges = EmitterProcessor.create();
 
     @Override
-    public Flowable<Open> openEvents() {
+    public Flux<Open> openEvents() {
         return opens;
     }
 
     @Override
-    public Flowable<ResultChange> resultChanges() {
+    public Flux<ResultChange> resultChanges() {
         return resultChanges;
     }
 
     @Override
-    public Flowable<RunStateChange> runStateChanges() {
+    public Flux<RunStateChange> runStateChanges() {
         return runStateChanges;
     }
 }
