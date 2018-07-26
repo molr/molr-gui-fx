@@ -1,0 +1,50 @@
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'jacoco'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    group = "cern.molr"
+
+    repositories {
+        maven { url 'http://artifactory.cern.ch/gradle-plugins' }
+        maven { url 'http://artifactory.cern.ch/ds-jcenter' }
+        maven { url 'http://artifactory.cern.ch/development' }
+
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+
+
+    dependencies {
+        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+        compile "io.reactivex.rxjava2:rxjava:2.1.17"
+        compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: springBootVersion
+        compile group: 'com.google.guava', name: 'guava', version: guavaVersion
+        compile 'io.reactivex.rxjava2:rxjavafx:2.2.+'
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+
+        compile group: 'cern.org.minifx', name: 'minifx-workbench', version: '0.0.+'
+    }
+
+  
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            xml.destination new File("${buildDir}/reports/jacoco/report.xml")
+            html.enabled false
+            csv.enabled false
+        }
+    }
+}
+
+
+
+
