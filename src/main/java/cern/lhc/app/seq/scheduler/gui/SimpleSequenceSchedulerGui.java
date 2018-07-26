@@ -4,13 +4,13 @@
 
 package cern.lhc.app.seq.scheduler.gui;
 
+import cern.lhc.app.seq.scheduler.conf.DemoConfiguration;
 import org.minifx.workbench.MiniFx;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import cern.lhc.app.seq.scheduler.conf.DemoConfiguration;
+import cern.lhc.app.seq.scheduler.conf.DeprecatedDemoConfiguration;
 
 @Configuration
 @ComponentScan

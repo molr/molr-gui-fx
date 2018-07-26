@@ -9,6 +9,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import cern.lhc.app.seq.scheduler.domain.molr.Line;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
 
@@ -16,7 +17,7 @@ import cern.lhc.app.seq.scheduler.domain.attributes.Attribute;
 import cern.lhc.app.seq.scheduler.domain.execution.AbstractExecutionBlock;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 
-public class DemoBlock extends AbstractExecutionBlock {
+public class DemoBlock extends AbstractExecutionBlock implements Line {
 
     public DemoBlock(Builder builder) {
         super(builder.name, builder.children, builder.attributes);
@@ -24,6 +25,11 @@ public class DemoBlock extends AbstractExecutionBlock {
 
     public static final Builder builder(String name) {
         return new Builder(name);
+    }
+
+    @Override
+    public String text() {
+        return name();
     }
 
     public static class Builder {

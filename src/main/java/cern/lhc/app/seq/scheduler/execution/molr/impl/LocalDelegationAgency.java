@@ -4,12 +4,10 @@
 
 package cern.lhc.app.seq.scheduler.execution.molr.impl;
 
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -32,7 +30,7 @@ import reactor.core.publisher.Mono;
 /**
  * This is probably the most simple agency inventible: It is employing several moles, instantiating a mission on the
  * first one who can do it
- * 
+ *
  * @author kfuchsbe
  */
 public class LocalDelegationAgency implements Agency {
@@ -45,6 +43,11 @@ public class LocalDelegationAgency implements Agency {
         this.missionHandleFactory = requireNonNull(missionHandleFactory, "missionHandleFactory must not be null");
         requireNonNull(moles, "moles must not be null");
         this.missionMoles = scanMoles(moles);
+    }
+
+    @Override
+    public Flux<Mission> executableMissions() {
+        return Flux.fromIterable(missionMoles.keySet()).sort(comparing(Mission::name));
     }
 
     @Override

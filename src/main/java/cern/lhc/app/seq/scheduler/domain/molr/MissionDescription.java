@@ -4,15 +4,15 @@
 
 package cern.lhc.app.seq.scheduler.domain.molr;
 
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
 public interface MissionDescription {
 
-    SortedSet<Line> topLevel(Page page);
+    List<? extends Line> topLevel();
 
-    Set<Line> childrenOf(Line line);
+    List<Line> childrenOf(Line line);
 
-    Set<Page> pages();
 
 }

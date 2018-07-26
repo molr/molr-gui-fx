@@ -21,6 +21,10 @@ public class Mission {
         this.name = Objects.requireNonNull(name, "name must not be null");
     }
 
+    public String name() {
+        return name;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

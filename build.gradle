@@ -25,7 +25,14 @@ allprojects {
         compile group: 'io.projectreactor', name: 'reactor-core', version: '3.1.8.RELEASE'
         compile group: 'com.github.shadskii', name: 'reactorfx', version:'1.8.0'
 
-        compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: springBootVersion
+        compile('org.springframework.boot:spring-boot-starter-webflux:' + springBootVersion) {
+            exclude group: "ch.qos.logback", module: "logback-classic"
+            /*This dependency is automatically imported, it should be excluded to avoid infinite loop between slf4j
+            * and log4j
+            */
+            exclude group: "org.apache.logging.log4j", module: "log4j-to-slf4j"
+        }
+
         compile group: 'com.google.guava', name: 'guava', version: guavaVersion
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
