@@ -9,7 +9,8 @@ import static org.junit.Assert.*;
 
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 
 import cern.lhc.app.seq.scheduler.domain.attributes.Attributes;
@@ -21,11 +22,10 @@ public class DemoBlockTest {
     @Test
     public void booleanAttributeWorks() {
         DemoBlock block = DemoBlock.builder("demo block").attribute(PARALLEL_CHILDREN).build();
-
         Optional<ParallelChildren> parallel = block.get(ParallelChildren.class);
-        System.out.println(parallel.get().get());
 
-        Assertions.assertThat(block.has(PARALLEL_CHILDREN)).isTrue();
+        assertThat(parallel.get().get()).isTrue();
+        assertThat(block.has(PARALLEL_CHILDREN)).isTrue();
     }
 
 }
