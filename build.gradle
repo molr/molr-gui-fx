@@ -30,6 +30,11 @@ allprojects {
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
         compile group: 'cern.org.minifx', name: 'minifx-workbench', version: '0.0.+'
+
+        compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+        compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+        compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4jVersion
+
     }
 
   
