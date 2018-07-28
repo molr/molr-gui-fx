@@ -6,15 +6,13 @@ package cern.lhc.app.seq.scheduler.execution.molr;
 
 import java.util.Map;
 
-import cern.lhc.app.seq.scheduler.domain.molr.Mission;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionCommand;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionState;
+import cern.lhc.app.seq.scheduler.domain.molr.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface Agency {
+
+    Flux<AgencyState> states();
 
     Flux<Mission> executableMissions();
 

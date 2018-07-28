@@ -20,6 +20,11 @@ public class SingleAgencyMolrService implements MolrService {
     }
 
     @Override
+    public Flux<AgencyState> states() {
+        return agency.states();
+    }
+
+    @Override
     public Flux<Mission> executableMissions() {
         return agency.executableMissions();
     }

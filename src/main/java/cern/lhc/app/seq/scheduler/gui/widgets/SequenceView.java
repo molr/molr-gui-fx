@@ -5,8 +5,11 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
+import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
+import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import org.minifx.workbench.annotations.View;
+import org.minifx.workbench.domain.PerspectivePos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Component;
@@ -18,7 +21,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 
-@View
+@View(at = CENTER, in = MissionsPerspective.class)
 @Component
 public abstract class SequenceView extends BorderPane {
 

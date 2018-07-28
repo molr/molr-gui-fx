@@ -12,7 +12,7 @@ public class AtomicIncrementMissionHandleFactory implements MissionHandleFactory
 
     @Override
     public MissionHandle next() {
-        return MissionHandle.ofId(nextId.getAndIncrement());
+        return MissionHandle.ofMissionAndId(nextId.getAndIncrement());
     }
 
 }

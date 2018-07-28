@@ -4,6 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.execution.molr.impl;
 
+import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
@@ -11,21 +12,17 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.google.common.collect.ImmutableList;
+import cern.lhc.app.seq.scheduler.domain.molr.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.collect.Streams;
 
-import cern.lhc.app.seq.scheduler.domain.molr.Mission;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionCommand;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandleFactory;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionState;
 import cern.lhc.app.seq.scheduler.execution.molr.Agency;
 import cern.lhc.app.seq.scheduler.execution.molr.Mole;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * This is probably the most simple agency inventible: It is employing several moles, instantiating a mission on the
@@ -37,12 +34,22 @@ public class LocalDelegationAgency implements Agency {
 
     private final Map<Mission, Mole> missionMoles;
     private final ConcurrentMap<MissionHandle, Mole> activeMoles = new ConcurrentHashMap<>();
+    private final ConcurrentMap<MissionHandle, MissionInstance> missionInstances = new ConcurrentHashMap<>();
     private final MissionHandleFactory missionHandleFactory;
+    private final EmitterProcessor<AgencyState> states = EmitterProcessor.create(1);
+
+    private final Scheduler scheduler = Schedulers.elastic();
 
     public LocalDelegationAgency(MissionHandleFactory missionHandleFactory, Iterable<Mole> moles) {
         this.missionHandleFactory = requireNonNull(missionHandleFactory, "missionHandleFactory must not be null");
         requireNonNull(moles, "moles must not be null");
         this.missionMoles = scanMoles(moles);
+        publishState();
+    }
+
+    @Override
+    public Flux<AgencyState> states() {
+        return states;
     }
 
     @Override
@@ -57,13 +64,21 @@ public class LocalDelegationAgency implements Agency {
 
     @Override
     public Mono<MissionHandle> instantiate(Mission mission, Map<String, Object> params) {
-        return Mono.fromSupplier(() -> {
+        Mono<MissionHandle> mono = Mono.fromSupplier(() -> {
             MissionHandle handle = missionHandleFactory.next();
             Mole mole = missionMoles.get(mission);
-            activeMoles.put(handle, mole);
             mole.instantiate(handle, mission, params);
+            activeMoles.put(handle, mole);
+            MissionInstance instance = new MissionInstance(handle, mission);
+            missionInstances.put(handle, instance);
             return handle;
-        });
+        }).doOnNext(mh -> this.publishState()).cache();
+        mono.subscribeOn(scheduler).subscribe();
+        return mono;
+    }
+
+    private final void publishState() {
+        states.onNext(ImmutableAgencyState.of(missionInstances.values()));
     }
 
     @Override

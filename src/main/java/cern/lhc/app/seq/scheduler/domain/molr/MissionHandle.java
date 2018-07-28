@@ -12,7 +12,7 @@ public class MissionHandle {
         this.id = id;
     }
 
-    public static MissionHandle ofId(long id) {
+    public static MissionHandle ofMissionAndId(long id) {
         return new MissionHandle(id);
     }
 

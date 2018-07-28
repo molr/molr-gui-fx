@@ -4,9 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import static cern.lhc.app.seq.scheduler.domain.Result.UNDEFINED;
 import static cern.lhc.app.seq.scheduler.domain.RunState.FINISHED;
-import static cern.lhc.app.seq.scheduler.domain.RunState.UNDEFINED;
 import static cern.lhc.app.seq.scheduler.domain.RunState.RUNNING;
 import static cern.lhc.app.seq.scheduler.util.DurationFormats.shortLetters;
 
@@ -81,7 +79,7 @@ public class ExecutableLine {
                 return "" + shortLetters(elapsed) + " elapsed; " + shortLetters(stillToGo) + " still to go; ETA: "
                         + formatter.format(Instant.now().plus(stillToGo));
             }
-        } , usualDurationProperty(), elapsedDuration, runStateProperty()));
+        }, usualDurationProperty(), elapsedDuration, runStateProperty()));
 
         progress.bind(Bindings.createObjectBinding(() -> {
             RunState rs = runStateProperty().getValue();
@@ -102,7 +100,7 @@ public class ExecutableLine {
             }
 
             return (1.0 * elapsed.toMillis()) / (1.0 * expected.toMillis());
-        } , usualDurationProperty(), elapsedDuration, runStateProperty()));
+        }, usualDurationProperty(), elapsedDuration, runStateProperty()));
 
         runState.addListener((observable, oldValue, newValue) -> {
             /*
