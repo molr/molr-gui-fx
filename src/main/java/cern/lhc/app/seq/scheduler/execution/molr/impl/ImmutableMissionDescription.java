@@ -1,5 +1,6 @@
 package cern.lhc.app.seq.scheduler.execution.molr.impl;
 
+import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 import cern.lhc.app.seq.scheduler.domain.execution.demo.DemoBlock;
 import cern.lhc.app.seq.scheduler.domain.molr.Line;
 import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
@@ -13,26 +14,16 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class DemoMissionDescription implements MissionDescription {
+public class ImmutableMissionDescription implements MissionDescription {
 
-    private final DemoBlock root;
+    private final ExecutionBlock root;
 
-    public DemoMissionDescription(DemoBlock root) {
+    public ImmutableMissionDescription(ExecutionBlock root) {
         this.root = root;
     }
 
     @Override
-    public List<Line> topLevel() {
-        return childLines(root);
+    public ExecutionBlock rootBlock() {
+        return this.root;
     }
-
-    private List<Line> childLines(DemoBlock root) {
-        return root.children().stream().map(c -> (Line) c).collect(toList());
-    }
-
-    @Override
-    public List<Line> childrenOf(Line line) {
-        return childLines((DemoBlock) line);
-    }
-
 }

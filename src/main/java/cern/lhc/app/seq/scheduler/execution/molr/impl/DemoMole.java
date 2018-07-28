@@ -1,20 +1,14 @@
 package cern.lhc.app.seq.scheduler.execution.molr.impl;
 
-import cern.lhc.app.seq.scheduler.domain.Result;
-import cern.lhc.app.seq.scheduler.domain.RunState;
 import cern.lhc.app.seq.scheduler.domain.execution.demo.DemoBlock;
 import cern.lhc.app.seq.scheduler.domain.molr.*;
 import cern.lhc.app.seq.scheduler.execution.molr.Mole;
-import cern.lhc.app.seq.scheduler.gui.commands.Open;
-import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
-import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import com.google.common.collect.ImmutableSet;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class DemoMole implements Mole {
 
@@ -28,7 +22,7 @@ public class DemoMole implements Mole {
 
     @Override
     public Mono<MissionDescription> representationOf(Mission mission) {
-        return Mono.just(new DemoMissionDescription(dummyTree(mission)));
+        return Mono.just(new ImmutableMissionDescription(dummyTree(mission)));
     }
 
     @Override

@@ -4,15 +4,14 @@
 
 package cern.lhc.app.seq.scheduler.domain.molr;
 
+import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
+
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
 public interface MissionDescription {
 
-    List<? extends Line> topLevel();
-
-    List<Line> childrenOf(Line line);
-
+    ExecutionBlock rootBlock();
 
 }
