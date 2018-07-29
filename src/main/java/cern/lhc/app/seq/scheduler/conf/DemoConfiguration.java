@@ -1,9 +1,11 @@
 package cern.lhc.app.seq.scheduler.conf;
 
 import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
-import cern.lhc.app.seq.scheduler.adapter.seq.NoOpExecutableAdapter;
+import cern.lhc.app.seq.scheduler.adapter.seq.ApplicationEventExecutableAdapter;
 import cern.lhc.app.seq.scheduler.execution.molr.conf.MolrConfiguration;
 import cern.lhc.app.seq.scheduler.execution.molr.impl.DemoMole;
+import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
+import cern.lhc.app.seq.scheduler.info.HardcodedExecutableStatisticsProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -21,6 +23,11 @@ public class DemoConfiguration {
 
     @Bean
     public ExecutableAdapter executableAdapter() {
-        return new NoOpExecutableAdapter();
+        return new ApplicationEventExecutableAdapter();
+    }
+
+    @Bean
+    public ExecutableStatisticsProvider executableStatisticsProvider() {
+        return new HardcodedExecutableStatisticsProvider();
     }
 }

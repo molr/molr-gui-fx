@@ -1,7 +1,9 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import cern.lhc.app.seq.scheduler.domain.molr.Mission;
+import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
 import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
+import cern.lhc.app.seq.scheduler.gui.commands.Open;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import cern.lhc.app.seq.scheduler.util.CellFactories;
 import com.google.common.collect.ImmutableMap;
@@ -13,8 +15,10 @@ import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
@@ -33,6 +37,9 @@ public class AvailableMissionsView extends BorderPane {
     @Autowired
     private MolrService molrService;
 
+    @Autowired
+    private ApplicationEventPublisher publisher;
+
     private ListView<Mission> missionListView;
 
     @PostConstruct
@@ -46,15 +53,26 @@ public class AvailableMissionsView extends BorderPane {
     private FlowPane buttonsPane() {
         FlowPane buttons = new FlowPane();
         Button debugButton = new Button("debug");
-
         debugButton.setOnAction(event -> instantiateSelectedMission());
-        buttons.getChildren().add(debugButton);
+
+        Button showButton = new Button("show");
+        showButton.setOnAction(event -> showMission());
+
+        buttons.getChildren().addAll(debugButton, showButton);
         return buttons;
     }
 
+    private void showMission() {
+        Mono<MissionDescription> representation = molrService.representationOf(selectedMission());
+        representation.subscribe(r -> publisher.publishEvent(new Open(r.rootBlock())));
+    }
+
     private void instantiateSelectedMission() {
-        Mission mission = missionListView.getSelectionModel().getSelectedItem();
-        molrService.instantiate(mission, ImmutableMap.of());
+        molrService.instantiate(selectedMission(), ImmutableMap.of());
+    }
+
+    private Mission selectedMission() {
+        return missionListView.getSelectionModel().getSelectedItem();
     }
 
     private ListView<Mission> newListView() {
