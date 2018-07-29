@@ -3,9 +3,8 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 import cern.lhc.app.seq.scheduler.domain.molr.Mission;
 import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
 import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
-import cern.lhc.app.seq.scheduler.gui.commands.Open;
+import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
-import cern.lhc.app.seq.scheduler.util.CellFactories;
 import com.google.common.collect.ImmutableMap;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Button;
@@ -21,9 +20,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import static cern.lhc.app.seq.scheduler.util.CellFactories.nonNullItemText;
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
@@ -64,7 +61,7 @@ public class AvailableMissionsView extends BorderPane {
 
     private void showMission() {
         Mono<MissionDescription> representation = molrService.representationOf(selectedMission());
-        representation.subscribe(r -> publisher.publishEvent(new Open(r)));
+        representation.subscribe(r -> publisher.publishEvent(new ViewMission(r)));
     }
 
     private void instantiateSelectedMission() {

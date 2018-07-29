@@ -37,4 +37,12 @@ public class MissionInstance {
                 '}';
     }
 
+    public MissionHandle handle() {
+        return this.handle;
+    }
+
+    public  Mission mission() {
+        return this.mission;
+    }
+
 }

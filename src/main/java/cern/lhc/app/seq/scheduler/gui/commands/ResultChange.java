@@ -14,7 +14,7 @@ public class ResultChange {
     private final Result result;
 
     public ResultChange(ExecutionBlock executable, Result result) {
-        this.executable = requireNonNull(executable, "executable must not be null");
+        this.executable = requireNonNull(executable, "missionDescription must not be null");
         this.result = requireNonNull(result, "result must not be null");
     }
 

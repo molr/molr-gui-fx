@@ -15,7 +15,7 @@ public class RunStateChange {
     private final RunState runState;
 
     public RunStateChange(ExecutionBlock executable, RunState runState) {
-        this.executable = requireNonNull(executable, "executable must not be null");
+        this.executable = requireNonNull(executable, "missionDescription must not be null");
         this.runState = requireNonNull(runState, "runState must not be null");
     }
 
@@ -29,7 +29,7 @@ public class RunStateChange {
 
     @Override
     public String toString() {
-        return "RunStateChange [executable=" + executable + ", runState=" + runState + "]";
+        return "RunStateChange [missionDescription=" + executable + ", runState=" + runState + "]";
     }
 
 }

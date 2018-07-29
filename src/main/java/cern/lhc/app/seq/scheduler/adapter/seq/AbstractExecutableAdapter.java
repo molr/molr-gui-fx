@@ -4,7 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.adapter.seq;
 
-import cern.lhc.app.seq.scheduler.gui.commands.Open;
+import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import reactor.core.publisher.EmitterProcessor;
@@ -15,12 +15,12 @@ import reactor.core.publisher.Flux;
  */
 public abstract class AbstractExecutableAdapter implements ExecutableAdapter {
 
-    protected final EmitterProcessor<Open> opens = EmitterProcessor.create();
+    protected final EmitterProcessor<ViewMission> opens = EmitterProcessor.create();
     protected final EmitterProcessor<ResultChange> resultChanges = EmitterProcessor.create();
     protected final EmitterProcessor<RunStateChange> runStateChanges = EmitterProcessor.create();
 
     @Override
-    public Flux<Open> openEvents() {
+    public Flux<ViewMission> openEvents() {
         return opens;
     }
 

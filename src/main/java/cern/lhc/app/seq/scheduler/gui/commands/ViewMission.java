@@ -6,15 +6,15 @@ package cern.lhc.app.seq.scheduler.gui.commands;
 
 import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
 
-public class Open {
+public class ViewMission {
 
     private final MissionDescription executable;
 
-    public Open(MissionDescription executable) {
+    public ViewMission(MissionDescription executable) {
         this.executable = executable;
     }
 
-    public MissionDescription executable() {
+    public MissionDescription missionDescription() {
         return executable;
     }
 

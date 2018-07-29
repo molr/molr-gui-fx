@@ -44,7 +44,7 @@ public class ExecutableLine {
     private final ReadOnlyStringProperty name;
 
     public <T> ExecutableLine(ExecutionBlock executable) {
-        this.executable = Objects.requireNonNull(executable, "executable must not be null");
+        this.executable = Objects.requireNonNull(executable, "missionDescription must not be null");
         this.name = new ReadOnlyStringWrapper(this, "name", executable.name());
 
         configureAsLeaf();
