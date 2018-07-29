@@ -22,7 +22,7 @@ public class DemoMole implements Mole {
 
     @Override
     public Mono<MissionDescription> representationOf(Mission mission) {
-        return Mono.just(new ImmutableMissionDescription(dummyTree(mission)));
+        return Mono.just(new ImmutableMissionDescription(mission, dummyTree(mission)));
     }
 
     @Override

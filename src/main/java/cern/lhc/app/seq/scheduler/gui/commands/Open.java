@@ -4,17 +4,17 @@
 
 package cern.lhc.app.seq.scheduler.gui.commands;
 
-import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
+import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
 
 public class Open {
 
-    private final ExecutionBlock executable;
+    private final MissionDescription executable;
 
-    public Open(ExecutionBlock executable) {
+    public Open(MissionDescription executable) {
         this.executable = executable;
     }
 
-    public ExecutionBlock executable() {
+    public MissionDescription executable() {
         return executable;
     }
 

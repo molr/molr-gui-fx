@@ -11,8 +11,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import cern.lhc.app.seq.scheduler.conf.DeprecatedDemoConfiguration;
-
 @Configuration
 @ComponentScan
 @Import({DemoConfiguration.class, MolrConfiguration.class})

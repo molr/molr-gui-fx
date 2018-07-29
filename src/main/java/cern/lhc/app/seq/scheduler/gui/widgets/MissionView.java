@@ -7,9 +7,9 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
+import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import org.minifx.workbench.annotations.View;
-import org.minifx.workbench.domain.PerspectivePos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Component;
@@ -23,22 +23,22 @@ import javafx.scene.layout.BorderPane;
 
 @View(at = CENTER, in = MissionsPerspective.class)
 @Component
-public abstract class SequenceView extends BorderPane {
+public abstract class MissionView extends BorderPane {
 
     private final TabPane tabPane;
 
-    public SequenceView(@Autowired ExecutableAdapter executableAdapter) {
+    public MissionView(@Autowired ExecutableAdapter executableAdapter) {
         tabPane = new TabPane();
         setCenter(tabPane);
         executableAdapter.openEvents().subscribeOn(fxThread()).subscribe(this::update);
     }
 
     public void update(Open openExecutable) {
-        SequencePane seqPane = sequencePane(openExecutable.executable());
-        Tab tab = new Tab(openExecutable.executable().name(), seqPane);
+        MissionPane seqPane = sequencePane(openExecutable.executable());
+        Tab tab = new Tab(openExecutable.executable().mission().name(), seqPane);
         tabPane.getTabs().add(tab);
     }
 
     @Lookup
-    public abstract SequencePane sequencePane(ExecutionBlock executable);
+    public abstract MissionPane sequencePane(MissionDescription executable);
 }

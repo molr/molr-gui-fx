@@ -10,16 +10,22 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toList;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
 
+import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
+import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,9 +38,6 @@ import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import javafx.application.Platform;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.ProgressBarTreeTableCell;
 import javafx.scene.layout.BorderPane;
 
@@ -45,24 +48,36 @@ import javafx.scene.layout.BorderPane;
  * because each event would produce a new prototype! Therefore we use rx streams here which are injected through the
  * ExecutableAdapter
  */
-public class SequencePane extends BorderPane {
+public class MissionPane extends BorderPane {
 
-    private final ExecutionBlock executableRoot;
+    private final MissionDescription missionDescription;
     private final Map<ExecutionBlock, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
+
+    private TreeTableView<ExecutableLine> treeTableView;
+    private VBox instanceInfo;
+    private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
     @Autowired
     private ExecutableAdapter executableAdapter;
 
     @Autowired
+    private MolrService molrService;
+
+    @Autowired
     private ExecutableStatisticsProvider executableStatisticsProvider;
 
-    public SequencePane(ExecutionBlock executableRoot) {
-        this.executableRoot = requireNonNull(executableRoot, "executableRoot must not be null");
+    public MissionPane(MissionDescription missionDescription) {
+        this.missionDescription = requireNonNull(missionDescription, "missionDescription must not be null");
+    }
+
+    public MissionPane(MissionDescription missionDescription, MissionHandle missionHandle) {
+        this.missionDescription = requireNonNull(missionDescription, "missionDescription must not be null");
+        this.missionHandle.set(requireNonNull(missionHandle, "missionHandle must not be null"));
     }
 
     private TreeItem<ExecutableLine> createTree() {
-        return nodeFor(executableRoot);
+        return nodeFor(missionDescription.rootBlock());
     }
 
     private TreeItem<ExecutableLine> nodeFor(ExecutionBlock l) {
@@ -80,16 +95,74 @@ public class SequencePane extends BorderPane {
 
     @PostConstruct
     public void init() {
+        instanceInfo = new VBox(10);
+        instanceInfo.setPadding(new Insets(10, 10, 10, 10));
+        setTop(new TitledPane("Mission Instance", instanceInfo));
 
         TreeItem<ExecutableLine> root = createTree();
-
-        executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
-        executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
+        treeTableView = new TreeTableView<>(root);
+        treeTableView.setShowRoot(false);
+        setCenter(treeTableView);
 
         TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("ExecutionBlock");
         executableColumn.setPrefWidth(600);
         executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
 
+        treeTableView.getColumns().add(executableColumn);
+
+        MissionHandle handle = missionHandle.get();
+        if (handle != null) {
+            configureForInstance(handle);
+        } else {
+            configureInstantiable();
+        }
+
+
+    }
+
+    private void configureInstantiable() {
+        Button instantiateButton = new Button("instantiate");
+        instantiateButton.setOnAction(event -> {
+            instantiateButton.setDisable(true);
+            this.instantiate();
+        });
+        instanceInfo.getChildren().add(instantiateButton);
+    }
+
+    private void instantiate() {
+        molrService.instantiate(this.missionDescription.mission(), Collections.emptyMap()).publishOn(FxSchedulers.fxThread()).subscribe(h -> {
+            this.missionHandle.set(h);
+            configureForInstance(h);
+        });
+    }
+
+
+    private void configureForInstance(MissionHandle handle) {
+        instanceInfo.getChildren().setAll(new Label(handle.toString()));
+
+        executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
+        executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
+
+        addInstanceColumns();
+        scheduled.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                Instant now = Instant.now();
+                for (ExecutableLine line : lines.values()) {
+                    line.actualTimeProperty().set(now);
+                }
+            });
+        }, 0, 500, MILLISECONDS);
+
+        setBottom(createButtonsPane());
+    }
+
+    private Pane createButtonsPane() {
+        FlowPane buttonsPane = new FlowPane();
+        buttonsPane.getChildren().addAll(new Button("step"), new Button("pause"), new Button("resume"));
+        return buttonsPane;
+    }
+
+    private void addInstanceColumns() {
         TreeTableColumn<ExecutableLine, RunState> runStateColumn = new TreeTableColumn<>("RunState");
         runStateColumn.setPrefWidth(100);
         runStateColumn.setCellValueFactory(param -> param.getValue().getValue().runStateProperty());
@@ -107,22 +180,7 @@ public class SequencePane extends BorderPane {
         commentColumn.setPrefWidth(300);
         commentColumn.setCellValueFactory(param -> param.getValue().getValue().commentProperty());
 
-        TreeTableView<ExecutableLine> treeTableView = new TreeTableView<>(root);
-        treeTableView.getColumns().setAll(executableColumn, runStateColumn, statusColumn, progressColumn,
-                commentColumn);
-
-        treeTableView.setShowRoot(false);
-        setCenter(treeTableView);
-
-        scheduled.scheduleAtFixedRate(() -> {
-            Platform.runLater(() -> {
-                Instant now = Instant.now();
-                for (ExecutableLine line : lines.values()) {
-                    line.actualTimeProperty().set(now);
-                }
-            });
-        }, 0, 500, MILLISECONDS);
-
+        treeTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
     }
 
     public void updateRunState(RunStateChange change) {

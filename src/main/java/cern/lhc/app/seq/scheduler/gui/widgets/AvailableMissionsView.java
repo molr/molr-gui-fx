@@ -64,7 +64,7 @@ public class AvailableMissionsView extends BorderPane {
 
     private void showMission() {
         Mono<MissionDescription> representation = molrService.representationOf(selectedMission());
-        representation.subscribe(r -> publisher.publishEvent(new Open(r.rootBlock())));
+        representation.subscribe(r -> publisher.publishEvent(new Open(r)));
     }
 
     private void instantiateSelectedMission() {
