@@ -4,13 +4,18 @@
 
 package cern.lhc.app.seq.scheduler.domain.molr;
 
+import org.springframework.lang.Nullable;
+
+import java.util.Objects;
+import java.util.Optional;
+
 import static java.util.Objects.requireNonNull;
 
 /**
  * One 'story line' within a mission. A mission might split up in different strands, of which each of them can have its
  * own state (e.g. running, paused ...). (If you would like to relate this to java, you would probably imagine it as a
  * Thread ;-)
- * 
+ *
  * @author kfuchsbe
  */
 public class Strand {
@@ -18,48 +23,26 @@ public class Strand {
     private final long id;
     private final String name;
 
-    public Strand(long id, String name) {
+    private final Strand parent;
+
+    private Strand(long id, String name) {
         this.id = id;
         this.name = requireNonNull(name, "name must not be null");
+        this.parent = null;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (id() ^ (id() >>> 32));
-        result = prime * result + ((name() == null) ? 0 : name().hashCode());
-        return result;
+    private Strand(long id, String name, Strand parent) {
+        this.id = id;
+        this.name = requireNonNull(name, "name must not be null");
+        this.parent = requireNonNull(parent, "parent must not be null");
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Strand other = (Strand) obj;
-        if (id != other.id) {
-            return false;
-        }
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        return true;
+    public static Strand ofIdName(long id, String name) {
+        return new Strand(id, name);
     }
 
-    @Override
-    public String toString() {
-        return "Strand [id=" + id() + ", name=" + name() + "]";
+    public static Strand ofIdNameParent(long id, String name, Strand parent) {
+        return new Strand(id, name, parent);
     }
 
     public String name() {
@@ -70,4 +53,31 @@ public class Strand {
         return id;
     }
 
+    public Optional<Strand> parent() {
+        return Optional.ofNullable(this.parent);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Strand strand = (Strand) o;
+        return id == strand.id &&
+                Objects.equals(name, strand.name) &&
+                Objects.equals(parent, strand.parent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, parent);
+    }
+
+    @Override
+    public String toString() {
+        return "Strand{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", parent=" + parent +
+                '}';
+    }
 }

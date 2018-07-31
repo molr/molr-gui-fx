@@ -107,6 +107,7 @@ public class MissionPane extends BorderPane {
         TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("ExecutionBlock");
         executableColumn.setPrefWidth(600);
         executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
+        executableColumn.setSortable(false);
 
         treeTableView.getColumns().add(executableColumn);
 
@@ -181,6 +182,7 @@ public class MissionPane extends BorderPane {
         commentColumn.setCellValueFactory(param -> param.getValue().getValue().commentProperty());
 
         treeTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
+        treeTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
     public void updateRunState(RunStateChange change) {
@@ -195,4 +197,7 @@ public class MissionPane extends BorderPane {
             Platform.runLater(() -> l.stateProperty().set(change.result()));
         });
     }
+
+
+
 }
