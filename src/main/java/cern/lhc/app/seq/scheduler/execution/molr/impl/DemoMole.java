@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class DemoMole implements Mole {
 
-    private final Set<Mission> dummyMissions = ImmutableSet.of(new Mission("Help Trump to win Elections."), new Mission("Conquer Rome"));
+    private final Set<Mission> dummyMissions = ImmutableSet.of(new Mission("Find Dr No."), new Mission("Conquer Rome"));
 
 
     @Override

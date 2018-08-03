@@ -4,26 +4,36 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
+import static com.google.common.collect.ImmutableSetMultimap.toImmutableSetMultimap;
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
 import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import cern.lhc.app.seq.scheduler.domain.molr.MissionState;
+import cern.lhc.app.seq.scheduler.domain.molr.Strand;
 import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +64,9 @@ public class MissionPane extends BorderPane {
     private final Map<ExecutionBlock, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
 
-    private TreeTableView<ExecutableLine> treeTableView;
+    private TreeTableView<ExecutableLine> blockTableView;
+    private TreeTableView<Strand> strandTableView;
+
     private VBox instanceInfo;
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
@@ -100,16 +112,16 @@ public class MissionPane extends BorderPane {
         setTop(new TitledPane("Mission Instance", instanceInfo));
 
         TreeItem<ExecutableLine> root = createTree();
-        treeTableView = new TreeTableView<>(root);
-        treeTableView.setShowRoot(false);
-        setCenter(treeTableView);
+        blockTableView = new TreeTableView<>(root);
+        blockTableView.setShowRoot(false);
+        setCenter(blockTableView);
 
         TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("ExecutionBlock");
         executableColumn.setPrefWidth(600);
         executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
         executableColumn.setSortable(false);
 
-        treeTableView.getColumns().add(executableColumn);
+        blockTableView.getColumns().add(executableColumn);
 
         MissionHandle handle = missionHandle.get();
         if (handle != null) {
@@ -131,7 +143,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void instantiate() {
-        molrService.instantiate(this.missionDescription.mission(), Collections.emptyMap()).publishOn(FxSchedulers.fxThread()).subscribe(h -> {
+        molrService.instantiate(this.missionDescription.mission(), Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });
@@ -140,6 +152,8 @@ public class MissionPane extends BorderPane {
 
     private void configureForInstance(MissionHandle handle) {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
+
+        molrService.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
 
         executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
         executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
@@ -154,13 +168,54 @@ public class MissionPane extends BorderPane {
             });
         }, 0, 500, MILLISECONDS);
 
-        setBottom(createButtonsPane());
+        setBottom(createBottomPane());
     }
 
-    private Pane createButtonsPane() {
-        FlowPane buttonsPane = new FlowPane();
+    private void updateStates(MissionState missionState) {
+        TreeItem<Strand> strandTreeItem = treeFor(missionState.activeStrands());
+        strandTableView.setRoot(strandTreeItem);
+
+        /* TODO: update the states*/
+    }
+
+    private TreeItem<Strand> treeFor(Set<Strand> strands) {
+        ImmutableSetMultimap<Strand, Strand> children = strands.stream().filter(s -> s.parent().isPresent()).collect(toImmutableSetMultimap(s -> s.parent().get(), identity()));
+
+        List<Strand> roots = strands.stream().filter(s -> !s.parent().isPresent()).collect(toList());
+        if (roots.size() != 1) {
+            throw new IllegalArgumentException("More than one root strand (= strand without a parent) found in set " + strands + ".");
+        }
+        Strand root = roots.get(0);
+
+        return treeItemFor(root, children);
+    }
+
+    private TreeItem<Strand> treeItemFor(Strand parent, ImmutableSetMultimap<Strand, Strand> children) {
+        TreeItem<Strand> item = new TreeItem<>();
+        Set<TreeItem<Strand>> childNodes = children.get(parent).stream().map(s -> treeItemFor(s, children)).collect(toSet());
+        item.getChildren().addAll(childNodes);
+        return item;
+    }
+
+
+    private Pane createBottomPane() {
+        BorderPane bottomPane = new BorderPane();
+        VBox buttonsPane = new VBox();
         buttonsPane.getChildren().addAll(new Button("step"), new Button("pause"), new Button("resume"));
-        return buttonsPane;
+        bottomPane.setLeft(buttonsPane);
+
+        strandTableView = new TreeTableView<>();
+        bottomPane.setCenter(strandTableView);
+
+        TreeTableColumn<Strand, String> idColumn = new TreeTableColumn<>("Strand id");
+        idColumn.setCellValueFactory(param -> new SimpleStringProperty("" + param.getValue().getValue().id()));
+
+        TreeTableColumn<Strand, String> nameColumn = new TreeTableColumn<>("Strand name");
+        nameColumn.setCellValueFactory(param -> new SimpleStringProperty("" + param.getValue().getValue().name()));
+
+        strandTableView.getColumns().addAll(idColumn, nameColumn);
+        strandTableView.getColumns().forEach(c -> c.setSortable(false));
+        return bottomPane;
     }
 
     private void addInstanceColumns() {
@@ -181,8 +236,8 @@ public class MissionPane extends BorderPane {
         commentColumn.setPrefWidth(300);
         commentColumn.setCellValueFactory(param -> param.getValue().getValue().commentProperty());
 
-        treeTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
-        treeTableView.getColumns().forEach(c -> c.setSortable(false));
+        blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
+        blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
     public void updateRunState(RunStateChange change) {
@@ -197,7 +252,6 @@ public class MissionPane extends BorderPane {
             Platform.runLater(() -> l.stateProperty().set(change.result()));
         });
     }
-
 
 
 }

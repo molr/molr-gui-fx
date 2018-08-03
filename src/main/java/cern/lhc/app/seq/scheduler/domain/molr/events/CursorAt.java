@@ -4,18 +4,17 @@
 
 package cern.lhc.app.seq.scheduler.domain.molr.events;
 
-import java.util.Set;
-
+import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
+import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
 import com.google.common.collect.ImmutableSet;
 
-import cern.lhc.app.seq.scheduler.domain.molr.Line;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import java.util.Set;
 
 public class CursorAt extends AbstractMissionEvent {
 
-    private final Set<Line> lines;
+    private final Set<ExecutionBlock> lines;
 
-    public CursorAt(MissionHandle handle, Set<Line> lines) {
+    public CursorAt(MissionHandle handle, Set<ExecutionBlock> lines) {
         super(handle);
         this.lines = ImmutableSet.copyOf(lines);
     }
