@@ -9,19 +9,22 @@ import java.util.Set;
 
 import cern.lhc.app.seq.scheduler.domain.RunState;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
+import com.google.common.collect.SetMultimap;
 
 public interface MissionState {
 
     /**
-     * Determines if the given command is allowed on the given strand.
+     * Retrieves the allowed commands for the given strand.
      *
-     * @param command the command to check if it is allowed
-     * @param strand  the strand on which to check if the command is allowed
-     * @return {@code true} if the given command is allowed to be executed on the given strand, {@code false} otherwise
+     * @param strand the strand for which to query the allowed commands
+     * @return a set of commands that are currently allowed.
      */
-    boolean isAllowed(MissionCommand command, Strand strand);
+    Set<MissionCommand> allowedCommandsFor(Strand strand);
 
-    Map<Strand, ExecutionBlock> cursorPositions();
+    ExecutionBlock cursorPositionIn(Strand strand);
 
-    Map<Strand, RunState> activeStrandStates();
+    RunState runStateOf(Strand strand);
+
+    Set<Strand> activeStrands();
+
 }

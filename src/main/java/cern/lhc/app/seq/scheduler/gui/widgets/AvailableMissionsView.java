@@ -2,8 +2,10 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import cern.lhc.app.seq.scheduler.domain.molr.Mission;
 import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
+import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
 import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
+import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import com.google.common.collect.ImmutableMap;
 import javafx.collections.FXCollections;
@@ -49,14 +51,24 @@ public class AvailableMissionsView extends BorderPane {
 
     private FlowPane buttonsPane() {
         FlowPane buttons = new FlowPane();
-        Button debugButton = new Button("debug");
-        debugButton.setOnAction(event -> instantiateSelectedMission());
-
         Button showButton = new Button("show");
         showButton.setOnAction(event -> showMission());
 
-        buttons.getChildren().addAll(debugButton, showButton);
+        Button instantiateButton = new Button("instantiate");
+        instantiateButton.setOnAction(event -> instantiateSelectedMission());
+
+        Button debugButton = new Button("debug");
+        debugButton.setOnAction(event -> debugMission());
+
+        buttons.getChildren().addAll(showButton, instantiateButton, debugButton);
         return buttons;
+    }
+
+    private void debugMission() {
+        Mission mission = selectedMission();
+        instantiate(mission).subscribe(h -> {
+            molrService.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(h, r)));
+        });
     }
 
     private void showMission() {
@@ -64,8 +76,12 @@ public class AvailableMissionsView extends BorderPane {
         representation.subscribe(r -> publisher.publishEvent(new ViewMission(r)));
     }
 
-    private void instantiateSelectedMission() {
-        molrService.instantiate(selectedMission(), ImmutableMap.of());
+    private Mono<MissionHandle> instantiateSelectedMission() {
+        return instantiate(selectedMission());
+    }
+
+    private Mono<MissionHandle> instantiate(Mission mission) {
+        return molrService.instantiate(mission, ImmutableMap.of());
     }
 
     private Mission selectedMission() {

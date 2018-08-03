@@ -29,9 +29,9 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
-@Name("Active")
+@Name("Instances")
 @Order(2)
-public class ActiveMissionsView extends BorderPane {
+public class MissionInstancesView extends BorderPane {
 
     @Autowired
     private MolrService molrService;
