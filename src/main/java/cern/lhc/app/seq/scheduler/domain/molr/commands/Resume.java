@@ -4,8 +4,6 @@
 
 package cern.lhc.app.seq.scheduler.domain.molr.commands;
 
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
-
 public class Resume {
 
 }

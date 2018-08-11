@@ -1,17 +1,17 @@
 package cern.lhc.app.seq.scheduler.execution.molr.impl;
 
-import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
-import cern.lhc.app.seq.scheduler.domain.molr.Mission;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
+import org.molr.commons.api.domain.Block;
+import org.molr.commons.api.domain.Mission;
+import org.molr.commons.api.domain.MissionDescription;
 
 import java.util.Objects;
 
 public class ImmutableMissionDescription implements MissionDescription {
 
     private final Mission mission;
-    private final ExecutionBlock root;
+    private final Block root;
 
-    public ImmutableMissionDescription(Mission mission, ExecutionBlock root) {
+    public ImmutableMissionDescription(Mission mission, Block root) {
         this.mission = mission;
         this.root = root;
     }
@@ -22,7 +22,7 @@ public class ImmutableMissionDescription implements MissionDescription {
     }
 
     @Override
-    public ExecutionBlock rootBlock() {
+    public Block rootBlock() {
         return this.root;
     }
 

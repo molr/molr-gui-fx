@@ -6,9 +6,9 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
-import cern.lhc.app.seq.scheduler.domain.molr.Mission;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import org.molr.commons.api.domain.Mission;
+import org.molr.commons.api.domain.MissionDescription;
+import org.molr.commons.api.domain.MissionHandle;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import javafx.application.Platform;

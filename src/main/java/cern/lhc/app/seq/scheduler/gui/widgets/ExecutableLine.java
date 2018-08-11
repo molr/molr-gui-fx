@@ -4,8 +4,8 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import static cern.lhc.app.seq.scheduler.domain.RunState.FINISHED;
-import static cern.lhc.app.seq.scheduler.domain.RunState.RUNNING;
+import static org.molr.commons.api.domain.RunState.FINISHED;
+import static org.molr.commons.api.domain.RunState.RUNNING;
 import static cern.lhc.app.seq.scheduler.util.DurationFormats.shortLetters;
 
 import java.time.Duration;
@@ -16,8 +16,8 @@ import java.util.Locale;
 import java.util.Objects;
 
 import cern.lhc.app.seq.scheduler.domain.Result;
-import cern.lhc.app.seq.scheduler.domain.RunState;
-import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
+import org.molr.commons.api.domain.Block;
+import org.molr.commons.api.domain.RunState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -29,7 +29,7 @@ public class ExecutableLine {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss").withLocale(Locale.FRANCE)
             .withZone(ZoneId.systemDefault());
 
-    private final ExecutionBlock executable;
+    private final Block executable;
     private final SimpleObjectProperty<RunState> runState = new SimpleObjectProperty<>(this, "runState",
             RunState.UNDEFINED);
     private final SimpleObjectProperty<Result> state = new SimpleObjectProperty<>(this, "state", Result.UNDEFINED);
@@ -43,9 +43,9 @@ public class ExecutableLine {
 
     private final ReadOnlyStringProperty name;
 
-    public <T> ExecutableLine(ExecutionBlock executable) {
+    public <T> ExecutableLine(Block executable) {
         this.executable = Objects.requireNonNull(executable, "missionDescription must not be null");
-        this.name = new ReadOnlyStringWrapper(this, "name", executable.name());
+        this.name = new ReadOnlyStringWrapper(this, "name", executable.text());
 
         configureAsLeaf();
     }
@@ -140,7 +140,7 @@ public class ExecutableLine {
         });
     }
 
-    public ExecutionBlock executable() {
+    public Block executable() {
         return executable;
     }
 

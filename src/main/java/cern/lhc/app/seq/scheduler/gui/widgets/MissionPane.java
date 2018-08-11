@@ -6,7 +6,6 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import static com.google.common.collect.ImmutableSetMultimap.toImmutableSetMultimap;
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.function.Function.identity;
@@ -18,32 +17,23 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionState;
-import cern.lhc.app.seq.scheduler.domain.molr.Strand;
-import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
+import org.molr.server.api.Agency;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.SetMultimap;
-import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import org.molr.commons.api.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
 import cern.lhc.app.seq.scheduler.domain.Result;
-import cern.lhc.app.seq.scheduler.domain.RunState;
-import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
@@ -61,7 +51,7 @@ import javafx.scene.layout.BorderPane;
 public class MissionPane extends BorderPane {
 
     private final MissionDescription missionDescription;
-    private final Map<ExecutionBlock, ExecutableLine> lines = new HashMap<>();
+    private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
 
     private TreeTableView<ExecutableLine> blockTableView;
@@ -74,7 +64,7 @@ public class MissionPane extends BorderPane {
     private ExecutableAdapter executableAdapter;
 
     @Autowired
-    private MolrService molrService;
+    private Agency agency;
 
     @Autowired
     private ExecutableStatisticsProvider executableStatisticsProvider;
@@ -92,7 +82,7 @@ public class MissionPane extends BorderPane {
         return nodeFor(missionDescription.rootBlock());
     }
 
-    private TreeItem<ExecutableLine> nodeFor(ExecutionBlock l) {
+    private TreeItem<ExecutableLine> nodeFor(Block l) {
         ExecutableLine line = new ExecutableLine(l);
         executableStatisticsProvider.expectedDurationFor(l).ifPresent(line.usualDurationProperty()::set);
         lines.put(l, line);
@@ -101,7 +91,7 @@ public class MissionPane extends BorderPane {
         return item;
     }
 
-    private List<TreeItem<ExecutableLine>> nodesFor(List<? extends ExecutionBlock> executables) {
+    private List<TreeItem<ExecutableLine>> nodesFor(List<? extends Block> executables) {
         return executables.stream().map(this::nodeFor).collect(toList());
     }
 
@@ -143,7 +133,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void instantiate() {
-        molrService.instantiate(this.missionDescription.mission(), Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
+        agency.instantiate(this.missionDescription.mission(), Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });
@@ -153,7 +143,7 @@ public class MissionPane extends BorderPane {
     private void configureForInstance(MissionHandle handle) {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
 
-        molrService.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
+        agency.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
 
         executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
         executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);

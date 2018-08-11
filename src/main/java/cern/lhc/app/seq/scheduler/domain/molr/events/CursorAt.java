@@ -5,7 +5,7 @@
 package cern.lhc.app.seq.scheduler.domain.molr.events;
 
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import org.molr.commons.api.domain.MissionHandle;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;

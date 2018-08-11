@@ -1,12 +1,10 @@
 package cern.lhc.app.seq.scheduler.execution.molr.conf;
 
-import cern.lhc.app.seq.scheduler.domain.molr.AtomicIncrementMissionHandleFactory;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandleFactory;
-import cern.lhc.app.seq.scheduler.execution.molr.Agency;
-import cern.lhc.app.seq.scheduler.execution.molr.Mole;
-import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
+import org.molr.commons.api.domain.AtomicIncrementMissionHandleFactory;
+import org.molr.commons.api.domain.MissionHandleFactory;
+import org.molr.server.api.Agency;
+import org.molr.mole.api.Mole;
 import cern.lhc.app.seq.scheduler.execution.molr.impl.LocalDelegationAgency;
-import cern.lhc.app.seq.scheduler.execution.molr.impl.SingleAgencyMolrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,14 +23,8 @@ public class MolrConfiguration {
     }
 
     @Bean
-    public Agency localAgency(MissionHandleFactory missionHandleFactory) {
+    public Agency agency(MissionHandleFactory missionHandleFactory) {
         return new LocalDelegationAgency(missionHandleFactory, moles);
     }
-
-    @Bean
-    public MolrService molrService(Agency agency) {
-        return new SingleAgencyMolrService(agency);
-    }
-
 
 }

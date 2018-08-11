@@ -1,7 +1,7 @@
 package cern.lhc.app.seq.scheduler.gui.commands;
 
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import org.molr.commons.api.domain.MissionDescription;
+import org.molr.commons.api.domain.MissionHandle;
 
 public class ViewMissionInstance {
 

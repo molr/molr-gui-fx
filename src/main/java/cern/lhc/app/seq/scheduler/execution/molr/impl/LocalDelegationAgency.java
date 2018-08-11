@@ -4,7 +4,6 @@
 
 package cern.lhc.app.seq.scheduler.execution.molr.impl;
 
-import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
@@ -12,12 +11,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import cern.lhc.app.seq.scheduler.domain.molr.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
-import cern.lhc.app.seq.scheduler.execution.molr.Agency;
-import cern.lhc.app.seq.scheduler.execution.molr.Mole;
+import org.molr.server.api.Agency;
+import org.molr.mole.api.Mole;
+import org.molr.commons.api.domain.*;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

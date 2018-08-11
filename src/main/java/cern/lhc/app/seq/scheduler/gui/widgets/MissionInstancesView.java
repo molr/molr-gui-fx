@@ -1,10 +1,8 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import cern.lhc.app.seq.scheduler.domain.molr.AgencyState;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionInstance;
-import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
+import org.molr.commons.api.domain.AgencyState;
+import org.molr.commons.api.domain.MissionInstance;
+import org.molr.server.api.Agency;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
@@ -20,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 
@@ -34,7 +31,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 public class MissionInstancesView extends BorderPane {
 
     @Autowired
-    private MolrService molrService;
+    private Agency agency;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -45,7 +42,7 @@ public class MissionInstancesView extends BorderPane {
 
     @PostConstruct
     public void init() {
-        molrService.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
+        agency.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
 
         listView = newListView();
         setCenter(listView);
@@ -54,7 +51,7 @@ public class MissionInstancesView extends BorderPane {
         Button connectButton = new Button("connect");
         connectButton.setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
-            molrService.representationOf(instance.mission()).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(instance.handle(), r)));
+            agency.representationOf(instance.mission()).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(instance.handle(), r)));
         });
         buttons.getChildren().add(connectButton);
         setBottom(buttons);

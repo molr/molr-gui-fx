@@ -6,7 +6,7 @@ package cern.lhc.app.seq.scheduler.gui.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import cern.lhc.app.seq.scheduler.domain.RunState;
+import org.molr.commons.api.domain.RunState;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 
 public class RunStateChange {

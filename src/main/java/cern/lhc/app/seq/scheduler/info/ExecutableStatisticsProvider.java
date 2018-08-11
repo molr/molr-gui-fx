@@ -4,13 +4,13 @@
 
 package cern.lhc.app.seq.scheduler.info;
 
+import org.molr.commons.api.domain.Block;
+
 import java.time.Duration;
 import java.util.Optional;
 
-import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
-
 public interface ExecutableStatisticsProvider {
 
-    public Optional<Duration> expectedDurationFor(ExecutionBlock executable);
+    public Optional<Duration> expectedDurationFor(Block executable);
 
 }

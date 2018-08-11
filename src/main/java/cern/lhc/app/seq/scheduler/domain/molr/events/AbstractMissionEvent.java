@@ -6,8 +6,8 @@ package cern.lhc.app.seq.scheduler.domain.molr.events;
 
 import static java.util.Objects.requireNonNull;
 
-import cern.lhc.app.seq.scheduler.domain.molr.MissionEvent;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import org.molr.commons.api.domain.MissionEvent;
+import org.molr.commons.api.domain.MissionHandle;
 
 public abstract class AbstractMissionEvent implements MissionEvent {
 

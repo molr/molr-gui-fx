@@ -1,9 +1,9 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import cern.lhc.app.seq.scheduler.domain.molr.Mission;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionDescription;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
-import cern.lhc.app.seq.scheduler.execution.molr.MolrService;
+import org.molr.commons.api.domain.Mission;
+import org.molr.commons.api.domain.MissionDescription;
+import org.molr.commons.api.domain.MissionHandle;
+import org.molr.server.api.Agency;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
@@ -34,7 +34,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 public class AvailableMissionsView extends BorderPane {
 
     @Autowired
-    private MolrService molrService;
+    private Agency agency;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -67,12 +67,12 @@ public class AvailableMissionsView extends BorderPane {
     private void debugMission() {
         Mission mission = selectedMission();
         instantiate(mission).subscribe(h -> {
-            molrService.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(h, r)));
+            agency.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(h, r)));
         });
     }
 
     private void showMission() {
-        Mono<MissionDescription> representation = molrService.representationOf(selectedMission());
+        Mono<MissionDescription> representation = agency.representationOf(selectedMission());
         representation.subscribe(r -> publisher.publishEvent(new ViewMission(r)));
     }
 
@@ -81,7 +81,7 @@ public class AvailableMissionsView extends BorderPane {
     }
 
     private Mono<MissionHandle> instantiate(Mission mission) {
-        return molrService.instantiate(mission, ImmutableMap.of());
+        return agency.instantiate(mission, ImmutableMap.of());
     }
 
     private Mission selectedMission() {
@@ -89,7 +89,7 @@ public class AvailableMissionsView extends BorderPane {
     }
 
     private ListView<Mission> newListView() {
-        List<Mission> missions = molrService.executableMissions().collectList().block();
+        List<Mission> missions = agency.executableMissions().collectList().block();
         ListView<Mission> list = new ListView<>(FXCollections.observableArrayList(missions));
         list.setCellFactory(nonNullItemText(Mission::name));
         return list;

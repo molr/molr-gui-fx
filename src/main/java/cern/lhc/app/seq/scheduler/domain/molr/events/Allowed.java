@@ -10,8 +10,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import cern.lhc.app.seq.scheduler.domain.molr.MissionCommand;
-import cern.lhc.app.seq.scheduler.domain.molr.MissionHandle;
+import org.molr.commons.api.domain.MissionCommand;
+import org.molr.commons.api.domain.MissionHandle;
 
 public class Allowed extends AbstractMissionEvent {
 
