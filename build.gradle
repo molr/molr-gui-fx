@@ -28,6 +28,9 @@ allprojects {
         compile 'cern.molr:client-api:+'
         compile 'cern.molr:supervisor-api:+'
 
+        /* required to be able to use the local configuration */
+        compile 'cern.molr:server:+'
+
         compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
         compile group: 'io.projectreactor', name: 'reactor-core', version: '3.1.8.RELEASE'
         compile group: 'com.github.shadskii', name: 'reactorfx', version:'1.8.0'

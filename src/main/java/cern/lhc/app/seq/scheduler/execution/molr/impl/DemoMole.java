@@ -27,8 +27,8 @@ public class DemoMole implements Mole {
     private Block linear(String missionName) {
         Block.Builder rootNodeBuilder = Block.builder(id(), missionName);
         for (int i = 0; i < 10; i++) {
-//            SleepBlock child = SleepBlock.of("Sleep no " + i + "", 1, SECONDS);
-//            rootNodeBuilder.child(child);
+            Block child = Block.idAndText(id(), "Block no " + i + "");
+            rootNodeBuilder.child(child);
         }
         return rootNodeBuilder.build();
     }
@@ -61,10 +61,10 @@ public class DemoMole implements Mole {
 
 
     private Block dummyTree(String rootName) {
-        Block l1a = Block.ofText(id(), "Leaf 1A");
-        Block l1b = Block.ofText(id(), "Leaf 1B");
+        Block l1a = Block.idAndText(id(), "Leaf 1A");
+        Block l1b = Block.idAndText(id(), "Leaf 1B");
         Block ss1 = Block.builder(id(), "subSeq 1").child(l1a).child(l1b).build();
-        Block ss2 = Block.builder(id(), "subSeq 2").child(Block.ofText(id(), "Leaf 2A")).child(Block.ofText(id(), "Leaf 2B"))
+        Block ss2 = Block.builder(id(), "subSeq 2").child(Block.idAndText(id(), "Leaf 2A")).child(Block.idAndText(id(), "Leaf 2B"))
                 .build();
         return Block.builder(id(), rootName).child(ss1).child(ss2).build();
     }
