@@ -4,17 +4,17 @@
 
 package cern.lhc.app.seq.scheduler.gui.commands;
 
-import org.molr.commons.api.domain.MissionDescription;
+import org.molr.commons.api.domain.MissionRepresentation;
 
 public class ViewMission {
 
-    private final MissionDescription executable;
+    private final MissionRepresentation executable;
 
-    public ViewMission(MissionDescription executable) {
+    public ViewMission(MissionRepresentation executable) {
         this.executable = executable;
     }
 
-    public MissionDescription missionDescription() {
+    public MissionRepresentation missionDescription() {
         return executable;
     }
 

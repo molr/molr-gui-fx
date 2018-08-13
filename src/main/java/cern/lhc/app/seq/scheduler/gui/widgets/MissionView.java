@@ -7,7 +7,7 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
 import org.molr.commons.api.domain.Mission;
-import org.molr.commons.api.domain.MissionDescription;
+import org.molr.commons.api.domain.MissionRepresentation;
 import org.molr.commons.api.domain.MissionHandle;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
@@ -58,8 +58,8 @@ public abstract class MissionView extends BorderPane {
     }
 
     @Lookup
-    public abstract MissionPane sequencePane(MissionDescription executable);
+    public abstract MissionPane sequencePane(MissionRepresentation executable);
 
     @Lookup
-    public abstract MissionPane missionPane(MissionDescription missionDescription, MissionHandle missionHandle);
+    public abstract MissionPane missionPane(MissionRepresentation missionRepresentation, MissionHandle missionHandle);
 }

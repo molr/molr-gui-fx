@@ -50,7 +50,7 @@ import javafx.scene.layout.BorderPane;
  */
 public class MissionPane extends BorderPane {
 
-    private final MissionDescription missionDescription;
+    private final MissionRepresentation missionRepresentation;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
 
@@ -69,17 +69,17 @@ public class MissionPane extends BorderPane {
     @Autowired
     private ExecutableStatisticsProvider executableStatisticsProvider;
 
-    public MissionPane(MissionDescription missionDescription) {
-        this.missionDescription = requireNonNull(missionDescription, "missionDescription must not be null");
+    public MissionPane(MissionRepresentation missionRepresentation) {
+        this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
     }
 
-    public MissionPane(MissionDescription missionDescription, MissionHandle missionHandle) {
-        this.missionDescription = requireNonNull(missionDescription, "missionDescription must not be null");
+    public MissionPane(MissionRepresentation missionRepresentation, MissionHandle missionHandle) {
+        this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionHandle must not be null"));
     }
 
     private TreeItem<ExecutableLine> createTree() {
-        return nodeFor(missionDescription.rootBlock());
+        return nodeFor(missionRepresentation.rootBlock());
     }
 
     private TreeItem<ExecutableLine> nodeFor(Block l) {
@@ -133,7 +133,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void instantiate() {
-        agency.instantiate(this.missionDescription.mission(), Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
+        agency.instantiate(this.missionRepresentation.mission(), Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });
