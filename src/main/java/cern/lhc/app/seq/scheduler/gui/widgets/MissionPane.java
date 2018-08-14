@@ -87,8 +87,12 @@ public class MissionPane extends BorderPane {
         executableStatisticsProvider.expectedDurationFor(l).ifPresent(line.usualDurationProperty()::set);
         lines.put(l, line);
         TreeItem<ExecutableLine> item = new TreeItem<>(line);
-        item.getChildren().addAll(nodesFor(l.children()));
+        item.getChildren().addAll(nodesFor(childrenOf(l)));
         return item;
+    }
+
+    private List<? extends Block> childrenOf(Block l) {
+        return missionRepresentation.childrenOf(l);
     }
 
     private List<TreeItem<ExecutableLine>> nodesFor(List<? extends Block> executables) {

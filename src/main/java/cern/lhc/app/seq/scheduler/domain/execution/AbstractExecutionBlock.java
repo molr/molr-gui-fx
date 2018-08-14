@@ -24,7 +24,7 @@ public abstract class AbstractExecutionBlock implements ExecutionBlock {
     public AbstractExecutionBlock(String name, List<? extends ExecutionBlock> children,
             ClassToInstanceMap<? extends Attribute<?, ?>> attributes) {
         this.name = requireNonNull(name, "name must not be null");
-        requireNonNull(children, "children must not be null");
+        requireNonNull(children, "childrenBlockIds must not be null");
         this.children = ImmutableList.copyOf(children);
         requireNonNull(attributes, "attributes must not be null");
         this.attributes = ImmutableClassToInstanceMap.copyOf(attributes);
@@ -94,7 +94,7 @@ public abstract class AbstractExecutionBlock implements ExecutionBlock {
 
     @Override
     public String toString() {
-        return "AbstractExecutionBlock [name=" + name + ", children=" + children + ", attributes=" + attributes + "]";
+        return "AbstractExecutionBlock [name=" + name + ", childrenBlockIds=" + children + ", attributes=" + attributes + "]";
     }
 
 }
