@@ -1,6 +1,7 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import org.molr.commons.api.domain.Mission;
+import org.molr.commons.api.domain.MissionInstance;
 import org.molr.commons.api.domain.MissionRepresentation;
 import org.molr.commons.api.domain.MissionHandle;
 import org.molr.server.api.Agency;
@@ -67,13 +68,14 @@ public class AvailableMissionsView extends BorderPane {
     private void debugMission() {
         Mission mission = selectedMission();
         instantiate(mission).subscribe(h -> {
-            agency.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(h, r)));
+            agency.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(new MissionInstance(h, mission), r)));
         });
     }
 
     private void showMission() {
-        Mono<MissionRepresentation> representation = agency.representationOf(selectedMission());
-        representation.subscribe(r -> publisher.publishEvent(new ViewMission(r)));
+        Mission mission = selectedMission();
+        Mono<MissionRepresentation> representation = agency.representationOf(mission);
+        representation.subscribe(r -> publisher.publishEvent(new ViewMission(mission, r)));
     }
 
     private Mono<MissionHandle> instantiateSelectedMission() {

@@ -1,5 +1,9 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
+import cern.lhc.app.seq.scheduler.util.Jsons;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
@@ -14,6 +18,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import static java.util.stream.Collectors.joining;
 import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 
@@ -89,7 +94,11 @@ public class JsonStreamDebuggingTab extends Tab {
     }
 
     private void appendLine(String v) {
-        Platform.runLater(() -> textArea.appendText(v + "\n"));
+        String indented = Jsons.prettyPring(v);
+        Platform.runLater(() -> textArea.appendText(indented + "\n"));
     }
+
+
+
 
 }

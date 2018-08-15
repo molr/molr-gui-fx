@@ -4,6 +4,33 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
+import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
+import cern.lhc.app.seq.scheduler.domain.Result;
+import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
+import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
+import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
+import com.google.common.collect.ImmutableSetMultimap;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.ProgressBarTreeTableCell;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import org.molr.commons.api.domain.*;
+import org.molr.server.api.Agency;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static com.google.common.collect.ImmutableSetMultimap.toImmutableSetMultimap;
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
@@ -11,35 +38,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.PostConstruct;
-
-import org.molr.server.api.Agency;
-import com.google.common.collect.ImmutableSetMultimap;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import org.molr.commons.api.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
-import cern.lhc.app.seq.scheduler.domain.Result;
-import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
-import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
-import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
-import javafx.application.Platform;
-import javafx.scene.control.cell.ProgressBarTreeTableCell;
-import javafx.scene.layout.BorderPane;
 
 @Component
 @Scope(value = "prototype")
@@ -50,6 +48,7 @@ import javafx.scene.layout.BorderPane;
  */
 public class MissionPane extends BorderPane {
 
+    private final Mission mission;
     private final MissionRepresentation missionRepresentation;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
@@ -69,13 +68,15 @@ public class MissionPane extends BorderPane {
     @Autowired
     private ExecutableStatisticsProvider executableStatisticsProvider;
 
-    public MissionPane(MissionRepresentation missionRepresentation) {
+    public MissionPane(Mission mission, MissionRepresentation missionRepresentation) {
+        this.mission = requireNonNull(mission, "mission must not be null");
         this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
     }
 
-    public MissionPane(MissionRepresentation missionRepresentation, MissionHandle missionHandle) {
+    public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionHandle missionHandle) {
+        this.mission = requireNonNull(mission, "mission must not be null");
         this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
-        this.missionHandle.set(requireNonNull(missionHandle, "missionHandle must not be null"));
+        this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
     }
 
     private TreeItem<ExecutableLine> createTree() {
@@ -137,7 +138,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void instantiate() {
-        agency.instantiate(this.missionRepresentation.mission(), Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
+        agency.instantiate(mission, Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });

@@ -20,7 +20,12 @@ import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 public class JsonStreamDebuggingPane extends BorderPane {
 
     private static final String DEFAULT_BASE = "http://localhost:8000";
-    private final static String[] DEFAULT_PATHS = new String[]{"/test-stream/5", "/executable-missions", "/states"};
+    private final static String[] DEFAULT_PATHS = new String[]{"/test-stream/5",
+            "/executable-missions",
+            "/states",
+            "/Linear Mission/instantiate",
+            "/Linear Mission/representation",
+            "/Conquer Rome/representation"};
 
     private final TabPane tabPane;
 

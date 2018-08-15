@@ -38,8 +38,8 @@ public abstract class MissionView extends BorderPane {
     @EventListener
     public void update(ViewMission viewMission) {
         Platform.runLater(() -> {
-            MissionPane seqPane = sequencePane(viewMission.missionDescription());
-            addTab(viewMission.missionDescription().mission(), seqPane);
+            MissionPane seqPane = sequencePane(viewMission.mission(), viewMission.missionDescription());
+            addTab(viewMission.mission(), seqPane);
         });
     }
 
@@ -47,8 +47,8 @@ public abstract class MissionView extends BorderPane {
     @EventListener
     public void update(ViewMissionInstance viewMissionInstance) {
         Platform.runLater(() -> {
-            MissionPane missionPane = missionPane(viewMissionInstance.missionDescription(), viewMissionInstance.missionHandle());
-            addTab(viewMissionInstance.missionDescription().mission(), missionPane);
+            MissionPane missionPane = missionPane(viewMissionInstance.missionInstance().mission(), viewMissionInstance.missionDescription(), viewMissionInstance.missionInstance().handle());
+            addTab(viewMissionInstance.missionInstance().mission(), missionPane);
         });
     }
 
@@ -58,8 +58,8 @@ public abstract class MissionView extends BorderPane {
     }
 
     @Lookup
-    public abstract MissionPane sequencePane(MissionRepresentation executable);
+    public abstract MissionPane sequencePane(Mission mission, MissionRepresentation executable);
 
     @Lookup
-    public abstract MissionPane missionPane(MissionRepresentation missionRepresentation, MissionHandle missionHandle);
+    public abstract MissionPane missionPane(Mission mission, MissionRepresentation missionRepresentation, MissionHandle missionHandle);
 }

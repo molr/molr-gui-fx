@@ -1,19 +1,20 @@
 package cern.lhc.app.seq.scheduler.gui.commands;
 
+import org.molr.commons.api.domain.MissionInstance;
 import org.molr.commons.api.domain.MissionRepresentation;
 import org.molr.commons.api.domain.MissionHandle;
 
 public class ViewMissionInstance {
 
-    private final MissionHandle missionHandle;
+    private final MissionInstance missionHandle;
     private final MissionRepresentation missionRepresentation;
 
-    public ViewMissionInstance(MissionHandle missionHandle, MissionRepresentation missionRepresentation) {
+    public ViewMissionInstance(MissionInstance missionHandle, MissionRepresentation missionRepresentation) {
         this.missionHandle = missionHandle;
         this.missionRepresentation = missionRepresentation;
     }
 
-    public MissionHandle missionHandle() {
+    public MissionInstance missionInstance() {
         return this.missionHandle;
     }
 
