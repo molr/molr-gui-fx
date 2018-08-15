@@ -95,7 +95,7 @@ public class JsonStreamDebuggingTab extends Tab {
 
     private void appendLine(String v) {
         String indented = Jsons.prettyPring(v);
-        Platform.runLater(() -> textArea.appendText(indented + "\n"));
+        Platform.runLater(() -> textArea.appendText(indented + "\n-----\n"));
     }
 
 
