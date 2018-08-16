@@ -2,7 +2,7 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import org.molr.commons.api.domain.AgencyState;
 import org.molr.commons.api.domain.MissionInstance;
-import org.molr.server.api.Agency;
+import org.molr.commons.api.service.Agency;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;

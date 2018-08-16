@@ -23,6 +23,7 @@ allprojects {
     dependencies {
         /* This is finally the only API we should need... ?*/
         compile 'cern.molr:server-api:+'
+        compile 'cern.molr:client:+'
 
         compile 'cern.molr:commons-api:+'
         compile 'cern.molr:client-api:+'

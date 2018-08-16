@@ -1,10 +1,8 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import org.molr.commons.api.domain.Mission;
-import org.molr.commons.api.domain.MissionInstance;
-import org.molr.commons.api.domain.MissionRepresentation;
-import org.molr.commons.api.domain.MissionHandle;
-import org.molr.server.api.Agency;
+import javafx.collections.ObservableList;
+import org.molr.commons.api.domain.*;
+import org.molr.commons.api.service.Agency;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
@@ -24,8 +22,12 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Set;
 
 import static cern.lhc.app.seq.scheduler.util.CellFactories.nonNullItemText;
+import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 
 @Component
@@ -41,13 +43,19 @@ public class AvailableMissionsView extends BorderPane {
     private ApplicationEventPublisher publisher;
 
     private ListView<Mission> missionListView;
+    private ObservableList<Mission> missions = FXCollections.observableArrayList();
 
     @PostConstruct
     public void init() {
         this.missionListView = newListView();
         setCenter(missionListView);
-
         setBottom(buttonsPane());
+        agency.states().publishOn(fxThread()).subscribe(this::update);
+    }
+
+    private void update(AgencyState state) {
+        List<Mission> missionList = state.executableMissions().stream().sorted(comparing(Mission::name)).collect(toList());
+        this.missions.setAll(missionList);
     }
 
     private FlowPane buttonsPane() {
@@ -91,8 +99,8 @@ public class AvailableMissionsView extends BorderPane {
     }
 
     private ListView<Mission> newListView() {
-        List<Mission> missions = agency.executableMissions().collectList().block();
-        ListView<Mission> list = new ListView<>(FXCollections.observableArrayList(missions));
+
+        ListView<Mission> list = new ListView<>(this.missions);
         list.setCellFactory(nonNullItemText(Mission::name));
         return list;
     }

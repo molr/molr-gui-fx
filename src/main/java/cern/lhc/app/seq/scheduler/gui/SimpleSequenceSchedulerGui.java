@@ -5,6 +5,7 @@
 package cern.lhc.app.seq.scheduler.gui;
 
 import cern.lhc.app.seq.scheduler.conf.DemoConfiguration;
+import org.molr.client.conf.LocalhostRestClientConfiguration;
 import org.molr.server.conf.LocalMolrConfiguration;
 import org.minifx.workbench.MiniFx;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ComponentScan
-@Import({DemoConfiguration.class, LocalMolrConfiguration.class})
+@Import({DemoConfiguration.class, LocalhostRestClientConfiguration.class})
 public class SimpleSequenceSchedulerGui {
 
     public static void main(String[] args) {

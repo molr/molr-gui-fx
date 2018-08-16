@@ -21,11 +21,14 @@ public class JsonStreamDebuggingPane extends BorderPane {
 
     private static final String DEFAULT_BASE = "http://localhost:8000";
     private final static String[] DEFAULT_PATHS = new String[]{"/test-stream/5",
-            "/executable-missions",
             "/states",
-            "/Linear Mission/instantiate",
-            "/Linear Mission/representation",
-            "/Conquer Rome/representation"};
+            "/mission/Linear Mission/instantiate",
+            "/mission/Linear Mission/representation",
+            "/mission/Conquer Rome/representation",
+            "/instance/0/states",
+            "/instance/0/instruct/PAUSE",
+            "/instance/0/instruct/RESUME"
+    };
 
     private final TabPane tabPane;
 

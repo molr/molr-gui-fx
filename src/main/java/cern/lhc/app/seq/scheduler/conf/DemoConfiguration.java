@@ -13,13 +13,7 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @Profile("demo")
-@Import(LocalMolrConfiguration.class)
 public class DemoConfiguration {
-
-    @Bean
-    public DemoMole demoMole() {
-        return new DemoMole();
-    }
 
     @Bean
     public ExecutableAdapter executableAdapter() {

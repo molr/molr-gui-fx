@@ -19,7 +19,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.molr.commons.api.domain.*;
-import org.molr.server.api.Agency;
+import org.molr.commons.api.service.Agency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -174,9 +174,9 @@ public class MissionPane extends BorderPane {
     }
 
     private TreeItem<Strand> treeFor(Set<Strand> strands) {
-        ImmutableSetMultimap<Strand, Strand> children = strands.stream().filter(s -> s.parent().isPresent()).collect(toImmutableSetMultimap(s -> s.parent().get(), identity()));
+        ImmutableSetMultimap<String, Strand> children = strands.stream().filter(s -> s.parentId().isPresent()).collect(toImmutableSetMultimap(s -> s.parentId().get(), identity()));
 
-        List<Strand> roots = strands.stream().filter(s -> !s.parent().isPresent()).collect(toList());
+        List<Strand> roots = strands.stream().filter(s -> !s.parentId().isPresent()).collect(toList());
         if (roots.size() != 1) {
             throw new IllegalArgumentException("More than one root strand (= strand without a parent) found in set " + strands + ".");
         }
@@ -185,9 +185,9 @@ public class MissionPane extends BorderPane {
         return treeItemFor(root, children);
     }
 
-    private TreeItem<Strand> treeItemFor(Strand parent, ImmutableSetMultimap<Strand, Strand> children) {
+    private TreeItem<Strand> treeItemFor(Strand parent, ImmutableSetMultimap<String, Strand> children) {
         TreeItem<Strand> item = new TreeItem<>();
-        Set<TreeItem<Strand>> childNodes = children.get(parent).stream().map(s -> treeItemFor(s, children)).collect(toSet());
+        Set<TreeItem<Strand>> childNodes = children.get(parent.id()).stream().map(s -> treeItemFor(s, children)).collect(toSet());
         item.getChildren().addAll(childNodes);
         return item;
     }
@@ -202,13 +202,10 @@ public class MissionPane extends BorderPane {
         strandTableView = new TreeTableView<>();
         bottomPane.setCenter(strandTableView);
 
-        TreeTableColumn<Strand, String> idColumn = new TreeTableColumn<>("Strand id");
+        TreeTableColumn<Strand, String> idColumn = new TreeTableColumn<>("Strand");
         idColumn.setCellValueFactory(param -> new SimpleStringProperty("" + param.getValue().getValue().id()));
 
-        TreeTableColumn<Strand, String> nameColumn = new TreeTableColumn<>("Strand name");
-        nameColumn.setCellValueFactory(param -> new SimpleStringProperty("" + param.getValue().getValue().name()));
-
-        strandTableView.getColumns().addAll(idColumn, nameColumn);
+        strandTableView.getColumns().addAll(idColumn);
         strandTableView.getColumns().forEach(c -> c.setSortable(false));
         return bottomPane;
     }
