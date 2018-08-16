@@ -44,7 +44,6 @@ public class JsonStreamDebuggingPane extends BorderPane {
             tabPane.getSelectionModel().select(tab);
         });
 
-
         TextField base = new TextField(DEFAULT_BASE);
         base.setPrefWidth(150);
 
