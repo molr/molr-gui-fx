@@ -170,6 +170,16 @@ public class MissionPane extends BorderPane {
         TreeItem<Strand> strandTreeItem = treeFor(missionState.activeStrands());
         strandTableView.setRoot(strandTreeItem);
 
+        for (ExecutableLine line : lines.values()) {
+            line.cursorProperty().set("");
+        }
+        for (Strand strand : missionState.activeStrands()) {
+            Optional<Block> cursor = missionState.cursorPositionIn(strand);
+            if (cursor.isPresent()) {
+
+                lines.get(cursor.get()).cursorProperty().set(strand.id() + "->");
+            }
+        }
         /* TODO: update the states*/
     }
 
@@ -177,7 +187,10 @@ public class MissionPane extends BorderPane {
         ImmutableSetMultimap<String, Strand> children = strands.stream().filter(s -> s.parentId().isPresent()).collect(toImmutableSetMultimap(s -> s.parentId().get(), identity()));
 
         List<Strand> roots = strands.stream().filter(s -> !s.parentId().isPresent()).collect(toList());
-        if (roots.size() != 1) {
+        if (roots.isEmpty()) {
+            throw new IllegalArgumentException("No root strand (= strand without a parent) found in set " + strands + ".");
+        }
+        if (roots.size() > 1) {
             throw new IllegalArgumentException("More than one root strand (= strand without a parent) found in set " + strands + ".");
         }
         Strand root = roots.get(0);
@@ -186,8 +199,8 @@ public class MissionPane extends BorderPane {
     }
 
     private TreeItem<Strand> treeItemFor(Strand parent, ImmutableSetMultimap<String, Strand> children) {
-        TreeItem<Strand> item = new TreeItem<>();
-        Set<TreeItem<Strand>> childNodes = children.get(parent.id()).stream().map(s -> treeItemFor(s, children)).collect(toSet());
+        TreeItem<Strand> item = new TreeItem<>(parent);
+        Set<TreeItem<Strand>> childNodes = children.get(parent.id()).stream().filter(c -> !Objects.isNull(c)).map(s -> treeItemFor(s, children)).collect(toSet());
         item.getChildren().addAll(childNodes);
         return item;
     }
@@ -211,6 +224,10 @@ public class MissionPane extends BorderPane {
     }
 
     private void addInstanceColumns() {
+        TreeTableColumn<ExecutableLine, String> cursorColumn = new TreeTableColumn<>("Cursor");
+        cursorColumn.setPrefWidth(40);
+        cursorColumn.setCellValueFactory(param -> param.getValue().getValue().cursorProperty());
+
         TreeTableColumn<ExecutableLine, RunState> runStateColumn = new TreeTableColumn<>("RunState");
         runStateColumn.setPrefWidth(100);
         runStateColumn.setCellValueFactory(param -> param.getValue().getValue().runStateProperty());
@@ -228,7 +245,8 @@ public class MissionPane extends BorderPane {
         commentColumn.setPrefWidth(300);
         commentColumn.setCellValueFactory(param -> param.getValue().getValue().commentProperty());
 
-        blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
+        blockTableView.getColumns().add(0, cursorColumn);
+        blockTableView.getColumns().addAll( runStateColumn, statusColumn, progressColumn, commentColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 

@@ -40,6 +40,7 @@ public class ExecutableLine {
     private final SimpleObjectProperty<Instant> endedAt = new SimpleObjectProperty<>(this, "endedAt");
     private final SimpleObjectProperty<Instant> actualTime = new SimpleObjectProperty<>(this, "actualTime");
     private final SimpleObjectProperty<Duration> elapsedDuration = new SimpleObjectProperty<>(this, "elapsedDuration");
+    private final SimpleStringProperty cursor = new SimpleStringProperty(this, "cursor");
 
     private final ReadOnlyStringProperty name;
 
@@ -170,6 +171,10 @@ public class ExecutableLine {
 
     public SimpleObjectProperty<RunState> runStateProperty() {
         return runState;
+    }
+
+    public SimpleStringProperty cursorProperty() {
+        return cursor;
     }
 
 }
