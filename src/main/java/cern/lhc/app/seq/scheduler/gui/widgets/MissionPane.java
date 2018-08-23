@@ -11,6 +11,7 @@ import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import com.google.common.collect.ImmutableSetMultimap;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -58,6 +59,9 @@ public class MissionPane extends BorderPane {
 
     private VBox instanceInfo;
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
+
+    private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Strand> operationalStrand = new SimpleObjectProperty<>();
 
     @Autowired
     private ExecutableAdapter executableAdapter;
@@ -176,7 +180,6 @@ public class MissionPane extends BorderPane {
         for (Strand strand : missionState.activeStrands()) {
             Optional<Block> cursor = missionState.cursorPositionIn(strand);
             if (cursor.isPresent()) {
-
                 lines.get(cursor.get()).cursorProperty().set(strand.id() + "->");
             }
         }
@@ -205,11 +208,9 @@ public class MissionPane extends BorderPane {
         return item;
     }
 
-
     private Pane createBottomPane() {
         BorderPane bottomPane = new BorderPane();
-        VBox buttonsPane = new VBox();
-        buttonsPane.getChildren().addAll(new Button("step"), new Button("pause"), new Button("resume"));
+        VBox buttonsPane = createButtonsPane();
         bottomPane.setLeft(buttonsPane);
 
         strandTableView = new TreeTableView<>();
@@ -221,6 +222,12 @@ public class MissionPane extends BorderPane {
         strandTableView.getColumns().addAll(idColumn);
         strandTableView.getColumns().forEach(c -> c.setSortable(false));
         return bottomPane;
+    }
+
+    private VBox createButtonsPane() {
+        VBox buttonsPane = new VBox();
+        buttonsPane.getChildren().addAll(new Button("step"), new Button("pause"), new Button("resume"));
+        return buttonsPane;
     }
 
     private void addInstanceColumns() {
