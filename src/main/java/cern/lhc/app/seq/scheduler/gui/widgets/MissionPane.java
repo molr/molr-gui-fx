@@ -21,6 +21,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.molr.commons.api.domain.*;
 import org.molr.commons.api.service.Agency;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -49,6 +51,8 @@ import static java.util.stream.Collectors.toSet;
  */
 public class MissionPane extends BorderPane {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MissionPane.class);
+
     private final Mission mission;
     private final MissionRepresentation missionRepresentation;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
@@ -61,7 +65,8 @@ public class MissionPane extends BorderPane {
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
-    private final SimpleObjectProperty<Strand> operationalStrand = new SimpleObjectProperty<>();
+
+    private final Map<MissionCommand, Button> commandButtons = new EnumMap<MissionCommand, Button>(MissionCommand.class);
 
     @Autowired
     private ExecutableAdapter executableAdapter;
@@ -171,8 +176,17 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateStates(MissionState missionState) {
-        TreeItem<Strand> strandTreeItem = treeFor(missionState.activeStrands());
-        strandTableView.setRoot(strandTreeItem);
+        this.lastState.set(missionState);
+        TreeItem<Strand> lastSelectedStrandNode = selectedStrandNode();
+
+        TreeItem<Strand> rootItem = treeFor(missionState.activeStrands());
+        strandTableView.setRoot(rootItem);
+
+        if (lastSelectedStrandNode != null) {
+            strandTableView.getSelectionModel().select(lastSelectedStrandNode);
+        } else {
+            strandTableView.getSelectionModel().select(rootItem);
+        }
 
         for (ExecutableLine line : lines.values()) {
             line.cursorProperty().set("");
@@ -183,7 +197,16 @@ public class MissionPane extends BorderPane {
                 lines.get(cursor.get()).cursorProperty().set(strand.id() + "->");
             }
         }
-        /* TODO: update the states*/
+
+        updateButtonStates();
+    }
+
+    Strand selectedStrand() {
+        return Optional.ofNullable(selectedStrandNode()).map(TreeItem::getValue).orElse(null);
+    }
+
+    private TreeItem<Strand> selectedStrandNode() {
+        return strandTableView.getSelectionModel().getSelectedItem();
     }
 
     private TreeItem<Strand> treeFor(Set<Strand> strands) {
@@ -209,10 +232,9 @@ public class MissionPane extends BorderPane {
     }
 
     private Pane createBottomPane() {
-        BorderPane bottomPane = new BorderPane();
-        VBox buttonsPane = createButtonsPane();
-        bottomPane.setLeft(buttonsPane);
 
+
+        BorderPane bottomPane = new BorderPane();
         strandTableView = new TreeTableView<>();
         bottomPane.setCenter(strandTableView);
 
@@ -221,13 +243,57 @@ public class MissionPane extends BorderPane {
 
         strandTableView.getColumns().addAll(idColumn);
         strandTableView.getColumns().forEach(c -> c.setSortable(false));
+
+        strandTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        strandTableView.getSelectionModel().selectedItemProperty().addListener((e, o, n) -> updateButtonStates());
+
+        VBox buttonsPane = createButtonsPane();
+        bottomPane.setLeft(buttonsPane);
+
         return bottomPane;
     }
 
+    private void updateButtonStates() {
+        Set<MissionCommand> missionCommands = allowedCommands();
+        this.commandButtons.entrySet().forEach(e -> {
+            Button button = e.getValue();
+            if (missionCommands.contains(e.getKey())) {
+                button.setDisable(false);
+            } else {
+                button.setDisable(true);
+            }
+        });
+
+    }
+
+    private Set<MissionCommand> allowedCommands() {
+        Strand strand = selectedStrand();
+        MissionState state = lastState.getValue();
+        if ((strand == null) || (state == null)) {
+            return Collections.emptySet();
+        }
+        return state.allowedCommandsFor(strand);
+    }
+
+
     private VBox createButtonsPane() {
+        for (MissionCommand command : MissionCommand.values()) {
+            Button button = commandButton(command);
+            this.commandButtons.put(command, button);
+        }
         VBox buttonsPane = new VBox();
-        buttonsPane.getChildren().addAll(new Button("step"), new Button("pause"), new Button("resume"));
+        Arrays.stream(MissionCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
+        updateButtonStates();
         return buttonsPane;
+    }
+
+    private Button commandButton(MissionCommand command) {
+        Button button = new Button(command.name().toLowerCase());
+        button.setOnAction(event -> {
+            Strand strand = selectedStrand();
+            agency.instruct(this.missionHandle.get(), command);
+        });
+        return button;
     }
 
     private void addInstanceColumns() {
@@ -253,7 +319,7 @@ public class MissionPane extends BorderPane {
         commentColumn.setCellValueFactory(param -> param.getValue().getValue().commentProperty());
 
         blockTableView.getColumns().add(0, cursorColumn);
-        blockTableView.getColumns().addAll( runStateColumn, statusColumn, progressColumn, commentColumn);
+        blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
