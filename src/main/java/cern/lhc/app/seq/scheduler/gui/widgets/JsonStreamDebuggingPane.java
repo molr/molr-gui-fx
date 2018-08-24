@@ -26,8 +26,8 @@ public class JsonStreamDebuggingPane extends BorderPane {
             "/mission/Linear Mission/representation",
             "/mission/Conquer Rome/representation",
             "/instance/0/states",
-            "/instance/0/instruct/PAUSE",
-            "/instance/0/instruct/RESUME"
+            "/instance/0/0/instruct/PAUSE",
+            "/instance/0/0/instruct/RESUME"
     };
 
     private final TabPane tabPane;

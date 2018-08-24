@@ -177,13 +177,15 @@ public class MissionPane extends BorderPane {
 
     private void updateStates(MissionState missionState) {
         this.lastState.set(missionState);
-        TreeItem<Strand> lastSelectedStrandNode = selectedStrandNode();
+        Strand lastSelectedStrandNode = selectedStrand();
 
         TreeItem<Strand> rootItem = treeFor(missionState.activeStrands());
         strandTableView.setRoot(rootItem);
 
-        if (lastSelectedStrandNode != null) {
-            strandTableView.getSelectionModel().select(lastSelectedStrandNode);
+        TreeItem<Strand> toBeSelected = find(rootItem, lastSelectedStrandNode);
+
+        if (toBeSelected != null) {
+            strandTableView.getSelectionModel().select(toBeSelected);
         } else {
             strandTableView.getSelectionModel().select(rootItem);
         }
@@ -199,6 +201,22 @@ public class MissionPane extends BorderPane {
         }
 
         updateButtonStates();
+    }
+
+    private TreeItem<Strand> find(TreeItem<Strand> item, Strand strandToFind) {
+        if (strandToFind == null) {
+            return null;
+        }
+        if (strandToFind.equals(item.getValue())) {
+            return item;
+        }
+        for (TreeItem<Strand> child : item.getChildren()) {
+            TreeItem<Strand> found = find(child, strandToFind);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
     }
 
     Strand selectedStrand() {
@@ -290,7 +308,7 @@ public class MissionPane extends BorderPane {
         button.setMnemonicParsing(false);
         button.setOnAction(event -> {
             Strand strand = selectedStrand();
-            agency.instruct(this.missionHandle.get(), command);
+            agency.instruct(this.missionHandle.get(), strand, command);
         });
         return button;
     }
@@ -329,7 +347,6 @@ public class MissionPane extends BorderPane {
     }
 
     public void updateResult(ResultChange change) {
-        System.out.println("Received MissionEvent: " + change.executable());
         Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
             Platform.runLater(() -> l.stateProperty().set(change.result()));
         });

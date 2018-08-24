@@ -59,7 +59,13 @@ public class AvailableMissionsView extends BorderPane {
 
     private void update(AgencyState state) {
         List<Mission> missionList = state.executableMissions().stream().sorted(comparing(Mission::name)).collect(toList());
+        Mission previousSelected = missionListView.getSelectionModel().getSelectedItem();
         this.missions.setAll(missionList);
+        if ((previousSelected != null) && missions.contains(previousSelected)) {
+            missionListView.getSelectionModel().select(previousSelected);
+        } else if (!missionList.isEmpty()) {
+            missionListView.getSelectionModel().select(0);
+        }
     }
 
     private FlowPane buttonsPane() {
@@ -115,7 +121,6 @@ public class AvailableMissionsView extends BorderPane {
     }
 
     private ListView<Mission> newListView() {
-
         ListView<Mission> list = new ListView<>(this.missions);
         list.setCellFactory(nonNullItemText(Mission::name));
         return list;
