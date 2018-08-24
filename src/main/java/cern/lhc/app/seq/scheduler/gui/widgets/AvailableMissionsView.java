@@ -14,6 +14,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
@@ -35,6 +37,8 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Available")
 public class AvailableMissionsView extends BorderPane {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AvailableMissionsView.class);
 
     @Autowired
     private Agency agency;
@@ -75,6 +79,10 @@ public class AvailableMissionsView extends BorderPane {
 
     private void debugMission() {
         Mission mission = selectedMission();
+        if (mission == null) {
+            LOGGER.warn("No mission selected. Doing nothing");
+            return;
+        }
         instantiate(mission).subscribe(h -> {
             agency.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(new MissionInstance(h, mission), r)));
         });
@@ -82,6 +90,10 @@ public class AvailableMissionsView extends BorderPane {
 
     private void showMission() {
         Mission mission = selectedMission();
+        if (mission == null) {
+            LOGGER.warn("No mission selected. Doing nothing");
+            return;
+        }
         Mono<MissionRepresentation> representation = agency.representationOf(mission);
         representation.subscribe(r -> publisher.publishEvent(new ViewMission(mission, r)));
     }
@@ -91,6 +103,10 @@ public class AvailableMissionsView extends BorderPane {
     }
 
     private Mono<MissionHandle> instantiate(Mission mission) {
+        if (mission == null) {
+            LOGGER.warn("No mission selected. Doing nothing");
+            return Mono.empty();
+        }
         return agency.instantiate(mission, ImmutableMap.of());
     }
 

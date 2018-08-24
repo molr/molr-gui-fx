@@ -232,8 +232,6 @@ public class MissionPane extends BorderPane {
     }
 
     private Pane createBottomPane() {
-
-
         BorderPane bottomPane = new BorderPane();
         strandTableView = new TreeTableView<>();
         bottomPane.setCenter(strandTableView);
@@ -288,7 +286,8 @@ public class MissionPane extends BorderPane {
     }
 
     private Button commandButton(MissionCommand command) {
-        Button button = new Button(command.name().toLowerCase());
+        Button button = new Button(command.name());
+        button.setMnemonicParsing(false);
         button.setOnAction(event -> {
             Strand strand = selectedStrand();
             agency.instruct(this.missionHandle.get(), command);

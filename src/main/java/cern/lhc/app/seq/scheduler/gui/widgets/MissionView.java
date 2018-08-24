@@ -55,6 +55,7 @@ public abstract class MissionView extends BorderPane {
     private void addTab(Mission mission, MissionPane seqPane) {
         Tab tab = new Tab(mission.name(), seqPane);
         tabPane.getTabs().add(tab);
+        tabPane.getSelectionModel().select(tab);
     }
 
     @Lookup
