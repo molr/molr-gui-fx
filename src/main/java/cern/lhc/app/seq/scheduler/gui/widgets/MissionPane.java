@@ -179,7 +179,7 @@ public class MissionPane extends BorderPane {
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
-        TreeItem<Strand> rootItem = treeFor(missionState.activeStrands());
+        TreeItem<Strand> rootItem = treeFor(missionState);
         strandTableView.setRoot(rootItem);
 
         TreeItem<Strand> toBeSelected = find(rootItem, lastSelectedStrandNode);
@@ -227,24 +227,13 @@ public class MissionPane extends BorderPane {
         return strandTableView.getSelectionModel().getSelectedItem();
     }
 
-    private TreeItem<Strand> treeFor(Set<Strand> strands) {
-        ImmutableSetMultimap<String, Strand> children = strands.stream().filter(s -> s.parentId().isPresent()).collect(toImmutableSetMultimap(s -> s.parentId().get(), identity()));
-
-        List<Strand> roots = strands.stream().filter(s -> !s.parentId().isPresent()).collect(toList());
-        if (roots.isEmpty()) {
-            throw new IllegalArgumentException("No root strand (= strand without a parent) found in set " + strands + ".");
-        }
-        if (roots.size() > 1) {
-            throw new IllegalArgumentException("More than one root strand (= strand without a parent) found in set " + strands + ".");
-        }
-        Strand root = roots.get(0);
-
-        return treeItemFor(root, children);
+    private TreeItem<Strand> treeFor(MissionState state) {
+        return treeItemFor(state.rootStrand(), state);
     }
 
-    private TreeItem<Strand> treeItemFor(Strand parent, ImmutableSetMultimap<String, Strand> children) {
+    private TreeItem<Strand> treeItemFor(Strand parent, MissionState state) {
         TreeItem<Strand> item = new TreeItem<>(parent);
-        Set<TreeItem<Strand>> childNodes = children.get(parent.id()).stream().filter(c -> !Objects.isNull(c)).map(s -> treeItemFor(s, children)).collect(toSet());
+        Set<TreeItem<Strand>> childNodes = state.childrenOf(parent).stream().map(s -> treeItemFor(s, state)).collect(toSet());
         item.getChildren().addAll(childNodes);
         return item;
     }
