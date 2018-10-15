@@ -44,6 +44,8 @@ public abstract class MissionView extends BorderPane {
     }
 
 
+
+
     @EventListener
     public void update(ViewMissionInstance viewMissionInstance) {
         Platform.runLater(() -> {

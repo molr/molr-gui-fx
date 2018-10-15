@@ -9,6 +9,7 @@ import cern.lhc.app.seq.scheduler.domain.Result;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
+import cern.lhc.app.seq.scheduler.util.FormattedButton;
 import com.google.common.collect.ImmutableSetMultimap;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -293,7 +294,7 @@ public class MissionPane extends BorderPane {
     }
 
     private Button commandButton(MissionCommand command) {
-        Button button = new Button(command.name());
+        Button button = new FormattedButton().getButton(command.name(),command.name(),"Green");
         button.setMnemonicParsing(false);
         button.setOnAction(event -> {
             Strand strand = selectedStrand();

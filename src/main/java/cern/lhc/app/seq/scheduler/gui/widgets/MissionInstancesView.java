@@ -1,19 +1,25 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import org.molr.commons.api.domain.AgencyState;
-import org.molr.commons.api.domain.MissionInstance;
-import org.molr.commons.api.service.Agency;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
+import org.molr.commons.api.domain.Mission;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
+import org.molr.commons.api.domain.AgencyState;
+import org.molr.commons.api.domain.MissionHandle;
+import org.molr.commons.api.domain.MissionInstance;
+import org.molr.commons.api.service.Agency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
@@ -55,6 +61,12 @@ public class MissionInstancesView extends BorderPane {
         });
         buttons.getChildren().add(connectButton);
         setBottom(buttons);
+
+
+    }
+
+    private void reloadListView(){
+        init();
     }
 
     private ListView<MissionInstance> newListView() {
@@ -62,5 +74,7 @@ public class MissionInstancesView extends BorderPane {
         list.setCellFactory(nonNullItemText(MissionInstance::toString));
         return list;
     }
+
+
 
 }
