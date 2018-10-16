@@ -61,7 +61,7 @@ public class FormattedButton {
     private FontAwesomeIcon getFontAwesomeIcon(String icon) {
 
         switch (icon) {
-            case "Available":
+            case "Show":
                 return FontAwesomeIcon.CHECK;
             case "Instantiate":
                 return FontAwesomeIcon.BULLSEYE;

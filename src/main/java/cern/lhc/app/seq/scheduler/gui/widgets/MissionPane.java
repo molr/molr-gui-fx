@@ -139,7 +139,8 @@ public class MissionPane extends BorderPane {
     }
 
     private void configureInstantiable() {
-        Button instantiateButton = new Button("instantiate");
+       // Button instantiateButton = new Button("instantiate");
+        Button instantiateButton = new FormattedButton().getButton("Instantiate","Instantiate","Blue");
         instantiateButton.setOnAction(event -> {
             instantiateButton.setDisable(true);
             this.instantiate();

@@ -89,7 +89,7 @@ public class AvailableMissionsView extends BorderPane {
     private FlowPane buttonsPane() {
         FlowPane buttons = new FlowPane();
 
-        Button showButton = new FormattedButton().getButton("Available","Available","Green");
+        Button showButton = new FormattedButton().getButton("Show","Show","Green");
 
         Button instantiateButton = new FormattedButton().getButton("Instantiate","Instantiate","Blue");
         instantiateButton.setOnAction(event -> instantiateSelectedMission());
