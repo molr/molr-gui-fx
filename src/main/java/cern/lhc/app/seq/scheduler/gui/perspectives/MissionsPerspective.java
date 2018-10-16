@@ -8,6 +8,6 @@ import org.springframework.core.annotation.Order;
 
 @Order(1)
 @Name("Missions")
-@Icon(value = FontAwesomeIcon.COMMENT, color = "lightblue")
+@Icon(value = FontAwesomeIcon.USER_SECRET, color = "blue")
 public interface MissionsPerspective extends Perspective {
 }

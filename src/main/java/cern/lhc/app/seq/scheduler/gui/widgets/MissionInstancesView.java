@@ -2,6 +2,9 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
+import cern.lhc.app.seq.scheduler.util.FormattedButton;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import org.minifx.workbench.annotations.Icon;
 import org.molr.commons.api.domain.Mission;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import javafx.collections.FXCollections;
@@ -33,6 +36,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Instances")
+@Icon(value= FontAwesomeIcon.SITEMAP, color="blue" )
 @Order(2)
 public class MissionInstancesView extends BorderPane {
 
@@ -54,7 +58,8 @@ public class MissionInstancesView extends BorderPane {
         setCenter(listView);
 
         FlowPane buttons = new FlowPane();
-        Button connectButton = new Button("connect");
+        Button connectButton = new FormattedButton().getButton("Connect","Connect","Green");
+
         connectButton.setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
             agency.representationOf(instance.mission()).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(instance, r)));

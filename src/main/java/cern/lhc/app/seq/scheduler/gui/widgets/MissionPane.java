@@ -284,7 +284,8 @@ public class MissionPane extends BorderPane {
 
     private VBox createButtonsPane() {
         for (MissionCommand command : MissionCommand.values()) {
-            Button button = commandButton(command);
+            //Button button = commandButton(command);
+            Button button = new FormattedButton().getAndGuessButton(command.toString());
             this.commandButtons.put(command, button);
         }
         VBox buttonsPane = new VBox();
