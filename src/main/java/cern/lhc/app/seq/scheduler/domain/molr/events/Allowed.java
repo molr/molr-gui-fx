@@ -10,8 +10,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.molr.commons.api.domain.MissionCommand;
-import org.molr.commons.api.domain.MissionHandle;
+import org.molr.commons.domain.MissionCommand;
+import org.molr.commons.domain.MissionHandle;
 
 public class Allowed extends AbstractMissionEvent {
 

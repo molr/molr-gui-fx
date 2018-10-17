@@ -6,7 +6,7 @@ package cern.lhc.app.seq.scheduler.execution.adapt;
 
 import java.util.function.Consumer;
 
-import org.molr.commons.api.domain.RunState;
+import org.molr.commons.domain.RunState;
 
 public class ExecutionControllerImpl implements ExecutionController{
 

@@ -10,7 +10,6 @@ import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
-import com.google.common.collect.ImmutableSetMultimap;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,8 +19,15 @@ import javafx.scene.control.cell.ProgressBarTreeTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import org.molr.commons.api.domain.*;
-import org.molr.commons.api.service.Agency;
+import org.molr.commons.domain.Block;
+import org.molr.commons.domain.Mission;
+import org.molr.commons.domain.MissionCommand;
+import org.molr.commons.domain.MissionHandle;
+import org.molr.commons.domain.MissionRepresentation;
+import org.molr.commons.domain.MissionState;
+import org.molr.commons.domain.RunState;
+import org.molr.commons.domain.Strand;
+import org.molr.agency.core.Agency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +41,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.google.common.collect.ImmutableSetMultimap.toImmutableSetMultimap;
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -285,8 +289,7 @@ public class MissionPane extends BorderPane {
 
     private VBox createButtonsPane() {
         for (MissionCommand command : MissionCommand.values()) {
-            //Button button = commandButton(command);
-            Button button = new FormattedButton().getAndGuessButton(command.toString());
+            Button button = commandButton(command);
             this.commandButtons.put(command, button);
         }
         VBox buttonsPane = new VBox();
@@ -296,7 +299,7 @@ public class MissionPane extends BorderPane {
     }
 
     private Button commandButton(MissionCommand command) {
-        Button button = new FormattedButton().getButton(command.name(),command.name(),"Green");
+        Button button = new FormattedButton().getAndGuessButton(command.toString());
         button.setMnemonicParsing(false);
         button.setOnAction(event -> {
             Strand strand = selectedStrand();

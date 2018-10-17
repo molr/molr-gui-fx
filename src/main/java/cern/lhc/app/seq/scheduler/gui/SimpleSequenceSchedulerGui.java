@@ -5,8 +5,7 @@
 package cern.lhc.app.seq.scheduler.gui;
 
 import cern.lhc.app.seq.scheduler.conf.DemoConfiguration;
-import org.molr.client.conf.LocalhostRestClientConfiguration;
-import org.molr.server.conf.LocalMolrConfiguration;
+import org.molr.agency.remote.conf.LocalhostRestClientConfiguration;
 import org.minifx.workbench.MiniFx;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

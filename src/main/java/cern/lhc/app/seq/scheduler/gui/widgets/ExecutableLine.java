@@ -4,8 +4,8 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import static org.molr.commons.api.domain.RunState.FINISHED;
-import static org.molr.commons.api.domain.RunState.RUNNING;
+import static org.molr.commons.domain.RunState.FINISHED;
+import static org.molr.commons.domain.RunState.RUNNING;
 import static cern.lhc.app.seq.scheduler.util.DurationFormats.shortLetters;
 
 import java.time.Duration;
@@ -16,8 +16,8 @@ import java.util.Locale;
 import java.util.Objects;
 
 import cern.lhc.app.seq.scheduler.domain.Result;
-import org.molr.commons.api.domain.Block;
-import org.molr.commons.api.domain.RunState;
+import org.molr.commons.domain.Block;
+import org.molr.commons.domain.RunState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;

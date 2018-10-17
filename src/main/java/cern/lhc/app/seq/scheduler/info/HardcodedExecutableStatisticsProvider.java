@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
-import org.molr.commons.api.domain.Block;
+import org.molr.commons.domain.Block;
 import com.google.common.collect.ImmutableMap;
 
 public class HardcodedExecutableStatisticsProvider implements ExecutableStatisticsProvider {

@@ -4,8 +4,8 @@
 
 package cern.lhc.app.seq.scheduler.execution.adapt;
 
-import static org.molr.commons.api.domain.RunState.FINISHED;
-import static org.molr.commons.api.domain.RunState.RUNNING;
+import static org.molr.commons.domain.RunState.FINISHED;
+import static org.molr.commons.domain.RunState.RUNNING;
 import static cern.lhc.app.seq.scheduler.domain.attributes.Attributes.PARALLEL_CHILDREN;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Objects.requireNonNull;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import cern.lhc.app.seq.scheduler.domain.Result;
-import org.molr.commons.api.domain.RunState;
+import org.molr.commons.domain.RunState;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionEvent;
 import cern.lhc.app.seq.scheduler.domain.execution.events.Cursor;

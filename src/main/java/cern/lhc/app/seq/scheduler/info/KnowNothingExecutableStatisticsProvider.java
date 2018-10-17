@@ -4,7 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.info;
 
-import org.molr.commons.api.domain.Block;
+import org.molr.commons.domain.Block;
 
 import java.time.Duration;
 import java.util.Optional;

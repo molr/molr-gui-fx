@@ -4,7 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.domain.execution.events;
 
-import org.molr.commons.api.domain.RunState;
+import org.molr.commons.domain.RunState;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 
 public final class RunStateChange extends AbstractValueEvent<RunState> {
