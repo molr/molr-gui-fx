@@ -6,7 +6,7 @@ allprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    group = "cern.molr"
+    group = "org.molr"
 
     repositories {
         mavenCentral()
@@ -22,15 +22,15 @@ allprojects {
 
     dependencies {
         /* This is finally the only API we should need... ?*/
-        compile 'cern.molr:server-api:+'
-        compile 'cern.molr:client:+'
+        compile 'org.molr:old-server-api:+'
+        compile 'org.molr:molr-agency-remote:+'
 
-        compile 'cern.molr:commons-api:+'
-        compile 'cern.molr:client-api:+'
-        compile 'cern.molr:supervisor-api:+'
+        compile 'org.molr:molr-commons:+'
+        compile 'org.molr:molr-agency-core:+'
+        compile 'org.molr:molr-mole-core:+'
 
         /* required to be able to use the local configuration */
-        compile 'cern.molr:server:+'
+        compile 'org.molr:molr-agency-server:+'
 
         compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
         compile group: 'io.projectreactor', name: 'reactor-core', version: '3.1.8.RELEASE'
