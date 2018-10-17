@@ -12,7 +12,7 @@ public class FormattedButton {
 
     public  Button getButton(String buttonText){
         Button butt = new Button();
-        butt.setMinSize(100,100);
+       // butt.setMinSize(100,100);
         butt.setText(buttonText);
         return butt;
     }
