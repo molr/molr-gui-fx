@@ -21,7 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.molr.commons.domain.Block;
 import org.molr.commons.domain.Mission;
-import org.molr.commons.domain.MissionCommand;
+import org.molr.commons.domain.StrandCommand;
 import org.molr.commons.domain.MissionHandle;
 import org.molr.commons.domain.MissionRepresentation;
 import org.molr.commons.domain.MissionState;
@@ -71,7 +71,7 @@ public class MissionPane extends BorderPane {
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
 
-    private final Map<MissionCommand, Button> commandButtons = new EnumMap<MissionCommand, Button>(MissionCommand.class);
+    private final Map<StrandCommand, Button> commandButtons = new EnumMap<StrandCommand, Button>(StrandCommand.class);
 
     @Autowired
     private ExecutableAdapter executableAdapter;
@@ -265,10 +265,10 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateButtonStates() {
-        Set<MissionCommand> missionCommands = allowedCommands();
+        Set<StrandCommand> strandCommands = allowedCommands();
         this.commandButtons.entrySet().forEach(e -> {
             Button button = e.getValue();
-            if (missionCommands.contains(e.getKey())) {
+            if (strandCommands.contains(e.getKey())) {
                 button.setDisable(false);
             } else {
                 button.setDisable(true);
@@ -277,7 +277,7 @@ public class MissionPane extends BorderPane {
 
     }
 
-    private Set<MissionCommand> allowedCommands() {
+    private Set<StrandCommand> allowedCommands() {
         Strand strand = selectedStrand();
         MissionState state = lastState.getValue();
         if ((strand == null) || (state == null)) {
@@ -288,17 +288,17 @@ public class MissionPane extends BorderPane {
 
 
     private VBox createButtonsPane() {
-        for (MissionCommand command : MissionCommand.values()) {
+        for (StrandCommand command : StrandCommand.values()) {
             Button button = commandButton(command);
             this.commandButtons.put(command, button);
         }
         VBox buttonsPane = new VBox();
-        Arrays.stream(MissionCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
+        Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
         updateButtonStates();
         return buttonsPane;
     }
 
-    private Button commandButton(MissionCommand command) {
+    private Button commandButton(StrandCommand command) {
         Button button = new FormattedButton().getAndGuessButton(command.toString());
         button.setMnemonicParsing(false);
         button.setOnAction(event -> {

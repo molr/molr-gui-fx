@@ -10,14 +10,14 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.molr.commons.domain.MissionCommand;
+import org.molr.commons.domain.StrandCommand;
 import org.molr.commons.domain.MissionHandle;
 
 public class Allowed extends AbstractMissionEvent {
 
-    private final Set<Class<? extends MissionCommand>> commands;
+    private final Set<Class<? extends StrandCommand>> commands;
 
-    public Allowed(MissionHandle handle, Set<Class<? extends MissionCommand>> commands) {
+    public Allowed(MissionHandle handle, Set<Class<? extends StrandCommand>> commands) {
         super(handle);
         requireNonNull(commands, "commands must not be null");
         this.commands = ImmutableSet.copyOf(commands);
