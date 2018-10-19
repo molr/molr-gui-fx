@@ -6,7 +6,7 @@ package cern.lhc.app.seq.scheduler.gui.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import cern.lhc.app.seq.scheduler.domain.Result;
+import org.molr.commons.domain.Result;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 
 public class ResultChange {

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import cern.lhc.app.seq.scheduler.domain.Result;
+import org.molr.commons.domain.Result;
 import org.molr.commons.domain.RunState;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionEvent;

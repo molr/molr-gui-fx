@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 
-import cern.lhc.app.seq.scheduler.domain.Result;
+import org.molr.commons.domain.Result;
 import org.molr.commons.domain.Block;
 import org.molr.commons.domain.RunState;
 import javafx.beans.binding.Bindings;

@@ -4,7 +4,7 @@
 
 package cern.lhc.app.seq.scheduler.domain.execution.events;
 
-import cern.lhc.app.seq.scheduler.domain.Result;
+import org.molr.commons.domain.Result;
 import cern.lhc.app.seq.scheduler.domain.execution.ExecutionBlock;
 
 public class ResultChange extends AbstractValueEvent<Result> {

@@ -5,7 +5,7 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
-import cern.lhc.app.seq.scheduler.domain.Result;
+import org.molr.commons.domain.Result;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
@@ -19,14 +19,8 @@ import javafx.scene.control.cell.ProgressBarTreeTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import org.molr.commons.domain.Block;
-import org.molr.commons.domain.Mission;
-import org.molr.commons.domain.StrandCommand;
-import org.molr.commons.domain.MissionHandle;
-import org.molr.commons.domain.MissionRepresentation;
-import org.molr.commons.domain.MissionState;
+import org.molr.commons.domain.*;
 import org.molr.commons.domain.RunState;
-import org.molr.commons.domain.Strand;
 import org.molr.agency.core.Agency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
