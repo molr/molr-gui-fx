@@ -137,8 +137,8 @@ public class MissionPane extends BorderPane {
     }
 
     private void configureInstantiable() {
-       // Button instantiateButton = new Button("instantiate");
-        Button instantiateButton = new FormattedButton().getButton("Instantiate","Instantiate","Blue");
+        // Button instantiateButton = new Button("instantiate");
+        Button instantiateButton = new FormattedButton().getButton("Instantiate", "Instantiate", "Blue");
         instantiateButton.setOnAction(event -> {
             instantiateButton.setDisable(true);
             this.instantiate();
@@ -193,7 +193,7 @@ public class MissionPane extends BorderPane {
         for (ExecutableLine line : lines.values()) {
             line.cursorProperty().set("");
         }
-        for (Strand strand : missionState.activeStrands()) {
+        for (Strand strand : missionState.allStrands()) {
             Optional<Block> cursor = missionState.cursorPositionIn(strand);
             if (cursor.isPresent()) {
                 lines.get(cursor.get()).cursorProperty().set(strand.id() + "->");
@@ -228,7 +228,11 @@ public class MissionPane extends BorderPane {
     }
 
     private TreeItem<Strand> treeFor(MissionState state) {
-        return treeItemFor(state.rootStrand(), state);
+        Optional<Strand> rootStrand = state.rootStrand();
+        if (rootStrand.isPresent()) {
+            return treeItemFor(rootStrand.get(), state);
+        }
+        return new TreeItem<>();
     }
 
     private TreeItem<Strand> treeItemFor(Strand parent, MissionState state) {
