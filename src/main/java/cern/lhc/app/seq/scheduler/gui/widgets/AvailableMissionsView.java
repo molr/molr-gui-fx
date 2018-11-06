@@ -94,6 +94,7 @@ public class AvailableMissionsView extends BorderPane {
         FlowPane buttons = new FlowPane();
 
         Button showButton = new FormattedButton().getButton("Show","Show","Green");
+        showButton.setOnAction(event -> showSelectedMission());
 
         Button instantiateButton = new FormattedButton().getButton("Instantiate","Instantiate","Blue");
         instantiateButton.setOnAction(event -> instantiateSelectedMission());
@@ -116,7 +117,7 @@ public class AvailableMissionsView extends BorderPane {
         });
     }
 
-    private void showMission() {
+    private void showSelectedMission() {
         Mission mission = selectedMission();
         if (mission == null) {
             LOGGER.warn("No mission selected. Doing nothing");
