@@ -22,7 +22,11 @@ public class JsonStreamDebuggingPane extends BorderPane {
     private static final String DEFAULT_BASE = "http://localhost:8000";
     private final static String[] DEFAULT_PATHS = new String[]{"/test-stream/5",
             "/states",
+            "/mission/Executable Leafs Demo Mission/instantiate",
+            "/mission/Executable Leafs Demo Mission/parameter-description",
+            "/mission/Executable Leafs Demo Mission/representation",
             "/mission/Linear Mission/instantiate",
+            "/mission/Linear Mission/parameter-description",
             "/mission/Linear Mission/representation",
             "/mission/Conquer Rome/representation",
             "/instance/0/states",
