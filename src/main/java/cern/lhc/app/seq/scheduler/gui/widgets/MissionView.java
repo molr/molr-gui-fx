@@ -7,6 +7,7 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
 import org.molr.commons.domain.Mission;
+import org.molr.commons.domain.MissionParameterDescription;
 import org.molr.commons.domain.MissionRepresentation;
 import org.molr.commons.domain.MissionHandle;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
@@ -38,18 +39,15 @@ public abstract class MissionView extends BorderPane {
     @EventListener
     public void update(ViewMission viewMission) {
         Platform.runLater(() -> {
-            MissionPane seqPane = sequencePane(viewMission.mission(), viewMission.missionDescription());
+            MissionPane seqPane = missionPane(viewMission.mission(), viewMission.representation(), viewMission.description());
             addTab(viewMission.mission(), seqPane);
         });
     }
 
-
-
-
     @EventListener
     public void update(ViewMissionInstance viewMissionInstance) {
         Platform.runLater(() -> {
-            MissionPane missionPane = missionPane(viewMissionInstance.missionInstance().mission(), viewMissionInstance.missionDescription(), viewMissionInstance.missionInstance().handle());
+            MissionPane missionPane = missionPane(viewMissionInstance.missionInstance().mission(), viewMissionInstance.missionDescription(),viewMissionInstance.description(), viewMissionInstance.missionInstance().handle());
             addTab(viewMissionInstance.missionInstance().mission(), missionPane);
         });
     }
@@ -61,8 +59,8 @@ public abstract class MissionView extends BorderPane {
     }
 
     @Lookup
-    public abstract MissionPane sequencePane(Mission mission, MissionRepresentation executable);
+    public abstract MissionPane missionPane(Mission mission, MissionRepresentation representation, MissionParameterDescription description);
 
     @Lookup
-    public abstract MissionPane missionPane(Mission mission, MissionRepresentation missionRepresentation, MissionHandle missionHandle);
+    public abstract MissionPane missionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description,  MissionHandle missionHandle);
 }

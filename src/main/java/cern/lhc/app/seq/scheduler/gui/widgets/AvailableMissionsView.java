@@ -4,12 +4,12 @@ import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMissionInstance;
 import cern.lhc.app.seq.scheduler.gui.perspectives.MissionsPerspective;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
-import com.google.common.collect.ImmutableMap;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -17,11 +17,7 @@ import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
-import org.molr.commons.domain.AgencyState;
-import org.molr.commons.domain.Mission;
-import org.molr.commons.domain.MissionHandle;
-import org.molr.commons.domain.MissionInstance;
-import org.molr.commons.domain.MissionRepresentation;
+import org.molr.commons.domain.*;
 import org.molr.agency.core.Agency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,23 +25,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static cern.lhc.app.seq.scheduler.util.CellFactories.nonNullItemText;
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
+import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static javafx.scene.control.ButtonType.APPLY;
+import static javafx.scene.control.ButtonType.CANCEL;
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 
 @Component
 @Order(1)
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Available")
-@Icon (value= FontAwesomeIcon.PLUS_CIRCLE, color="green" )
+@Icon(value = FontAwesomeIcon.PLUS_CIRCLE, color = "green")
 public class AvailableMissionsView extends BorderPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvailableMissionsView.class);
@@ -75,8 +78,6 @@ public class AvailableMissionsView extends BorderPane {
                 }
             }
         });
-
-
     }
 
     private void update(AgencyState state) {
@@ -93,13 +94,13 @@ public class AvailableMissionsView extends BorderPane {
     private FlowPane buttonsPane() {
         FlowPane buttons = new FlowPane();
 
-        Button showButton = new FormattedButton().getButton("Show","Show","Green");
+        Button showButton = new FormattedButton().getButton("Show", "Show", "Green");
         showButton.setOnAction(event -> showSelectedMission());
 
-        Button instantiateButton = new FormattedButton().getButton("Instantiate","Instantiate","Blue");
+        Button instantiateButton = new FormattedButton().getButton("Instantiate", "Instantiate", "Blue");
         instantiateButton.setOnAction(event -> instantiateSelectedMission());
 
-        Button debugButton = new FormattedButton().getButton("Debug","Debug","Cyan");
+        Button debugButton = new FormattedButton().getButton("Debug", "Debug", "Cyan");
         debugButton.setOnAction(event -> debugMission());
 
         buttons.getChildren().addAll(showButton, instantiateButton, debugButton);
@@ -112,9 +113,13 @@ public class AvailableMissionsView extends BorderPane {
             LOGGER.warn("No mission selected. Doing nothing");
             return;
         }
-        instantiate(mission).subscribe(h -> {
-            agency.representationOf(mission).subscribe(r -> publisher.publishEvent(new ViewMissionInstance(new MissionInstance(h, mission), r)));
-        });
+
+        instantiate(mission)
+                .map(h -> new MissionInstance(h, mission))
+                .zipWith(agency.representationOf(mission))
+                .zipWith(agency.parameterDescriptionOf(mission))
+                .map(tuple22 -> new ViewMissionInstance(tuple22.getT1().getT1(), tuple22.getT1().getT2(), tuple22.getT2()))
+                .subscribe(publisher::publishEvent);
     }
 
     private void showSelectedMission() {
@@ -123,8 +128,13 @@ public class AvailableMissionsView extends BorderPane {
             LOGGER.warn("No mission selected. Doing nothing");
             return;
         }
-        Mono<MissionRepresentation> representation = agency.representationOf(mission);
-        representation.subscribe(r -> publisher.publishEvent(new ViewMission(mission, r)));
+
+        System.out.println("Trying to show mission " + mission);
+        agency.representationOf(mission).subscribe(System.out::println);
+        agency.parameterDescriptionOf(mission).subscribe(System.out::println);
+        Flux.zip(agency.representationOf(mission), agency.parameterDescriptionOf(mission))
+                .map(t -> new ViewMission(mission, t.getT1(), t.getT2()))
+                .subscribe(publisher::publishEvent);
     }
 
     private Mono<MissionHandle> instantiateSelectedMission() {
@@ -136,7 +146,45 @@ public class AvailableMissionsView extends BorderPane {
             LOGGER.warn("No mission selected. Doing nothing");
             return Mono.empty();
         }
-        return agency.instantiate(mission, ImmutableMap.of());
+
+        Optional<Map<String, Object>> parameters = parametersFor(mission);
+        if (!parameters.isPresent()) {
+            LOGGER.info("Aborted by user. Mission will not be instantiated.");
+            return Mono.empty();
+        }
+        Map<String, Object> params = parameters.get();
+        return agency.instantiate(mission, params);
+    }
+
+    private Optional<Map<String, Object>> parametersFor(Mission mission) {
+        MissionParameterDescription description = agency.parameterDescriptionOf(mission).block();
+
+        if (description.parameters().isEmpty()) {
+            /* This is a valid situation! There are no parameters, so no need to query them ;-)*/
+            return Optional.of(emptyMap());
+        }
+
+        Dialog<Map<String, Object>> dialog = parameterDialogFor(mission, description);
+        return dialog.showAndWait();
+    }
+
+    private Dialog<Map<String, Object>> parameterDialogFor(Mission mission, MissionParameterDescription description) {
+        ParameterEditor editor = new ParameterEditor(description.parameters());
+
+        Dialog<Map<String, Object>> dialog1 = new Dialog<>();
+        dialog1.setTitle("Parameters for mission '" + mission.name() + "'.");
+        dialog1.setHeaderText("Please check and complete the parameters for this mission.");
+
+        dialog1.getDialogPane().setContent(editor);
+        dialog1.getDialogPane().getButtonTypes().addAll(APPLY, CANCEL);
+
+        dialog1.setResultConverter(b -> {
+            if (b == APPLY) {
+                return editor.parameterValues();
+            }
+            return null;
+        });
+        return dialog1;
     }
 
     private Mission selectedMission() {

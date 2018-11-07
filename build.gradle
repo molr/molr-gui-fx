@@ -55,6 +55,8 @@ allprojects {
         compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
         compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4jVersion
 
+        compile  group: 'org.controlsfx', name: 'controlsfx', version: '8.40.14'
+
     }
 
   

@@ -54,6 +54,7 @@ public class MissionPane extends BorderPane {
 
     private final Mission mission;
     private final MissionRepresentation missionRepresentation;
+    private final MissionParameterDescription description;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
 
@@ -76,14 +77,16 @@ public class MissionPane extends BorderPane {
     @Autowired
     private ExecutableStatisticsProvider executableStatisticsProvider;
 
-    public MissionPane(Mission mission, MissionRepresentation missionRepresentation) {
+    public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description) {
         this.mission = requireNonNull(mission, "mission must not be null");
         this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
+        this.description = requireNonNull(description, "description must not be null");
     }
 
-    public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionHandle missionHandle) {
+    public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description, MissionHandle missionHandle) {
         this.mission = requireNonNull(mission, "mission must not be null");
         this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
+        this.description = requireNonNull(description, "description must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
     }
 
@@ -137,17 +140,20 @@ public class MissionPane extends BorderPane {
     }
 
     private void configureInstantiable() {
-        // Button instantiateButton = new Button("instantiate");
+        ParameterEditor parameterEditor = new ParameterEditor(description.parameters());
+        instanceInfo.getChildren().add(parameterEditor);
+
         Button instantiateButton = new FormattedButton().getButton("Instantiate", "Instantiate", "Blue");
         instantiateButton.setOnAction(event -> {
             instantiateButton.setDisable(true);
-            this.instantiate();
+            this.instantiate(parameterEditor.parameterValues());
         });
         instanceInfo.getChildren().add(instantiateButton);
+
     }
 
-    private void instantiate() {
-        agency.instantiate(mission, Collections.emptyMap()).publishOn(fxThread()).subscribe(h -> {
+    private void instantiate(Map<String, Object> params) {
+        agency.instantiate(mission, params).publishOn(fxThread()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });
