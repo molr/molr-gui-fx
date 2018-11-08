@@ -5,6 +5,8 @@
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
+import javafx.scene.Node;
+import javafx.scene.layout.HBox;
 import org.molr.commons.domain.Result;
 import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
 import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
@@ -60,6 +62,7 @@ public class MissionPane extends BorderPane {
 
     private TreeTableView<ExecutableLine> blockTableView;
     private TreeTableView<Strand> strandTableView;
+    private TextArea output;
 
     private VBox instanceInfo;
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
@@ -123,7 +126,7 @@ public class MissionPane extends BorderPane {
         setCenter(blockTableView);
 
         TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("ExecutionBlock");
-        executableColumn.setPrefWidth(600);
+        executableColumn.setPrefWidth(300);
         executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
         executableColumn.setSortable(false);
 
@@ -164,6 +167,7 @@ public class MissionPane extends BorderPane {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
 
         agency.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
+        agency.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
 
         executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
         executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
@@ -207,6 +211,10 @@ public class MissionPane extends BorderPane {
         }
 
         updateButtonStates();
+    }
+
+    private void updateOutput(MissionOutput output) {
+        this.output.setText(output.pretty());
     }
 
     private TreeItem<Strand> find(TreeItem<Strand> item, Strand strandToFind) {
@@ -262,11 +270,15 @@ public class MissionPane extends BorderPane {
         strandTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         strandTableView.getSelectionModel().selectedItemProperty().addListener((e, o, n) -> updateButtonStates());
 
-        VBox buttonsPane = createButtonsPane();
-        bottomPane.setLeft(buttonsPane);
+        HBox buttonsPane = createButtonsPane();
+        bottomPane.setTop(buttonsPane);
+
+        this.output = new TextArea();
+        bottomPane.setRight(output);
 
         return bottomPane;
     }
+
 
     private void updateButtonStates() {
         Set<StrandCommand> strandCommands = allowedCommands();
@@ -291,12 +303,12 @@ public class MissionPane extends BorderPane {
     }
 
 
-    private VBox createButtonsPane() {
+    private HBox createButtonsPane() {
         for (StrandCommand command : StrandCommand.values()) {
             Button button = commandButton(command);
             this.commandButtons.put(command, button);
         }
-        VBox buttonsPane = new VBox();
+        HBox buttonsPane = new HBox();
         Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
         updateButtonStates();
         return buttonsPane;

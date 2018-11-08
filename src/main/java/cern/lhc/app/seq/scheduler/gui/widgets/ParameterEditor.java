@@ -52,8 +52,8 @@ public class ParameterEditor extends BorderPane {
 
     public Map<String, Object> parameterValues() {
         return parameterItems.stream()
-                .filter(i -> !Objects.isNull(i.value))
-                .collect(toMap(i -> i.param.placeholder().name(), i -> i.value));
+                .filter(i -> !Objects.isNull(i.getValue()))
+                .collect(toMap(i -> i.param.placeholder().name(), i -> i.getValue()));
     }
 
     private final static Set<MissionParameterItem> itemsFrom(Set<MissionParameter<?>> parameters) {
