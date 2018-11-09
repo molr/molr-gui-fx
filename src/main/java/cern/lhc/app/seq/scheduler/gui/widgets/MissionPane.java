@@ -57,7 +57,7 @@ public class MissionPane extends BorderPane {
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
 
     private TreeTableView<ExecutableLine> blockTableView;
-    private TreeTableView<Strand> strandTableView;
+    private TreeTableView<StrandLine> strandTableView;
     private TextArea output;
 
     private VBox instanceInfo;
@@ -90,17 +90,17 @@ public class MissionPane extends BorderPane {
         return nodeFor(missionRepresentation.rootBlock());
     }
 
-    private TreeItem<ExecutableLine> nodeFor(Block l) {
-        ExecutableLine line = new ExecutableLine(l);
-        executableStatisticsProvider.expectedDurationFor(l).ifPresent(line.usualDurationProperty()::set);
-        lines.put(l, line);
+    private TreeItem<ExecutableLine> nodeFor(Block block) {
+        ExecutableLine line = new ExecutableLine(block);
+        executableStatisticsProvider.expectedDurationFor(block).ifPresent(line.usualDurationProperty()::set);
+        lines.put(block, line);
         TreeItem<ExecutableLine> item = new TreeItem<>(line);
-        item.getChildren().addAll(nodesFor(childrenOf(l)));
+        item.getChildren().addAll(nodesFor(childrenOf(block)));
         return item;
     }
 
-    private List<? extends Block> childrenOf(Block l) {
-        return missionRepresentation.childrenOf(l);
+    private List<? extends Block> childrenOf(Block block) {
+        return missionRepresentation.childrenOf(block);
     }
 
     private List<TreeItem<ExecutableLine>> nodesFor(List<? extends Block> executables) {
@@ -118,7 +118,7 @@ public class MissionPane extends BorderPane {
         blockTableView.setShowRoot(false);
         setCenter(blockTableView);
 
-        TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("ExecutionBlock");
+        TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("Block");
         executableColumn.setPrefWidth(300);
         executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
         executableColumn.setSortable(false);
@@ -132,7 +132,6 @@ public class MissionPane extends BorderPane {
             configureInstantiable();
         }
 
-
     }
 
     private void configureInstantiable() {
@@ -145,7 +144,6 @@ public class MissionPane extends BorderPane {
             this.instantiate(parameterEditor.parameterValues());
         });
         instanceInfo.getChildren().add(instantiateButton);
-
     }
 
     private void instantiate(Map<String, Object> params) {
@@ -161,9 +159,6 @@ public class MissionPane extends BorderPane {
 
         agency.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
         agency.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
-
-//        executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
-//        executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
 
         addInstanceColumns();
         scheduled.scheduleAtFixedRate(() -> {
@@ -182,10 +177,10 @@ public class MissionPane extends BorderPane {
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
-        TreeItem<Strand> rootItem = treeFor(missionState);
+        TreeItem<StrandLine> rootItem = treeFor(missionState);
         strandTableView.setRoot(rootItem);
 
-        TreeItem<Strand> toBeSelected = find(rootItem, lastSelectedStrandNode);
+        TreeItem<StrandLine> toBeSelected = find(rootItem, lastSelectedStrandNode);
 
         if (toBeSelected != null) {
             strandTableView.getSelectionModel().select(toBeSelected);
@@ -203,6 +198,15 @@ public class MissionPane extends BorderPane {
             }
         }
 
+
+        lines.entrySet().forEach(e -> {
+            Result result = missionState.resultOf(e.getKey());
+            e.getValue().stateProperty().set(result);
+        });
+
+
+
+
         updateButtonStates();
     }
 
@@ -210,15 +214,15 @@ public class MissionPane extends BorderPane {
         this.output.setText(output.pretty());
     }
 
-    private TreeItem<Strand> find(TreeItem<Strand> item, Strand strandToFind) {
+    private TreeItem<StrandLine> find(TreeItem<StrandLine> item, Strand strandToFind) {
         if (strandToFind == null) {
             return null;
         }
-        if (strandToFind.equals(item.getValue())) {
+        if (strandToFind.equals(item.getValue().strand())) {
             return item;
         }
-        for (TreeItem<Strand> child : item.getChildren()) {
-            TreeItem<Strand> found = find(child, strandToFind);
+        for (TreeItem<StrandLine> child : item.getChildren()) {
+            TreeItem<StrandLine> found = find(child, strandToFind);
             if (found != null) {
                 return found;
             }
@@ -227,14 +231,17 @@ public class MissionPane extends BorderPane {
     }
 
     Strand selectedStrand() {
-        return Optional.ofNullable(selectedStrandNode()).map(TreeItem::getValue).orElse(null);
+        return Optional.ofNullable(selectedStrandNode())
+                .map(TreeItem::getValue)
+                .map(StrandLine::strand)
+                .orElse(null);
     }
 
-    private TreeItem<Strand> selectedStrandNode() {
+    private TreeItem<StrandLine> selectedStrandNode() {
         return strandTableView.getSelectionModel().getSelectedItem();
     }
 
-    private TreeItem<Strand> treeFor(MissionState state) {
+    private TreeItem<StrandLine> treeFor(MissionState state) {
         Optional<Strand> rootStrand = state.rootStrand();
         if (rootStrand.isPresent()) {
             return treeItemFor(rootStrand.get(), state);
@@ -242,9 +249,9 @@ public class MissionPane extends BorderPane {
         return new TreeItem<>();
     }
 
-    private TreeItem<Strand> treeItemFor(Strand parent, MissionState state) {
-        TreeItem<Strand> item = new TreeItem<>(parent);
-        Set<TreeItem<Strand>> childNodes = state.childrenOf(parent).stream().map(s -> treeItemFor(s, state)).collect(toSet());
+    private TreeItem<StrandLine> treeItemFor(Strand parent, MissionState state) {
+        TreeItem<StrandLine> item = new TreeItem<>(new StrandLine(parent, state.runStateOf(parent)));
+        Set<TreeItem<StrandLine>> childNodes = state.childrenOf(parent).stream().map(s -> treeItemFor(s, state)).collect(toSet());
         item.getChildren().addAll(childNodes);
         return item;
     }
@@ -252,12 +259,15 @@ public class MissionPane extends BorderPane {
     private Pane createBottomPane() {
         BorderPane bottomPane = new BorderPane();
         strandTableView = new TreeTableView<>();
-        bottomPane.setCenter(strandTableView);
+        bottomPane.setLeft(strandTableView);
 
-        TreeTableColumn<Strand, String> idColumn = new TreeTableColumn<>("Strand");
-        idColumn.setCellValueFactory(param -> new SimpleStringProperty("" + param.getValue().getValue().id()));
+        TreeTableColumn<StrandLine, String> idColumn = new TreeTableColumn<>("Strand");
+        idColumn.setCellValueFactory(param -> param.getValue().getValue().idProperty());
 
-        strandTableView.getColumns().addAll(idColumn);
+        TreeTableColumn<StrandLine, RunState> runStateCollumn = new TreeTableColumn<>("RunState");
+        runStateCollumn.setCellValueFactory(param -> param.getValue().getValue().runStateProperty());
+
+        strandTableView.getColumns().addAll(idColumn, runStateCollumn);
         strandTableView.getColumns().forEach(c -> c.setSortable(false));
 
         strandTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -267,7 +277,7 @@ public class MissionPane extends BorderPane {
         bottomPane.setTop(buttonsPane);
 
         this.output = new TextArea();
-        bottomPane.setRight(output);
+        bottomPane.setCenter(output);
 
         return bottomPane;
     }
@@ -319,14 +329,14 @@ public class MissionPane extends BorderPane {
 
     private void addInstanceColumns() {
         TreeTableColumn<ExecutableLine, String> cursorColumn = new TreeTableColumn<>("Cursor");
-        cursorColumn.setPrefWidth(40);
+        cursorColumn.setPrefWidth(60);
         cursorColumn.setCellValueFactory(param -> param.getValue().getValue().cursorProperty());
 
         TreeTableColumn<ExecutableLine, RunState> runStateColumn = new TreeTableColumn<>("RunState");
         runStateColumn.setPrefWidth(100);
         runStateColumn.setCellValueFactory(param -> param.getValue().getValue().runStateProperty());
 
-        TreeTableColumn<ExecutableLine, Result> statusColumn = new TreeTableColumn<>("Status");
+        TreeTableColumn<ExecutableLine, Result> statusColumn = new TreeTableColumn<>("Result");
         statusColumn.setPrefWidth(100);
         statusColumn.setCellValueFactory(param -> param.getValue().getValue().stateProperty());
 
