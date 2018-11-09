@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
 import cern.lhc.app.seq.scheduler.gui.commands.ViewMission;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -31,7 +30,7 @@ public abstract class MissionView extends BorderPane {
 
     private final TabPane tabPane;
 
-    public MissionView(@Autowired ExecutableAdapter executableAdapter) {
+    public MissionView() {
         tabPane = new TabPane();
         setCenter(tabPane);
     }

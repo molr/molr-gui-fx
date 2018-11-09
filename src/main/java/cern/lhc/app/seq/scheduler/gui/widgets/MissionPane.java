@@ -4,12 +4,8 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import cern.lhc.app.seq.scheduler.adapter.seq.ExecutableAdapter;
-import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import org.molr.commons.domain.Result;
-import cern.lhc.app.seq.scheduler.gui.commands.ResultChange;
-import cern.lhc.app.seq.scheduler.gui.commands.RunStateChange;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
 import javafx.application.Platform;
@@ -70,9 +66,6 @@ public class MissionPane extends BorderPane {
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, Button> commandButtons = new EnumMap<StrandCommand, Button>(StrandCommand.class);
-
-    @Autowired
-    private ExecutableAdapter executableAdapter;
 
     @Autowired
     private Agency agency;
@@ -169,8 +162,8 @@ public class MissionPane extends BorderPane {
         agency.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
         agency.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
 
-        executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
-        executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
+//        executableAdapter.runStateChanges().subscribeOn(fxThread()).subscribe(this::updateRunState);
+//        executableAdapter.resultChanges().subscribeOn(fxThread()).subscribe(this::updateResult);
 
         addInstanceColumns();
         scheduled.scheduleAtFixedRate(() -> {
@@ -350,18 +343,18 @@ public class MissionPane extends BorderPane {
         blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
-
-    public void updateRunState(RunStateChange change) {
-        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
-            Platform.runLater(() -> l.runStateProperty().set(change.runState()));
-        });
-    }
-
-    public void updateResult(ResultChange change) {
-        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
-            Platform.runLater(() -> l.stateProperty().set(change.result()));
-        });
-    }
+//
+//    public void updateRunState(RunStateChange change) {
+//        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
+//            Platform.runLater(() -> l.runStateProperty().set(change.runState()));
+//        });
+//    }
+//
+//    public void updateResult(ResultChange change) {
+//        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
+//            Platform.runLater(() -> l.stateProperty().set(change.result()));
+//        });
+//    }
 
 
 }
