@@ -353,12 +353,7 @@ public class MissionPane extends BorderPane {
         blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
-//
-//    public void updateRunState(RunStateChange change) {
-//        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
-//            Platform.runLater(() -> l.runStateProperty().set(change.runState()));
-//        });
-//    }
+
 //
 //    public void updateResult(ResultChange change) {
 //        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {

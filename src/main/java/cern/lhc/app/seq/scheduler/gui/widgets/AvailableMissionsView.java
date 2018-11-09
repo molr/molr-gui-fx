@@ -129,7 +129,6 @@ public class AvailableMissionsView extends BorderPane {
             return;
         }
 
-        System.out.println("Trying to show mission " + mission);
         agency.representationOf(mission).subscribe(System.out::println);
         agency.parameterDescriptionOf(mission).subscribe(System.out::println);
         Flux.zip(agency.representationOf(mission), agency.parameterDescriptionOf(mission))
