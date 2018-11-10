@@ -10,7 +10,6 @@ import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ProgressBarTreeTableCell;
@@ -198,13 +197,15 @@ public class MissionPane extends BorderPane {
             }
         }
 
-
         lines.entrySet().forEach(e -> {
             Result result = missionState.resultOf(e.getKey());
-            e.getValue().stateProperty().set(result);
+            e.getValue().resultProperty().set(result);
         });
 
-
+        lines.entrySet().forEach(e -> {
+            RunState result = missionState.runStateOf(e.getKey());
+            e.getValue().runStateProperty().set(result);
+        });
 
 
         updateButtonStates();
@@ -338,7 +339,7 @@ public class MissionPane extends BorderPane {
 
         TreeTableColumn<ExecutableLine, Result> statusColumn = new TreeTableColumn<>("Result");
         statusColumn.setPrefWidth(100);
-        statusColumn.setCellValueFactory(param -> param.getValue().getValue().stateProperty());
+        statusColumn.setCellValueFactory(param -> param.getValue().getValue().resultProperty());
 
         TreeTableColumn<ExecutableLine, Double> progressColumn = new TreeTableColumn<>("Progress");
         progressColumn.setPrefWidth(200);
@@ -353,13 +354,6 @@ public class MissionPane extends BorderPane {
         blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
-
-//
-//    public void updateResult(ResultChange change) {
-//        Optional.ofNullable(lines.get(change.executable())).ifPresent(l -> {
-//            Platform.runLater(() -> l.stateProperty().set(change.result()));
-//        });
-//    }
 
 
 }

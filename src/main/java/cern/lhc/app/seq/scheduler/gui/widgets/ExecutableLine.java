@@ -145,7 +145,7 @@ public class ExecutableLine {
         return executable;
     }
 
-    public SimpleObjectProperty<Result> stateProperty() {
+    public SimpleObjectProperty<Result> resultProperty() {
         return state;
     }
 
