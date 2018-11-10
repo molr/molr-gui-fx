@@ -4,7 +4,13 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
+import javafx.util.Callback;
+import org.minifx.fxcommons.util.Fillers;
 import org.molr.commons.domain.Result;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
@@ -31,6 +37,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
@@ -58,6 +65,8 @@ public class MissionPane extends BorderPane {
     private TreeTableView<ExecutableLine> blockTableView;
     private TreeTableView<StrandLine> strandTableView;
     private TextArea output;
+
+    private BooleanProperty autoFollow = new SimpleBooleanProperty(true);
 
     private VBox instanceInfo;
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
@@ -119,7 +128,7 @@ public class MissionPane extends BorderPane {
 
         TreeTableColumn<ExecutableLine, String> executableColumn = new TreeTableColumn<>("Block");
         executableColumn.setPrefWidth(300);
-        executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
+        executableColumn.setCellValueFactory(nullSafe(ExecutableLine::nameProperty));
         executableColumn.setSortable(false);
 
         blockTableView.getColumns().add(executableColumn);
@@ -197,6 +206,16 @@ public class MissionPane extends BorderPane {
             }
         }
 
+        if (autoFollow.get()) {
+            collapse(blockTableView.getRoot());
+            for (Strand strand : missionState.allStrands()) {
+                Optional<Block> cursor = missionState.cursorPositionIn(strand);
+                if (cursor.isPresent()) {
+                    expandParents(blockTableView.getRoot(), cursor.get());
+                }
+            }
+        }
+
         lines.entrySet().forEach(e -> {
             Result result = missionState.resultOf(e.getKey());
             e.getValue().resultProperty().set(result);
@@ -209,6 +228,39 @@ public class MissionPane extends BorderPane {
 
 
         updateButtonStates();
+    }
+
+
+    private void collapse(TreeItem<ExecutableLine> subTree) {
+        for (TreeItem<ExecutableLine> child : subTree.getChildren()) {
+            collapse(child);
+        }
+        subTree.setExpanded(false);
+    }
+
+
+    private boolean expandParents(TreeItem<ExecutableLine> subTree, Block block) {
+        if (block.equals(subTree.getValue().executable())) {
+            expandParents(subTree.getParent());
+            return true;
+        } else {
+            for (TreeItem<ExecutableLine> child : subTree.getChildren()) {
+                if (expandParents(child, block)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void expandParents(TreeItem<ExecutableLine> selectedItem) {
+        if (selectedItem != null) {
+            expandParents(selectedItem.getParent());
+
+            if (!selectedItem.isLeaf()) {
+                selectedItem.setExpanded(true);
+            }
+        }
     }
 
     private void updateOutput(MissionOutput output) {
@@ -263,10 +315,10 @@ public class MissionPane extends BorderPane {
         bottomPane.setLeft(strandTableView);
 
         TreeTableColumn<StrandLine, String> idColumn = new TreeTableColumn<>("Strand");
-        idColumn.setCellValueFactory(param -> param.getValue().getValue().idProperty());
+        idColumn.setCellValueFactory(nullSafe(StrandLine::idProperty));
 
         TreeTableColumn<StrandLine, RunState> runStateCollumn = new TreeTableColumn<>("RunState");
-        runStateCollumn.setCellValueFactory(param -> param.getValue().getValue().runStateProperty());
+        runStateCollumn.setCellValueFactory(nullSafe(StrandLine::runStateProperty));
 
         strandTableView.getColumns().addAll(idColumn, runStateCollumn);
         strandTableView.getColumns().forEach(c -> c.setSortable(false));
@@ -314,6 +366,10 @@ public class MissionPane extends BorderPane {
         }
         HBox buttonsPane = new HBox();
         Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
+        buttonsPane.getChildren().add(Fillers.horizontalFiller());
+        CheckBox autoFollowCheckbox = new CheckBox("Automatically Expand/Collapse");
+        autoFollowCheckbox.selectedProperty().bindBidirectional(this.autoFollow);
+        buttonsPane.getChildren().add(autoFollowCheckbox);
         updateButtonStates();
         return buttonsPane;
     }
@@ -331,29 +387,37 @@ public class MissionPane extends BorderPane {
     private void addInstanceColumns() {
         TreeTableColumn<ExecutableLine, String> cursorColumn = new TreeTableColumn<>("Cursor");
         cursorColumn.setPrefWidth(60);
-        cursorColumn.setCellValueFactory(param -> param.getValue().getValue().cursorProperty());
+        /* For some reason there appeared a nullpointer exception here .. unclear*/
+        cursorColumn.setCellValueFactory(nullSafe(ExecutableLine::cursorProperty));
 
         TreeTableColumn<ExecutableLine, RunState> runStateColumn = new TreeTableColumn<>("RunState");
         runStateColumn.setPrefWidth(100);
-        runStateColumn.setCellValueFactory(param -> param.getValue().getValue().runStateProperty());
+        runStateColumn.setCellValueFactory(nullSafe(ExecutableLine::runStateProperty));
 
         TreeTableColumn<ExecutableLine, Result> statusColumn = new TreeTableColumn<>("Result");
         statusColumn.setPrefWidth(100);
-        statusColumn.setCellValueFactory(param -> param.getValue().getValue().resultProperty());
+        statusColumn.setCellValueFactory(nullSafe(ExecutableLine::resultProperty));
 
         TreeTableColumn<ExecutableLine, Double> progressColumn = new TreeTableColumn<>("Progress");
         progressColumn.setPrefWidth(200);
-        progressColumn.setCellValueFactory(param -> param.getValue().getValue().progressProperty());
+        progressColumn.setCellValueFactory(nullSafe(ExecutableLine::progressProperty));
         progressColumn.setCellFactory(ProgressBarTreeTableCell.forTreeTableColumn());
 
         TreeTableColumn<ExecutableLine, String> commentColumn = new TreeTableColumn<>("Comment");
         commentColumn.setPrefWidth(300);
-        commentColumn.setCellValueFactory(param -> param.getValue().getValue().commentProperty());
+        commentColumn.setCellValueFactory(nullSafe(ExecutableLine::commentProperty));
 
         blockTableView.getColumns().add(0, cursorColumn);
         blockTableView.getColumns().addAll(runStateColumn, statusColumn, progressColumn, commentColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
+
+    public static final <S, T> Callback<TreeTableColumn.CellDataFeatures<S, T>, ObservableValue<T>> nullSafe(Function<S, ObservableValue<T>> mapper) {
+        return param -> Optional.ofNullable(param.getValue())
+                .map(e -> e.getValue())
+                .map(mapper)
+                .orElse(null);
+    }
 
 }
