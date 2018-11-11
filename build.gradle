@@ -59,6 +59,14 @@ allprojects {
 
     }
 
+    sourceSets {
+        main {
+            resources {
+                srcDirs "src/main/resources", "src/main/java"
+            }
+        }
+    }
+
   
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
