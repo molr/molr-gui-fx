@@ -30,7 +30,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Instances")
-@Icon(value= FontAwesomeIcon.SITEMAP, color="blue" )
+@Icon(value = FontAwesomeIcon.SITEMAP, color = "blue")
 @Order(2)
 public class MissionInstancesView extends BorderPane {
 
@@ -52,12 +52,12 @@ public class MissionInstancesView extends BorderPane {
         setCenter(listView);
 
         FlowPane buttons = new FlowPane();
-        Button connectButton = new FormattedButton().getButton("Connect","Connect","Green");
+        Button connectButton = new FormattedButton().getButton("Connect", "Connect", "Green");
 
         connectButton.setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
-            agency.representationOf(instance.mission())
-                    .zipWith(agency.parameterDescriptionOf(instance.mission()), (r,d) -> new ViewMissionInstance(instance, r, d))
+            agency.parameterDescriptionOf(instance.mission())
+                    .map(d -> new ViewMissionInstance(instance, d))
                     .subscribe(publisher::publishEvent);
         });
         buttons.getChildren().add(connectButton);
@@ -66,7 +66,7 @@ public class MissionInstancesView extends BorderPane {
 
     }
 
-    private void reloadListView(){
+    private void reloadListView() {
         init();
     }
 
@@ -75,7 +75,6 @@ public class MissionInstancesView extends BorderPane {
         list.setCellFactory(nonNullItemText(MissionInstance::toString));
         return list;
     }
-
 
 
 }

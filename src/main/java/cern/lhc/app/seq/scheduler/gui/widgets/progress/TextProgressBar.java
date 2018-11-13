@@ -12,7 +12,8 @@ public class TextProgressBar extends StackPane {
 
     private static final String RED_BAR = "red-bar";
     private static final String GREEN_BAR = "green-bar";
-    private static final String[] COLOR_STYLE_CLASSES = {RED_BAR, GREEN_BAR};
+    private static final String ORANGE_BAR = "orange-bar";
+    private static final String[] COLOR_STYLE_CLASSES = {RED_BAR, GREEN_BAR, ORANGE_BAR};
 
     private final ObjectProperty<Progress> progress = new SimpleObjectProperty<>(Progress.undefined());
 
@@ -45,6 +46,9 @@ public class TextProgressBar extends StackPane {
                 break;
             case FAILED:
                 setBarStyleClass(RED_BAR);
+                break;
+            default:
+                setBarStyleClass(ORANGE_BAR);
                 break;
         }
 

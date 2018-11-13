@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +52,6 @@ public class MissionPane extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(MissionPane.class);
 
     private final Mission mission;
-    private final MissionRepresentation missionRepresentation;
     private final MissionParameterDescription description;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
@@ -66,43 +66,37 @@ public class MissionPane extends BorderPane {
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<MissionRepresentation> lastRepresentation = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, Button> commandButtons = new EnumMap<StrandCommand, Button>(StrandCommand.class);
 
     @Autowired
     private Agency agency;
 
-    public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description) {
+    public MissionPane(Mission mission, MissionParameterDescription description) {
         this.mission = requireNonNull(mission, "mission must not be null");
-        this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
         this.description = requireNonNull(description, "description must not be null");
     }
 
-    public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description, MissionHandle missionHandle) {
+    public MissionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
         this.mission = requireNonNull(mission, "mission must not be null");
-        this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
         this.description = requireNonNull(description, "description must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
     }
 
-    private TreeItem<ExecutableLine> createTree() {
-        return nodeFor(missionRepresentation.rootBlock());
+    private TreeItem<ExecutableLine> createTree(MissionRepresentation representation) {
+        return nodeFor(representation, representation.rootBlock());
     }
 
-    private TreeItem<ExecutableLine> nodeFor(Block block) {
-        ExecutableLine line = new ExecutableLine(block);
-        lines.put(block, line);
+    private TreeItem<ExecutableLine> nodeFor(MissionRepresentation representation, Block block) {
+        ExecutableLine line = lines.computeIfAbsent(block, b -> new ExecutableLine(block));
         TreeItem<ExecutableLine> item = new TreeItem<>(line);
-        item.getChildren().addAll(nodesFor(childrenOf(block)));
+        item.getChildren().addAll(nodesFor(representation, representation.childrenOf(block)));
         return item;
     }
 
-    private List<? extends Block> childrenOf(Block block) {
-        return missionRepresentation.childrenOf(block);
-    }
-
-    private List<TreeItem<ExecutableLine>> nodesFor(List<? extends Block> executables) {
-        return executables.stream().map(this::nodeFor).collect(toList());
+    private List<TreeItem<ExecutableLine>> nodesFor(MissionRepresentation representation, List<? extends Block> executables) {
+        return executables.stream().map(b -> this.nodeFor(representation, b)).collect(toList());
     }
 
     @PostConstruct
@@ -111,8 +105,7 @@ public class MissionPane extends BorderPane {
         instanceInfo.setPadding(new Insets(10, 10, 10, 10));
         setTop(new TitledPane("Mission Instance", instanceInfo));
 
-        TreeItem<ExecutableLine> root = createTree();
-        blockTableView = new TreeTableView<>(root);
+        blockTableView = new TreeTableView<>();
         blockTableView.setTableMenuButtonVisible(true);
         blockTableView.setShowRoot(false);
         setCenter(blockTableView);
@@ -137,6 +130,7 @@ public class MissionPane extends BorderPane {
             configureInstantiable();
         }
 
+        updateRepresentation(agency.representationOf(this.mission).block());
     }
 
     private void configureInstantiable() {
@@ -164,10 +158,16 @@ public class MissionPane extends BorderPane {
 
         agency.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
         agency.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
+        agency.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
-
         setBottom(createBottomPane());
+    }
+
+    private void updateRepresentation(MissionRepresentation representation) {
+        TreeItem<ExecutableLine> newRoot = createTree(representation);
+        this.blockTableView.setRoot(newRoot);
+        Optional.ofNullable(lastState.get()).ifPresent(this::cursorAndFollow);
     }
 
     private void updateStates(MissionState missionState) {
@@ -185,13 +185,37 @@ public class MissionPane extends BorderPane {
             strandTableView.getSelectionModel().select(rootItem);
         }
 
+        cursorAndFollow(missionState);
+
+        lines.entrySet().
+                forEach(e -> {
+                    Result result = missionState.resultOf(e.getKey());
+                    e.getValue().resultProperty().set(result);
+                });
+
+        lines.entrySet().
+                forEach(e -> {
+                    RunState result = missionState.runStateOf(e.getKey());
+                    e.getValue().runStateProperty().set(result);
+                });
+
+
+        updateButtonStates();
+    }
+
+    private void cursorAndFollow(MissionState missionState) {
         for (ExecutableLine line : lines.values()) {
             line.cursorProperty().set("");
         }
         for (Strand strand : missionState.allStrands()) {
             Optional<Block> cursor = missionState.cursorPositionIn(strand);
             if (cursor.isPresent()) {
-                lines.get(cursor.get()).cursorProperty().set("<-" + strand.id() + "->");
+                ExecutableLine line = lines.get(cursor.get());
+                if (line == null) {
+                    LOGGER.warn("No line for block {} available. Cannot set cursor.", cursor.get());
+                } else {
+                    line.cursorProperty().set("<-" + strand.id() + "->");
+                }
             }
         }
 
@@ -200,25 +224,11 @@ public class MissionPane extends BorderPane {
             for (Strand strand : missionState.allStrands()) {
                 Optional<Block> cursor = missionState.cursorPositionIn(strand);
                 if (cursor.isPresent()) {
-                    expandParents(blockTableView.getRoot(), cursor.get());
+                    boolean found = expandParents(blockTableView.getRoot(), cursor.get());
                 }
             }
         }
-
-        lines.entrySet().forEach(e -> {
-            Result result = missionState.resultOf(e.getKey());
-            e.getValue().resultProperty().set(result);
-        });
-
-        lines.entrySet().forEach(e -> {
-            RunState result = missionState.runStateOf(e.getKey());
-            e.getValue().runStateProperty().set(result);
-        });
-
-
-        updateButtonStates();
     }
-
 
     private void collapse(TreeItem<ExecutableLine> subTree) {
         collapseChildreanOf(subTree);
