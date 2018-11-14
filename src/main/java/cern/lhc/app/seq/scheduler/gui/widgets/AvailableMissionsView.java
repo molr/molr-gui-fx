@@ -94,16 +94,16 @@ public class AvailableMissionsView extends BorderPane {
     private FlowPane buttonsPane() {
         FlowPane buttons = new FlowPane();
 
-        Button showButton = new FormattedButton().getButton("Show", "Show", "Green");
-        showButton.setOnAction(event -> showSelectedMission());
+        FormattedButton showButton = new FormattedButton("Show", "Show", "Green");
+        showButton.getButton().setOnAction(event -> showSelectedMission());
 
-        Button instantiateButton = new FormattedButton().getButton("Instantiate", "Instantiate", "Blue");
-        instantiateButton.setOnAction(event -> instantiateSelectedMission());
+        FormattedButton instantiateButton = new FormattedButton("Instantiate", "Instantiate", "Blue");
+        instantiateButton.getButton().setOnAction(event -> instantiateSelectedMission());
 
-        Button debugButton = new FormattedButton().getButton("Debug", "Debug", "Cyan");
-        debugButton.setOnAction(event -> debugMission());
+        FormattedButton debugButton = new FormattedButton("Debug", "Debug", "Cyan");
+        debugButton.getButton().setOnAction(event -> debugMission());
 
-        buttons.getChildren().addAll(showButton, instantiateButton, debugButton);
+        buttons.getChildren().addAll(showButton.getButton(), instantiateButton.getButton(), debugButton.getButton());
         return buttons;
     }
 

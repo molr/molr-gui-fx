@@ -6,6 +6,9 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
+import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import org.molr.commons.domain.Mission;
 import org.molr.commons.domain.MissionParameterDescription;
 import org.molr.commons.domain.MissionRepresentation;
@@ -24,6 +27,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 
+import javax.swing.*;
+
 @View(at = CENTER, in = MissionsPerspective.class)
 @Component
 public abstract class MissionView extends BorderPane {
@@ -33,6 +38,8 @@ public abstract class MissionView extends BorderPane {
     public MissionView() {
         tabPane = new TabPane();
         setCenter(tabPane);
+       // addKeyboardShortcuts();
+
     }
 
     @EventListener
@@ -42,6 +49,22 @@ public abstract class MissionView extends BorderPane {
             addTab(viewMission.mission(), seqPane);
         });
     }
+
+    private void addKeyboardShortcuts(){
+        this.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.F2){
+                System.out.println("F2");
+            }
+            else
+            {
+                System.out.println(e.getCode() + " was pressed");
+            }
+        });
+    }
+
+
+
+
 
     @EventListener
     public void update(ViewMissionInstance viewMissionInstance) {
@@ -62,4 +85,7 @@ public abstract class MissionView extends BorderPane {
 
     @Lookup
     public abstract MissionPane missionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description,  MissionHandle missionHandle);
+
+
 }
+

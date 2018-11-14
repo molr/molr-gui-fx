@@ -52,15 +52,15 @@ public class MissionInstancesView extends BorderPane {
         setCenter(listView);
 
         FlowPane buttons = new FlowPane();
-        Button connectButton = new FormattedButton().getButton("Connect","Connect","Green");
+        FormattedButton connectButton = new FormattedButton("Connect","Connect","Green");
 
-        connectButton.setOnAction(event -> {
+        connectButton.getButton().setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
             agency.representationOf(instance.mission())
                     .zipWith(agency.parameterDescriptionOf(instance.mission()), (r,d) -> new ViewMissionInstance(instance, r, d))
                     .subscribe(publisher::publishEvent);
         });
-        buttons.getChildren().add(connectButton);
+        buttons.getChildren().add(connectButton.getButton());
         setBottom(buttons);
 
 

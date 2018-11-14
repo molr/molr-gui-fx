@@ -4,21 +4,23 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import javafx.scene.layout.HBox;
-import org.molr.commons.domain.Result;
 import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ProgressBarTreeTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import org.molr.commons.domain.*;
-import org.molr.commons.domain.RunState;
 import org.molr.agency.core.Agency;
+import org.molr.commons.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +28,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
@@ -54,6 +58,7 @@ public class MissionPane extends BorderPane {
     private final MissionParameterDescription description;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
+    private List<EventHandler> eventsList = new ArrayList<EventHandler>();
 
     private TreeTableView<ExecutableLine> blockTableView;
     private TreeTableView<StrandLine> strandTableView;
@@ -64,7 +69,7 @@ public class MissionPane extends BorderPane {
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
 
-    private final Map<StrandCommand, Button> commandButtons = new EnumMap<StrandCommand, Button>(StrandCommand.class);
+    private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
 
     @Autowired
     private Agency agency;
@@ -76,6 +81,7 @@ public class MissionPane extends BorderPane {
         this.mission = requireNonNull(mission, "mission must not be null");
         this.missionRepresentation = requireNonNull(missionRepresentation, "missionRepresentation must not be null");
         this.description = requireNonNull(description, "description must not be null");
+
     }
 
     public MissionPane(Mission mission, MissionRepresentation missionRepresentation, MissionParameterDescription description, MissionHandle missionHandle) {
@@ -84,6 +90,7 @@ public class MissionPane extends BorderPane {
         this.description = requireNonNull(description, "description must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
     }
+
 
     private TreeItem<ExecutableLine> createTree() {
         return nodeFor(missionRepresentation.rootBlock());
@@ -105,6 +112,10 @@ public class MissionPane extends BorderPane {
     private List<TreeItem<ExecutableLine>> nodesFor(List<? extends Block> executables) {
         return executables.stream().map(this::nodeFor).collect(toList());
     }
+
+
+
+
 
     @PostConstruct
     public void init() {
@@ -131,18 +142,21 @@ public class MissionPane extends BorderPane {
             configureInstantiable();
         }
 
+
+
     }
+
 
     private void configureInstantiable() {
         ParameterEditor parameterEditor = new ParameterEditor(description.parameters());
         instanceInfo.getChildren().add(parameterEditor);
 
-        Button instantiateButton = new FormattedButton().getButton("Instantiate", "Instantiate", "Blue");
-        instantiateButton.setOnAction(event -> {
-            instantiateButton.setDisable(true);
+        FormattedButton instantiateButton = new FormattedButton("Instantiate", "Instantiate", "Blue");
+        instantiateButton.getButton().setOnAction(event -> {
+            instantiateButton.getButton().setDisable(true);
             this.instantiate(parameterEditor.parameterValues());
         });
-        instanceInfo.getChildren().add(instantiateButton);
+        instanceInfo.getChildren().add(instantiateButton.getButton());
     }
 
     private void instantiate(Map<String, Object> params) {
@@ -168,6 +182,7 @@ public class MissionPane extends BorderPane {
                 }
             });
         }, 0, 500, MILLISECONDS);
+
 
         setBottom(createBottomPane());
     }
@@ -280,21 +295,71 @@ public class MissionPane extends BorderPane {
         this.output = new TextArea();
         bottomPane.setCenter(output);
 
+
         return bottomPane;
     }
 
 
+
     private void updateButtonStates() {
+        clearListeners();
         Set<StrandCommand> strandCommands = allowedCommands();
         this.commandButtons.entrySet().forEach(e -> {
-            Button button = e.getValue();
+            FormattedButton button = e.getValue();
             if (strandCommands.contains(e.getKey())) {
-                button.setDisable(false);
+                button.getButton().setDisable(false);
+                listenFor(button.getKeyCode());
             } else {
-                button.setDisable(true);
+                button.getButton().setDisable(true);
             }
         });
 
+    }
+
+    private MissionHandle getThisMissionHandle(){
+        return this.missionHandle.get();
+    }
+
+    private StrandCommand getCommandFromKeycode(KeyCode kc){
+
+        switch (kc.getName()){
+            case "F2" :
+                return StrandCommand.PAUSE;
+            case "F6":
+                return StrandCommand.STEP_INTO;
+            case "F7" :
+                return StrandCommand.STEP_OVER;
+            case "F8":
+                return StrandCommand.SKIP;
+            case "F5":
+                return StrandCommand.RESUME;
+            default:
+                return StrandCommand.PAUSE;
+
+        }
+
+    }
+
+    private void listenFor(KeyCode kc ){
+
+        EventHandler filter = new EventHandler<KeyEvent>(){
+
+            @Override
+            public void handle(KeyEvent event) {
+                Strand strand = selectedStrand();
+                agency.instruct(getThisMissionHandle(), strand, getCommandFromKeycode(kc) );
+            }
+        };
+
+        eventsList.add(filter);
+        this.addEventFilter(KeyEvent.KEY_PRESSED, filter);
+
+    }
+
+    private void clearListeners() {
+        for (EventHandler e : eventsList){
+            this.removeEventFilter(KeyEvent.KEY_PRESSED, e);
+         }
     }
 
     private Set<StrandCommand> allowedCommands() {
@@ -309,19 +374,21 @@ public class MissionPane extends BorderPane {
 
     private HBox createButtonsPane() {
         for (StrandCommand command : StrandCommand.values()) {
-            Button button = commandButton(command);
+            FormattedButton button = commandButton(command);
             this.commandButtons.put(command, button);
         }
         HBox buttonsPane = new HBox();
-        Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
+
+       Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(e -> buttonsPane.getChildren().add(e.getButton()));
+
         updateButtonStates();
         return buttonsPane;
     }
 
-    private Button commandButton(StrandCommand command) {
-        Button button = new FormattedButton().getAndGuessButton(command.toString());
-        button.setMnemonicParsing(false);
-        button.setOnAction(event -> {
+    private FormattedButton commandButton(StrandCommand command) {
+        FormattedButton button = new FormattedButton(command.toString());
+        button.getButton().setMnemonicParsing(false);
+        button.getButton().setOnAction(event -> {
             Strand strand = selectedStrand();
             agency.instruct(this.missionHandle.get(), strand, command);
         });

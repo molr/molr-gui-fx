@@ -2,59 +2,95 @@ package cern.lhc.app.seq.scheduler.util;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+//import javafx.scene.paint.Color;
+
+import java.awt.*;
+
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
+import static javafx.scene.paint.Color.*;
 
 public class FormattedButton {
 
+    Button butt;
+    KeyCode associatedKeyCode = null;
 
-    public  Button getButton(String buttonText){
-        Button butt = new Button();
-       // butt.setMinSize(100,100);
+
+    public FormattedButton(String buttonText, String buttonGraphic, String colour, int fontSize, KeyCode kc){
+        butt = new Button();
         butt.setText(buttonText);
-        return butt;
     }
 
-    public  Button getButton(String buttonText, String buttonGraphic){
-        Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
-        Button butt = getButton(buttonText);
-        butt.setGraphic(nodeIcon);
-        return butt;
-    }
-
-    public  Button getButton(String buttonText, String buttonGraphic, String colour){
+    public FormattedButton(String buttonText, String buttonGraphic, String colour){
         Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
         nodeIcon.setFill(getColour(colour));
-        Button butt = getButton(buttonText);
+        butt = new Button();
+        butt.setText(buttonText);
         butt.setGraphic(nodeIcon);
+    }
+
+    public FormattedButton(String buttonText, String buttonGraphic){
+        Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
+        butt = new Button();
+        butt.setText(buttonText);
+        butt.setGraphic(nodeIcon);
+    }
+
+    public FormattedButton(String buttonText){
+        butt = new Button();
+        getAndGuessButton(buttonText);
+    }
+
+    public Button getButton(){
         return butt;
     }
 
-    public Button getButton(String buttonText, String buttonGraphic, String colour, int fontSize){
-        Button butt = getButton(buttonText, buttonGraphic, colour);
-        butt.setStyle("-fx-font-size: " + fontSize);
-        return butt;
+    private void getButton(String buttonText, String buttonGraphic, String colour, KeyCode kc){
+        Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
+        nodeIcon.setFill(getColour(colour));
+        butt.setText(buttonText);
+        butt.setGraphic(nodeIcon);
+        butt.setTooltip(new Tooltip(kc.getName()));
+       // assignKeyboardShortcut(kc);
+        associatedKeyCode = kc;
+    }
+
+
+    public KeyCode getKeyCode(){
+        return associatedKeyCode;
     }
 
     public Button getAndGuessButton(String buttonText){
         // PAUSE, STEP_OVER, STEP_INTO, SKIP, RESUME;
         switch (buttonText){
             case "PAUSE":
-                return getButton("Pause","Pause","Blue");
+                getButton("Pause","Pause","Blue", KeyCode.F2);
+                return butt;
             case "STEP_OVER":
-                return getButton("Step Over","Step Into","Cyan");
+                getButton("Step Over","Step Into","Cyan",KeyCode.F6);
+                return butt;
             case "STEP_INTO":
-                return getButton("Step Into","Step Over","LightGreen");
+                getButton("Step Into","Step Over","LightGreen",KeyCode.F7);
+                return butt;
             case "SKIP":
-                return getButton("Skip","Skip","LightBlue");
+                getButton("Skip","Skip","LightBlue", KeyCode.F8);
+                return butt;
             case "RESUME":
-                return getButton("Resume","Start","Green");
+                 getButton("Resume","Start","Green",KeyCode.F5);
+                return butt;
             default:
-                return getButton(" ", " ", " ");
-
-
+                 getButton(" ", " ", " ",null);
+                return butt;
         }
     }
 
@@ -62,66 +98,69 @@ public class FormattedButton {
 
         switch (icon) {
             case "Show":
-                return FontAwesomeIcon.CHECK;
+                return CHECK;
             case "Instantiate":
-                return FontAwesomeIcon.BULLSEYE;
+                return BULLSEYE;
             case "Debug":
-                return FontAwesomeIcon.BUG;
+                return BUG;
             case "Instances":
-                return FontAwesomeIcon.AMAZON;
+                return AMAZON;
             case "Missons":
-                return FontAwesomeIcon.USER_SECRET;
+                return USER_SECRET;
             case "Start":
-                return FontAwesomeIcon.PLAY;
+                return PLAY;
             case "Step Into":
-                return FontAwesomeIcon.SIGN_IN;
+                return SIGN_IN;
             case "Step Over":
-                return FontAwesomeIcon.SIGN_OUT;
+                return SIGN_OUT;
             case "Step":
-                return FontAwesomeIcon.SIGN_OUT;
+                return SIGN_OUT;
             case "Stop":
-                return FontAwesomeIcon.STOP;
+                return STOP;
             case "Pause":
-                return FontAwesomeIcon.PAUSE;
+                return PAUSE;
             case "Skip":
-                return FontAwesomeIcon.ANGLE_DOUBLE_DOWN;
+                return ANGLE_DOUBLE_DOWN;
             case "Connect":
-                return FontAwesomeIcon.PLUG;
+                return PLUG;
             case "PAUSE":
-                return FontAwesomeIcon.PAUSE;
+                return PAUSE;
             case "STEP_OVER":
-                return FontAwesomeIcon.SIGN_OUT;
+                return SIGN_OUT;
             case "STEP_INTO":
-                return FontAwesomeIcon.SIGN_IN;
+                return SIGN_IN;
             case "SKIP":
-                return FontAwesomeIcon.ANGLE_DOUBLE_DOWN;
+                return ANGLE_DOUBLE_DOWN;
             case "RESUME":
-                return FontAwesomeIcon.PLAY;
+                return PLAY;
             default:
-                return FontAwesomeIcon.BEER;
+                return BEER;
 
         }
     }
+
+
 
     private Color getColour(String colour) {
         switch (colour) {
             case "Green":
-                return Color.GREEN;
+                return GREEN;
             case "Blue":
-                return Color.BLUE;
+                return BLUE;
             case "Red":
-                return Color.RED;
+                return RED;
             case "Yellow":
-                return Color.YELLOW;
+                return YELLOW;
             case "Cyan":
-                return Color.CYAN;
+                return CYAN;
             case "LightGreen":
-                return Color.LIGHTGREEN;
+                return LIGHTGREEN;
             case "LightBlue":
-                return Color.LIGHTBLUE;
+                return LIGHTBLUE;
             default:
                 return Color.BLACK;
         }
     }
+
 
 }
