@@ -64,7 +64,6 @@ public class MissionPane extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(MissionPane.class);
 
     private final Mission mission;
-    private final MissionRepresentation missionRepresentation;
     private final MissionParameterDescription description;
     private final Map<Block, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
@@ -136,7 +135,7 @@ public class MissionPane extends BorderPane {
         executableColumn.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
         executableColumn.setSortable(false);
 
-        blockTableView.getColumns().add(executableColumn);
+        blockTableView.getColumns().addAll(idColumn, executableColumn);
 
         MissionHandle handle = missionHandle.get();
         if (handle != null) {
@@ -145,6 +144,7 @@ public class MissionPane extends BorderPane {
             configureInstantiable();
         }
 
+        updateRepresentation(agency.representationOf(this.mission).block());
     }
 
     private void configureInstantiable() {
@@ -175,16 +175,6 @@ public class MissionPane extends BorderPane {
         agency.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
-        scheduled.scheduleAtFixedRate(() -> {
-            Platform.runLater(() -> {
-                Instant now = Instant.now();
-                for (ExecutableLine line : lines.values()) {
-                    line.actualTimeProperty().set(now);
-                }
-            });
-        }, 0, 500, MILLISECONDS);
-
-
         setBottom(createBottomPane());
     }
 
@@ -440,7 +430,7 @@ public class MissionPane extends BorderPane {
             this.commandButtons.put(command, button);
         }
         HBox buttonsPane = new HBox();
-        Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(buttonsPane.getChildren()::add);
+        Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(b -> buttonsPane.getChildren().add(b.getButton()));
         buttonsPane.getChildren().add(Fillers.horizontalFiller());
         CheckBox autoFollowCheckbox = new CheckBox("Automatically Expand/Collapse");
         autoFollowCheckbox.selectedProperty().bindBidirectional(this.autoFollow);
