@@ -56,8 +56,8 @@ public class MissionInstancesView extends BorderPane {
 
         connectButton.getButton().setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
-            agency.representationOf(instance.mission())
-                    .zipWith(agency.parameterDescriptionOf(instance.mission()), (r,d) -> new ViewMissionInstance(instance, r, d))
+            agency.parameterDescriptionOf(instance.mission())
+                    .map(d -> new ViewMissionInstance(instance, d))
                     .subscribe(publisher::publishEvent);
         });
         buttons.getChildren().add(connectButton.getButton());

@@ -11,22 +11,16 @@ import org.molr.commons.domain.MissionRepresentation;
 public class ViewMission {
 
     private final Mission mission;
-    private final MissionRepresentation representation;
     private final MissionParameterDescription description;
 
 
-    public ViewMission(Mission mission, MissionRepresentation executable, MissionParameterDescription description) {
+    public ViewMission(Mission mission, MissionParameterDescription description) {
         this.mission = mission;
-        this.representation = executable;
         this.description = description;
     }
 
     public Mission mission() {
         return this.mission;
-    }
-
-    public MissionRepresentation representation() {
-        return representation;
     }
 
     public MissionParameterDescription description() {

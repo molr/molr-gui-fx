@@ -116,9 +116,8 @@ public class AvailableMissionsView extends BorderPane {
 
         instantiate(mission)
                 .map(h -> new MissionInstance(h, mission))
-                .zipWith(agency.representationOf(mission))
                 .zipWith(agency.parameterDescriptionOf(mission))
-                .map(tuple22 -> new ViewMissionInstance(tuple22.getT1().getT1(), tuple22.getT1().getT2(), tuple22.getT2()))
+                .map(tuple22 -> new ViewMissionInstance(tuple22.getT1(), tuple22.getT2()))
                 .subscribe(publisher::publishEvent);
     }
 
@@ -129,10 +128,8 @@ public class AvailableMissionsView extends BorderPane {
             return;
         }
 
-        agency.representationOf(mission).subscribe(System.out::println);
-        agency.parameterDescriptionOf(mission).subscribe(System.out::println);
-        Flux.zip(agency.representationOf(mission), agency.parameterDescriptionOf(mission))
-                .map(t -> new ViewMission(mission, t.getT1(), t.getT2()))
+        agency.parameterDescriptionOf(mission)
+                .map(d -> new ViewMission(mission, d))
                 .subscribe(publisher::publishEvent);
     }
 
