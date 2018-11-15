@@ -4,19 +4,16 @@
 
 package cern.lhc.app.seq.scheduler.gui.widgets;
 
-import cern.lhc.app.seq.scheduler.info.ExecutableStatisticsProvider;
 import cern.lhc.app.seq.scheduler.gui.widgets.progress.Progress;
 import cern.lhc.app.seq.scheduler.gui.widgets.progress.TextProgressBarTreeTableCell;
 import cern.lhc.app.seq.scheduler.util.FormattedButton;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ProgressBarTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
@@ -27,8 +24,6 @@ import org.molr.agency.core.Agency;
 import org.molr.commons.domain.*;
 import javafx.util.Callback;
 import org.minifx.fxcommons.util.Fillers;
-import org.molr.agency.core.Agency;
-import org.molr.commons.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,18 +32,14 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 import java.util.function.Function;
 
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -188,7 +179,7 @@ public class MissionPane extends BorderPane {
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
-        TreeItem<StrandLine> rootItem = treeFor(missionState);
+        TreeItem<StrandLine> rootItem = strandsTreeItemsFor(missionState);
         strandTableView.setRoot(rootItem);
 
         TreeItem<StrandLine> toBeSelected = find(rootItem, lastSelectedStrandNode);
@@ -311,12 +302,16 @@ public class MissionPane extends BorderPane {
         return strandTableView.getSelectionModel().getSelectedItem();
     }
 
-    private TreeItem<StrandLine> treeFor(MissionState state) {
+    private TreeItem<StrandLine> strandsTreeItemsFor(MissionState state) {
         Optional<Strand> rootStrand = state.rootStrand();
+        TreeItem<StrandLine> strandTreeItem;
         if (rootStrand.isPresent()) {
-            return treeItemFor(rootStrand.get(), state);
+            strandTreeItem = treeItemFor(rootStrand.get(), state);
+        } else {
+            strandTreeItem = new TreeItem<>();
         }
-        return new TreeItem<>();
+        strandTreeItem.setExpanded(true);
+        return strandTreeItem;
     }
 
     private TreeItem<StrandLine> treeItemFor(Strand parent, MissionState state) {
