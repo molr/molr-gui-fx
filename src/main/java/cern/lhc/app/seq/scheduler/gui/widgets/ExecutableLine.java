@@ -6,6 +6,7 @@ package cern.lhc.app.seq.scheduler.gui.widgets;
 
 import static org.molr.commons.domain.RunState.FINISHED;
 import static cern.lhc.app.seq.scheduler.util.DurationFormats.shortLetters;
+import static org.molr.commons.domain.RunState.RUNNING;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -53,9 +54,11 @@ public class ExecutableLine {
                 return new Progress(0.0, "", result);
             } else if (FINISHED == rs) {
                 return new Progress(1.0, "" + Objects.toString(rs).toLowerCase(), result);
+            } else if (RUNNING == rs) {
+                return new Progress(-1.0, "" + Objects.toString(rs).toLowerCase(), result);
+            } else {
+                return new Progress(0.05, "" + Objects.toString(rs).toLowerCase(), result);
             }
-
-            return new Progress(-1.0, "" + Objects.toString(rs).toLowerCase(), result);
         }, resultProperty(), runStateProperty()));
 
     }

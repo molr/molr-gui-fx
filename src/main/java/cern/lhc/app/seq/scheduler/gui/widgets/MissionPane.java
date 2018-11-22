@@ -112,7 +112,7 @@ public class MissionPane extends BorderPane {
 
         blockTableView = new TreeTableView<>();
         blockTableView.setTableMenuButtonVisible(true);
-        blockTableView.setShowRoot(false);
+        blockTableView.setShowRoot(true);
         setCenter(blockTableView);
 
         TreeTableColumn<ExecutableLine, String> idColumn = new TreeTableColumn<>("id");
@@ -430,6 +430,11 @@ public class MissionPane extends BorderPane {
         CheckBox autoFollowCheckbox = new CheckBox("Automatically Expand/Collapse");
         autoFollowCheckbox.selectedProperty().bindBidirectional(this.autoFollow);
         buttonsPane.getChildren().add(autoFollowCheckbox);
+
+        CheckBox showRootCheckbox = new CheckBox("Show root");
+        showRootCheckbox.selectedProperty().bindBidirectional(blockTableView.showRootProperty());
+        buttonsPane.getChildren().add(showRootCheckbox);
+
         updateButtonStates();
         return buttonsPane;
     }
