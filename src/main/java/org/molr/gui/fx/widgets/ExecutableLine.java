@@ -4,24 +4,23 @@
 
 package org.molr.gui.fx.widgets;
 
-import static org.molr.commons.domain.RunState.FINISHED;
-import static org.molr.gui.fx.util.DurationFormats.shortLetters;
-import static org.molr.commons.domain.RunState.RUNNING;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import org.molr.commons.domain.Block;
+import org.molr.commons.domain.Result;
+import org.molr.commons.domain.RunState;
+import org.molr.gui.fx.widgets.progress.Progress;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 
-import org.molr.gui.fx.widgets.progress.Progress;
-import org.molr.commons.domain.Result;
-import org.molr.commons.domain.Block;
-import org.molr.commons.domain.RunState;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import static org.molr.commons.domain.RunState.FINISHED;
+import static org.molr.commons.domain.RunState.RUNNING;
 
 public class ExecutableLine {
 

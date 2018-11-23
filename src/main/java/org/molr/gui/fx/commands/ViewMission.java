@@ -6,7 +6,6 @@ package org.molr.gui.fx.commands;
 
 import org.molr.commons.domain.Mission;
 import org.molr.commons.domain.MissionParameterDescription;
-import org.molr.commons.domain.MissionRepresentation;
 
 public class ViewMission {
 

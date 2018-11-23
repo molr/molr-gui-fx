@@ -2,23 +2,16 @@ package org.molr.gui.fx.util;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-//import javafx.scene.paint.Color;
-
-import java.awt.*;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 import static javafx.scene.paint.Color.*;
+
+//import javafx.scene.paint.Color;
 
 public class FormattedButton {
 

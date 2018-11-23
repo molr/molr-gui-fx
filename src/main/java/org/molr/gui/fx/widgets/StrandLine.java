@@ -2,7 +2,6 @@ package org.molr.gui.fx.widgets;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import org.molr.commons.domain.Result;
 import org.molr.commons.domain.RunState;
 import org.molr.commons.domain.Strand;
 

@@ -4,9 +4,6 @@
 
 package org.molr.gui.fx.util;
 
-import static org.molr.gui.fx.util.DurationFormats.formatLetters;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

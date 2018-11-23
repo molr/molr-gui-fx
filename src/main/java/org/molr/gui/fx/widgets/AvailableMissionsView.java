@@ -1,9 +1,5 @@
 package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.commands.ViewMission;
-import org.molr.gui.fx.commands.ViewMissionInstance;
-import org.molr.gui.fx.perspectives.MissionsPerspective;
-import org.molr.gui.fx.util.FormattedButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,9 +12,13 @@ import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
-import org.molr.commons.domain.*;
 import org.molr.agency.core.Agency;
+import org.molr.commons.domain.*;
+import org.molr.gui.fx.commands.ViewMission;
+import org.molr.gui.fx.commands.ViewMissionInstance;
+import org.molr.gui.fx.perspectives.MissionsPerspective;
 import org.molr.gui.fx.util.CellFactories;
+import org.molr.gui.fx.util.FormattedButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

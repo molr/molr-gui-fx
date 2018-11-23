@@ -4,25 +4,24 @@
 
 package org.molr.gui.fx.widgets;
 
-import static org.minifx.workbench.domain.PerspectivePos.CENTER;
-
+import javafx.application.Platform;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
+import org.minifx.workbench.annotations.View;
 import org.molr.commons.domain.Mission;
-import org.molr.commons.domain.MissionParameterDescription;
 import org.molr.commons.domain.MissionHandle;
+import org.molr.commons.domain.MissionParameterDescription;
+import org.molr.gui.fx.commands.ViewMission;
 import org.molr.gui.fx.commands.ViewMissionInstance;
 import org.molr.gui.fx.perspectives.MissionsPerspective;
-import javafx.application.Platform;
-import org.minifx.workbench.annotations.View;
-import org.molr.gui.fx.commands.ViewMission;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.BorderPane;
+import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
 @View(at = CENTER, in = MissionsPerspective.class)
 @Component

@@ -4,14 +4,11 @@
 
 package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.widgets.progress.Progress;
-import org.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
-import org.molr.gui.fx.util.FormattedButton;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.EventHandler;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -20,10 +17,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import org.molr.agency.core.Agency;
-import org.molr.commons.domain.*;
 import javafx.util.Callback;
 import org.minifx.fxcommons.util.Fillers;
+import org.molr.agency.core.Agency;
+import org.molr.commons.domain.*;
+import org.molr.gui.fx.util.FormattedButton;
+import org.molr.gui.fx.widgets.progress.Progress;
+import org.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

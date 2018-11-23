@@ -1,22 +1,22 @@
 package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.commands.ViewMissionInstance;
-import org.molr.gui.fx.perspectives.MissionsPerspective;
-import org.molr.gui.fx.util.FormattedButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import org.minifx.workbench.annotations.Icon;
 import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
+import org.molr.agency.core.Agency;
 import org.molr.commons.domain.AgencyState;
 import org.molr.commons.domain.MissionInstance;
-import org.molr.agency.core.Agency;
+import org.molr.gui.fx.commands.ViewMissionInstance;
+import org.molr.gui.fx.perspectives.MissionsPerspective;
 import org.molr.gui.fx.util.CellFactories;
+import org.molr.gui.fx.util.FormattedButton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;

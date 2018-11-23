@@ -4,10 +4,10 @@
 
 package org.molr.gui.fx.util;
 
-import java.time.Duration;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+
+import java.time.Duration;
 
 public final class DurationFormats {
 

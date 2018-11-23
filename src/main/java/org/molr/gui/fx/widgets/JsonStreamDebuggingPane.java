@@ -1,11 +1,14 @@
 package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.perspectives.DebugPerspective;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import org.minifx.workbench.annotations.View;
+import org.molr.gui.fx.perspectives.DebugPerspective;
 import org.springframework.stereotype.Component;
 
 import static org.minifx.fxcommons.util.Fillers.horizontalFiller;
