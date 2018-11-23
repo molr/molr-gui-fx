@@ -303,13 +303,8 @@ public class MissionPane extends BorderPane {
     }
 
     private TreeItem<StrandLine> strandsTreeItemsFor(MissionState state) {
-        Optional<Strand> rootStrand = state.rootStrand();
-        TreeItem<StrandLine> strandTreeItem;
-        if (rootStrand.isPresent()) {
-            strandTreeItem = treeItemFor(rootStrand.get(), state);
-        } else {
-            strandTreeItem = new TreeItem<>();
-        }
+        Strand rootStrand = state.rootStrand();
+        TreeItem<StrandLine> strandTreeItem = treeItemFor(rootStrand, state);
         strandTreeItem.setExpanded(true);
         return strandTreeItem;
     }
@@ -363,18 +358,18 @@ public class MissionPane extends BorderPane {
 
     }
 
-    private MissionHandle getThisMissionHandle(){
+    private MissionHandle getThisMissionHandle() {
         return this.missionHandle.get();
     }
 
-    private StrandCommand getCommandFromKeycode(KeyCode kc){
+    private StrandCommand getCommandFromKeycode(KeyCode kc) {
 
-        switch (kc.getName()){
-            case "F2" :
+        switch (kc.getName()) {
+            case "F2":
                 return StrandCommand.PAUSE;
             case "F6":
                 return StrandCommand.STEP_INTO;
-            case "F7" :
+            case "F7":
                 return StrandCommand.STEP_OVER;
             case "F8":
                 return StrandCommand.SKIP;
@@ -387,14 +382,14 @@ public class MissionPane extends BorderPane {
 
     }
 
-    private void listenFor(KeyCode kc ){
+    private void listenFor(KeyCode kc) {
 
-        EventHandler filter = new EventHandler<KeyEvent>(){
+        EventHandler filter = new EventHandler<KeyEvent>() {
 
             @Override
             public void handle(KeyEvent event) {
                 Strand strand = selectedStrand();
-                agency.instruct(getThisMissionHandle(), strand, getCommandFromKeycode(kc) );
+                agency.instruct(getThisMissionHandle(), strand, getCommandFromKeycode(kc));
             }
         };
 
@@ -404,9 +399,9 @@ public class MissionPane extends BorderPane {
     }
 
     private void clearListeners() {
-        for (EventHandler e : eventsList){
+        for (EventHandler e : eventsList) {
             this.removeEventFilter(KeyEvent.KEY_PRESSED, e);
-         }
+        }
     }
 
     private Set<StrandCommand> allowedCommands() {
