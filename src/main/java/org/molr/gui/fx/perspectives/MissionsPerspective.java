@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.perspectives;
+package org.molr.gui.fx.perspectives;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import org.minifx.workbench.annotations.Icon;

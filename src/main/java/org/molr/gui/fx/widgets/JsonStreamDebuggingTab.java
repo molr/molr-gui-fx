@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
 import org.molr.gui.fx.util.Jsons;
 import javafx.application.Platform;

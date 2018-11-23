@@ -1,7 +1,7 @@
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.gui.commands.ViewMissionInstance;
-import org.molr.gui.fx.gui.perspectives.MissionsPerspective;
+import org.molr.gui.fx.commands.ViewMissionInstance;
+import org.molr.gui.fx.perspectives.MissionsPerspective;
 import org.molr.gui.fx.util.FormattedButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import org.minifx.workbench.annotations.Icon;

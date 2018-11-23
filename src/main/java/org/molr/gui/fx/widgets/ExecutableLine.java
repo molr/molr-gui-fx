@@ -2,7 +2,7 @@
  * Copyright (c) 2017 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
 import static org.molr.commons.domain.RunState.FINISHED;
 import static org.molr.gui.fx.util.DurationFormats.shortLetters;
@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 
-import org.molr.gui.fx.gui.widgets.progress.Progress;
+import org.molr.gui.fx.widgets.progress.Progress;
 import org.molr.commons.domain.Result;
 import org.molr.commons.domain.Block;
 import org.molr.commons.domain.RunState;

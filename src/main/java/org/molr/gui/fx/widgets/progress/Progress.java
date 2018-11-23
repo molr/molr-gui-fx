@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.widgets.progress;
+package org.molr.gui.fx.widgets.progress;
 
 import org.molr.commons.domain.Result;
 

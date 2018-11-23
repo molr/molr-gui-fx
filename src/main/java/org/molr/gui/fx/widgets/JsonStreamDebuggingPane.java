@@ -1,6 +1,6 @@
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.gui.perspectives.DebugPerspective;
+import org.molr.gui.fx.perspectives.DebugPerspective;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;

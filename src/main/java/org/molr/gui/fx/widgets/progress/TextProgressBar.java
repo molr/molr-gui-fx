@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.widgets.progress;
+package org.molr.gui.fx.widgets.progress;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

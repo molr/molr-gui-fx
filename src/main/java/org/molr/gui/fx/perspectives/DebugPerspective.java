@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.perspectives;
+package org.molr.gui.fx.perspectives;
 
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;

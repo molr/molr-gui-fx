@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.BorderPane;

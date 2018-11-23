@@ -2,10 +2,10 @@
  * Copyright (c) 2017 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
-import org.molr.gui.fx.gui.widgets.progress.Progress;
-import org.molr.gui.fx.gui.widgets.progress.TextProgressBarTreeTableCell;
+import org.molr.gui.fx.widgets.progress.Progress;
+import org.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
 import org.molr.gui.fx.util.FormattedButton;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

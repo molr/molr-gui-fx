@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.commands;
+package org.molr.gui.fx.commands;
 
 import org.molr.commons.domain.MissionInstance;
 import org.molr.commons.domain.MissionParameterDescription;

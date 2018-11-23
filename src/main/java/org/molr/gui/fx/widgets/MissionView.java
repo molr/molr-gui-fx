@@ -2,7 +2,7 @@
  * Copyright (c) 2017 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
@@ -11,11 +11,11 @@ import javafx.scene.input.KeyEvent;
 import org.molr.commons.domain.Mission;
 import org.molr.commons.domain.MissionParameterDescription;
 import org.molr.commons.domain.MissionHandle;
-import org.molr.gui.fx.gui.commands.ViewMissionInstance;
-import org.molr.gui.fx.gui.perspectives.MissionsPerspective;
+import org.molr.gui.fx.commands.ViewMissionInstance;
+import org.molr.gui.fx.perspectives.MissionsPerspective;
 import javafx.application.Platform;
 import org.minifx.workbench.annotations.View;
-import org.molr.gui.fx.gui.commands.ViewMission;
+import org.molr.gui.fx.commands.ViewMission;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

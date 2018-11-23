@@ -1,4 +1,4 @@
-package org.molr.gui.fx.gui.widgets;
+package org.molr.gui.fx.widgets;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

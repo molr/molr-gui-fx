@@ -2,7 +2,7 @@
  * Copyright (c) 2017 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package org.molr.gui.fx.gui.commands;
+package org.molr.gui.fx.commands;
 
 import org.molr.commons.domain.Mission;
 import org.molr.commons.domain.MissionParameterDescription;
