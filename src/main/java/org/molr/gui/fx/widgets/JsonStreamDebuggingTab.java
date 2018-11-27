@@ -5,7 +5,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import net.jcip.annotations.GuardedBy;
 import org.molr.gui.fx.util.Jsons;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,7 +25,6 @@ public class JsonStreamDebuggingTab extends Tab {
     private final TextArea textArea;
     private final TextField inputField;
 
-    @GuardedBy("monitor")
     private Disposable activeSubscription = null;
 
     private final WebClient client = WebClient.create();
