@@ -1,11 +1,29 @@
 buildscript {
     project.ext['CERN_VM'] = System.getProperty('CERN_TECHNET_VM') ?: System.getenv('CERN_TECHNET_VM') ?: System.getProperty('CERN_VM') ?: System.getenv('CERN_VM') ?: false
+    project.ext['DEPLOYMENT'] = System.getProperty('deployment') ?: false
+    project.ext['VCS_TAG'] = System.getProperty('TRAVIS_TAG') ?: System.getenv('TRAVIS_TAG') ?: System.getProperty('VCS_TAG')
+
+    project.ext['BINTRAY.userName'] = System.getProperty('BINTRAY_USER') ?: System.getenv('BINTRAY_USER')
+    project.ext['BINTRAY.apiToken'] = System.getProperty('BINTRAY_API_TOKEN') ?: System.getenv('BINTRAY_API_TOKEN')
+
+    repositories {
+        if (project['CERN_VM']) {
+            maven { url 'http://artifactory.cern.ch/ds-jcenter' }
+            maven { url 'http://artifactory.cern.ch/development' }
+        } else {
+            mavenCentral()
+            jcenter()
+        }
+    }
+    dependencies { classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4' }
 }
 
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -26,9 +44,9 @@ repositories {
 
 dependencies {
     /* This is finally the only API we should need... ?*/
-    compile 'org.molr:molr-agency-remote:+'
+    compile group: 'org.molr', name: 'molr-agency-remote', version: '0.0.1'
 
-    compile group: 'org.minifx', name: 'minifx-workbench', version: '+'
+    compile group: 'org.minifx', name: 'minifx-workbench', version: '0.0.3'
     compile group: 'org.controlsfx', name: 'controlsfx', version: '8.40.14'
     compile group: 'com.github.shadskii', name: 'reactorfx', version: '1.8.0'
 
@@ -41,7 +59,6 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -93,6 +110,11 @@ sourceSets {
             srcDirs "src/main/resources", "src/main/java"
         }
     }
+}
+
+if (project['DEPLOYMENT']) {
+    println "Applying deployment scripts for ${project.name}"
+    apply from: './gradle/bintray-deploy.gradle'
 }
 
 task wrapper(type: Wrapper) { gradleVersion = '4.10.2' }
