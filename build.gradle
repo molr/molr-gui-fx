@@ -35,9 +35,9 @@ repositories {
             maven { url 'http://artifactory.cern.ch/ds-jcenter' }
             maven { url 'http://artifactory.cern.ch/development' }
         } else {
-            maven { url "https://dl.bintray.com/molr/molr-repo" }
             mavenCentral()
             jcenter()
+            maven { url "https://dl.bintray.com/molr/molr-repo" }
         }
     }
 }
