@@ -55,7 +55,7 @@ public class MissionPane extends BorderPane {
 
     private final Mission mission;
     private final MissionParameterDescription description;
-    private final Map<Block, ExecutableLine> lines = new HashMap<>();
+    private final Map<String, ExecutableLine> lines = new HashMap<>();
     private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
     private List<EventHandler> eventsList = new ArrayList<EventHandler>();
 
@@ -93,7 +93,7 @@ public class MissionPane extends BorderPane {
     }
 
     private TreeItem<ExecutableLine> nodeFor(MissionRepresentation representation, Block block) {
-        ExecutableLine line = lines.computeIfAbsent(block, b -> new ExecutableLine(block));
+        ExecutableLine line = lines.computeIfAbsent(block.id(), b -> new ExecutableLine(block));
         TreeItem<ExecutableLine> item = new TreeItem<>(line);
         item.getChildren().addAll(nodesFor(representation, representation.childrenOf(block)));
         return item;
@@ -193,13 +193,13 @@ public class MissionPane extends BorderPane {
 
         lines.entrySet().
                 forEach(e -> {
-                    Result result = missionState.resultOf(e.getKey());
+                    Result result = missionState.resultOfBlockId(e.getKey());
                     e.getValue().resultProperty().set(result);
                 });
 
         lines.entrySet().
                 forEach(e -> {
-                    RunState result = missionState.runStateOf(e.getKey());
+                    RunState result = missionState.runStateOfBlockId(e.getKey());
                     e.getValue().runStateProperty().set(result);
                 });
 
@@ -212,11 +212,11 @@ public class MissionPane extends BorderPane {
             line.cursorProperty().set("");
         }
         for (Strand strand : missionState.allStrands()) {
-            Optional<Block> cursor = missionState.cursorPositionIn(strand);
-            if (cursor.isPresent()) {
-                ExecutableLine line = lines.get(cursor.get());
+            Optional<String> cursorBlockId = missionState.cursorBlockIdIn(strand);
+            if (cursorBlockId.isPresent()) {
+                ExecutableLine line = lines.get(cursorBlockId.get());
                 if (line == null) {
-                    LOGGER.warn("No line for block {} available. Cannot set cursor.", cursor.get());
+                    LOGGER.warn("No line for block {} available. Cannot set cursor.", cursorBlockId.get());
                 } else {
                     line.cursorProperty().set("<-" + strand.id() + "->");
                 }
@@ -226,9 +226,9 @@ public class MissionPane extends BorderPane {
         if (autoFollow.get()) {
             collapseChildreanOf(blockTableView.getRoot());
             for (Strand strand : missionState.allStrands()) {
-                Optional<Block> cursor = missionState.cursorPositionIn(strand);
-                if (cursor.isPresent()) {
-                    boolean found = expandParents(blockTableView.getRoot(), cursor.get());
+                Optional<String> cursorBlockId = missionState.cursorBlockIdIn(strand);
+                if (cursorBlockId.isPresent()) {
+                    boolean found = expandParents(blockTableView.getRoot(), cursorBlockId.get());
                 }
             }
         }
@@ -245,14 +245,13 @@ public class MissionPane extends BorderPane {
         }
     }
 
-
-    private boolean expandParents(TreeItem<ExecutableLine> subTree, Block block) {
-        if (block.equals(subTree.getValue().executable())) {
+    private boolean expandParents(TreeItem<ExecutableLine> subTree, String blockId) {
+        if (blockId.equals(subTree.getValue().executable().id())) {
             expandParents(subTree.getParent());
             return true;
         } else {
             for (TreeItem<ExecutableLine> child : subTree.getChildren()) {
-                if (expandParents(child, block)) {
+                if (expandParents(child, blockId)) {
                     return true;
                 }
             }
