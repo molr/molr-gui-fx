@@ -3,9 +3,9 @@ package org.molr.gui.fx.widgets;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.BorderPane;
 import org.controlsfx.control.PropertySheet;
-import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 import org.molr.commons.domain.MissionParameter;
+import org.molr.gui.fx.util.MoreEditors;
 
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.controlsfx.control.PropertySheet.Mode.CATEGORY;
+import static org.molr.commons.util.MissionParameters.defaultValueFor;
 
 public class ParameterEditor extends BorderPane {
 
@@ -26,7 +27,6 @@ public class ParameterEditor extends BorderPane {
         this.parameterItems = itemsFrom(parameters);
         init();
     }
-
 
     private void init() {
         PropertySheet sheet = new PropertySheet();
@@ -41,57 +41,56 @@ public class ParameterEditor extends BorderPane {
     }
 
     private PropertyEditor<?> propertyEditorFor(PropertySheet.Item item) {
-        if (Boolean.class.isAssignableFrom(item.getType())) {
-            return Editors.createCheckEditor(item);
+        MissionParameterItem parameterItem = (MissionParameterItem) item;
+        if (parameterItem.parameter.isRequired()) {
+            return MoreEditors.getPropertyEditor(item);
         }
-        if (Number.class.isAssignableFrom(item.getType())) {
-            return Editors.createNumericEditor(item);
-        }
-        return Editors.createTextEditor(item);
+        return new OptionalMissionParameterPropertyEditor<>(item, parameterItem.parameter);
     }
 
     public Map<String, Object> parameterValues() {
         return parameterItems.stream()
-                .filter(i -> !Objects.isNull(i.getValue()))
-                .collect(toMap(i -> i.param.placeholder().name(), i -> i.getValue()));
+                .filter(item -> !Objects.isNull(item.getValue()))
+                .collect(toMap(item -> item.parameter.placeholder().name(), MissionParameterItem::getValue));
     }
 
-    private final static Set<MissionParameterItem> itemsFrom(Set<MissionParameter<?>> parameters) {
+    private static Set<MissionParameterItem> itemsFrom(Set<MissionParameter<?>> parameters) {
         return parameters.stream().map(MissionParameterItem::new).collect(toSet());
     }
 
-    private static class MissionParameterItem implements PropertySheet.Item {
 
-        private final MissionParameter<?> param;
+    public static class MissionParameterItem implements PropertySheet.Item {
+
+        private final MissionParameter<?> parameter;
         private Object value;
 
-        private MissionParameterItem(MissionParameter<?> param) {
-            this.param = param;
-            this.value = param.defaultValue();
+        private MissionParameterItem(MissionParameter<?> parameter) {
+            this.parameter = parameter;
+            this.value = defaultValueFor(parameter);
         }
 
         @Override
         public Class<?> getType() {
-            return param.placeholder().type();
+            return parameter.placeholder().type();
         }
 
         @Override
         public String getCategory() {
-            if (param.isRequired()) {
-                return "mandatory";
+            if (parameter.isRequired()) {
+                return "Mandatory";
             } else {
-                return "optional";
+                return "Optional";
             }
         }
 
         @Override
         public String getName() {
-            return param.placeholder().name();
+            return parameter.placeholder().name();
         }
 
         @Override
         public String getDescription() {
-            return "";
+            return "Specify value for " + parameter.placeholder().name();
         }
 
         @Override
@@ -100,8 +99,8 @@ public class ParameterEditor extends BorderPane {
         }
 
         @Override
-        public void setValue(Object value) {
-            this.value = value;
+        public void setValue(Object newValue) {
+            this.value = newValue;
         }
 
         @Override
@@ -109,6 +108,5 @@ public class ParameterEditor extends BorderPane {
             return Optional.empty();
         }
     }
-
 
 }
