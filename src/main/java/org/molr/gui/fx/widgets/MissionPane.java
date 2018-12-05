@@ -19,7 +19,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.minifx.fxcommons.util.Fillers;
-import org.molr.agency.core.Agency;
+import org.molr.commons.api.Mole;
 import org.molr.commons.domain.*;
 import org.molr.gui.fx.util.FormattedButton;
 import org.molr.gui.fx.widgets.progress.Progress;
@@ -74,7 +74,7 @@ public class MissionPane extends BorderPane {
     private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
 
     @Autowired
-    private Agency agency;
+    private Mole mole;
 
     public MissionPane(Mission mission, MissionParameterDescription description) {
         this.mission = requireNonNull(mission, "mission must not be null");
@@ -134,7 +134,7 @@ public class MissionPane extends BorderPane {
             configureInstantiable();
         }
 
-        updateRepresentation(agency.representationOf(this.mission).block());
+        updateRepresentation(mole.representationOf(this.mission).block());
     }
 
     private void configureInstantiable() {
@@ -150,7 +150,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void instantiate(Map<String, Object> params) {
-        agency.instantiate(mission, params).publishOn(fxThread()).subscribe(h -> {
+        mole.instantiate(mission, params).publishOn(fxThread()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });
@@ -160,9 +160,9 @@ public class MissionPane extends BorderPane {
     private void configureForInstance(MissionHandle handle) {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
 
-        agency.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
-        agency.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
-        agency.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
+        mole.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
+        mole.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
+        mole.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
         setBottom(createBottomPane());
@@ -387,7 +387,7 @@ public class MissionPane extends BorderPane {
             @Override
             public void handle(KeyEvent event) {
                 Strand strand = selectedStrand();
-                agency.instruct(getThisMissionHandle(), strand, getCommandFromKeycode(kc));
+                mole.instruct(getThisMissionHandle(), strand, getCommandFromKeycode(kc));
             }
         };
 
@@ -437,7 +437,7 @@ public class MissionPane extends BorderPane {
         button.getButton().setMnemonicParsing(false);
         button.getButton().setOnAction(event -> {
             Strand strand = selectedStrand();
-            agency.instruct(this.missionHandle.get(), strand, command);
+            mole.instruct(this.missionHandle.get(), strand, command);
         });
         return button;
     }

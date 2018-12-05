@@ -10,7 +10,7 @@ import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
-import org.molr.agency.core.Agency;
+import org.molr.commons.api.Mole;
 import org.molr.commons.domain.AgencyState;
 import org.molr.commons.domain.MissionInstance;
 import org.molr.gui.fx.commands.ViewMissionInstance;
@@ -34,7 +34,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 public class MissionInstancesView extends BorderPane {
 
     @Autowired
-    private Agency agency;
+    private Mole mole;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -45,7 +45,7 @@ public class MissionInstancesView extends BorderPane {
 
     @PostConstruct
     public void init() {
-        agency.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
+        mole.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
 
         listView = newListView();
         setCenter(listView);
@@ -55,7 +55,7 @@ public class MissionInstancesView extends BorderPane {
 
         connectButton.getButton().setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
-            agency.parameterDescriptionOf(instance.mission())
+            mole.parameterDescriptionOf(instance.mission())
                     .map(d -> new ViewMissionInstance(instance, d))
                     .subscribe(publisher::publishEvent);
         });

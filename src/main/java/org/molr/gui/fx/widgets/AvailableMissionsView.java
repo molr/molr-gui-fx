@@ -12,7 +12,7 @@ import javafx.scene.layout.FlowPane;
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
-import org.molr.agency.core.Agency;
+import org.molr.commons.api.Mole;
 import org.molr.commons.domain.*;
 import org.molr.gui.fx.commands.ViewMission;
 import org.molr.gui.fx.commands.ViewMissionInstance;
@@ -50,7 +50,7 @@ public class AvailableMissionsView extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(AvailableMissionsView.class);
 
     @Autowired
-    private Agency agency;
+    private Mole mole;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -63,7 +63,7 @@ public class AvailableMissionsView extends BorderPane {
         this.missionListView = newListView();
         setCenter(missionListView);
         setBottom(buttonsPane());
-        agency.states().publishOn(fxThread()).subscribe(this::update);
+        mole.states().publishOn(fxThread()).subscribe(this::update);
 
         missionListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -112,7 +112,7 @@ public class AvailableMissionsView extends BorderPane {
 
         instantiate(mission)
                 .map(h -> new MissionInstance(h, mission))
-                .zipWith(agency.parameterDescriptionOf(mission))
+                .zipWith(mole.parameterDescriptionOf(mission))
                 .map(tuple22 -> new ViewMissionInstance(tuple22.getT1(), tuple22.getT2()))
                 .subscribe(publisher::publishEvent);
     }
@@ -124,7 +124,7 @@ public class AvailableMissionsView extends BorderPane {
             return;
         }
 
-        agency.parameterDescriptionOf(mission)
+        mole.parameterDescriptionOf(mission)
                 .map(d -> new ViewMission(mission, d))
                 .subscribe(publisher::publishEvent);
     }
@@ -145,11 +145,11 @@ public class AvailableMissionsView extends BorderPane {
             return Mono.empty();
         }
         Map<String, Object> params = parameters.get();
-        return agency.instantiate(mission, params);
+        return mole.instantiate(mission, params);
     }
 
     private Optional<Map<String, Object>> parametersFor(Mission mission) {
-        MissionParameterDescription description = agency.parameterDescriptionOf(mission).block();
+        MissionParameterDescription description = mole.parameterDescriptionOf(mission).block();
 
         if (description.parameters().isEmpty()) {
             /* This is a valid situation! There are no parameters, so no need to query them ;-)*/

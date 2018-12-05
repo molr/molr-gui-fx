@@ -5,7 +5,7 @@
 package org.molr.gui.fx;
 
 import org.minifx.workbench.MiniFx;
-import org.molr.agency.remote.conf.LocalhostRestClientConfiguration;
+import org.molr.mole.remote.conf.LocalhostRestClientConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
