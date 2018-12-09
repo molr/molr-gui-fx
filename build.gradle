@@ -27,7 +27,7 @@ apply plugin: 'com.jfrog.bintray'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-group = "org.molr"
+group = "io.molr"
 
 repositories {
     repositories {
@@ -44,7 +44,7 @@ repositories {
 
 dependencies {
     /* This is finally the only API we should need... ?*/
-    compile group: 'org.molr', name: 'molr-mole-remote', version: molrVersion
+    compile group: 'io.molr', name: 'molr-mole-remote', version: molrVersion
 
     compile group: 'org.minifx', name: 'minifx-workbench', version: '0.0.3'
     compile group: 'org.controlsfx', name: 'controlsfx', version: '8.40.14'
