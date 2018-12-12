@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -23,7 +24,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import org.minifx.fxcommons.util.Fillers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +112,14 @@ public class MissionPane extends BorderPane {
         blockTableView = new TreeTableView<>();
         blockTableView.setTableMenuButtonVisible(true);
         blockTableView.setShowRoot(true);
-        setCenter(blockTableView);
+
+        BorderPane blocksBox = new BorderPane();
+        blocksBox.setCenter(blockTableView);
+        blocksBox.setBottom(createBlockTableOptions());
+
+        setCenter(blocksBox);
+        setRight(createStrandCommandPane());
+
 
         TreeTableColumn<ExecutableLine, String> idColumn = new TreeTableColumn<>("id");
         idColumn.setPrefWidth(70);
@@ -165,7 +172,13 @@ public class MissionPane extends BorderPane {
         mole.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
-        setBottom(createBottomPane());
+
+        setBottom(createOutput());
+    }
+
+    private TitledPane createOutput() {
+        this.output = new TextArea();
+        return new TitledPane("Output", this.output);
     }
 
     private void updateRepresentation(MissionRepresentation representation) {
@@ -314,10 +327,8 @@ public class MissionPane extends BorderPane {
         return item;
     }
 
-    private Pane createBottomPane() {
-        BorderPane bottomPane = new BorderPane();
+    private Pane createStrandCommandPane() {
         strandTableView = new TreeTableView<>();
-        bottomPane.setLeft(strandTableView);
 
         TreeTableColumn<StrandLine, String> idColumn = new TreeTableColumn<>("Strand");
         idColumn.setCellValueFactory(nullSafe(StrandLine::idProperty));
@@ -330,14 +341,14 @@ public class MissionPane extends BorderPane {
 
         strandTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         strandTableView.getSelectionModel().selectedItemProperty().addListener((e, o, n) -> updateButtonStates());
+        strandTableView.setPrefWidth(220);
 
-        HBox buttonsPane = createButtonsPane();
-        bottomPane.setTop(buttonsPane);
+        Node buttonsPane = createButtonsPane();
 
-        this.output = new TextArea();
-        bottomPane.setCenter(output);
-
-        return bottomPane;
+        BorderPane box = new BorderPane();
+        box.setCenter(strandTableView);
+        box.setTop(buttonsPane);
+        return box;
     }
 
 
@@ -412,28 +423,33 @@ public class MissionPane extends BorderPane {
     }
 
 
-    private HBox createButtonsPane() {
+    private VBox createButtonsPane() {
         for (StrandCommand command : StrandCommand.values()) {
             FormattedButton button = commandButton(command);
             this.commandButtons.put(command, button);
         }
-        HBox buttonsPane = new HBox();
+        VBox buttonsPane = new VBox();
+        buttonsPane.setPadding(new Insets(10));
         Arrays.stream(StrandCommand.values()).map(commandButtons::get).forEach(b -> buttonsPane.getChildren().add(b.getButton()));
-        buttonsPane.getChildren().add(Fillers.horizontalFiller());
-        CheckBox autoFollowCheckbox = new CheckBox("Automatically Expand/Collapse");
-        autoFollowCheckbox.selectedProperty().bindBidirectional(this.autoFollow);
-        buttonsPane.getChildren().add(autoFollowCheckbox);
-
-        CheckBox showRootCheckbox = new CheckBox("Show root");
-        showRootCheckbox.selectedProperty().bindBidirectional(blockTableView.showRootProperty());
-        buttonsPane.getChildren().add(showRootCheckbox);
-
         updateButtonStates();
         return buttonsPane;
     }
 
+    private HBox createBlockTableOptions() {
+        HBox box = new HBox(10);
+        CheckBox autoFollowCheckbox = new CheckBox("Automatically Expand/Collapse");
+        autoFollowCheckbox.selectedProperty().bindBidirectional(this.autoFollow);
+        box.getChildren().add(autoFollowCheckbox);
+
+        CheckBox showRootCheckbox = new CheckBox("Show root");
+        showRootCheckbox.selectedProperty().bindBidirectional(blockTableView.showRootProperty());
+        box.getChildren().add(showRootCheckbox);
+        return box;
+    }
+
     private FormattedButton commandButton(StrandCommand command) {
         FormattedButton button = new FormattedButton(command.toString());
+        button.getButton().setPrefWidth(200);
         button.getButton().setMnemonicParsing(false);
         button.getButton().setOnAction(event -> {
             Strand strand = selectedStrand();
