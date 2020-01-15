@@ -1,3 +1,5 @@
+import org.gradle.api.JavaVersion
+
 buildscript {
     project.ext['CERN_VM'] = System.getProperty('CERN_TECHNET_VM') ?: System.getenv('CERN_TECHNET_VM') ?: System.getProperty('CERN_VM') ?: System.getenv('CERN_VM') ?: false
     project.ext['DEPLOYMENT'] = System.getProperty('deployment') ?: false
@@ -22,14 +24,19 @@ buildscript {
     }
 }
 
+plugins {
+    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
+}
+
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'org.openjfx.javafxplugin'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
 
 group = "io.molr"
 
@@ -50,7 +57,10 @@ dependencies {
     /* This is finally the only API we should need... ?*/
     compile group: 'io.molr', name: 'molr-mole-remote', version: molrVersion
 
-    compile group: 'org.minifx', name: 'minifx-workbench', version: '0.0.3'
+    compile group: 'org.minifx', name: 'minifx-workbench', version: '1.1.1-11'
+    compile 'de.jensd:fontawesomefx-commons:11.0'
+        //compile group: 'org.minifx', name: 'minifx-workbench', version: '0.0.3'
+
     compile group: 'org.controlsfx', name: 'controlsfx', version: '8.40.14'
     compile group: 'com.github.shadskii', name: 'reactorfx', version: '1.8.0'
 
@@ -129,6 +139,11 @@ if (!project['CERN_VM']) {
 if (project['DEPLOYMENT']) {
     println "Applying deployment scripts for ${project.name}"
     apply from: './gradle/bintray-deploy.gradle'
+}
+
+javafx {
+    // version = "12.0.1"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web' ]
 }
 
 task wrapper(type: Wrapper) { gradleVersion = '4.10.2' }
