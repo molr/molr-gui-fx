@@ -57,11 +57,11 @@ dependencies {
     /* This is finally the only API we should need... ?*/
     compile group: 'io.molr', name: 'molr-mole-remote', version: molrVersion
 
-    compile group: 'org.minifx', name: 'minifx-workbench', version: '0.1.1'
+    compile group: 'org.minifx', name: 'minifx-workbench', version: '1.1.1-11'
     //compile 'de.jensd:fontawesomefx-commons:11.0'
         //compile group: 'org.minifx', name: 'minifx-workbench', version: '0.0.3'
 
-    compile group: 'org.controlsfx', name: 'controlsfx', version: '8.40.14'
+    compile group: 'org.controlsfx', name: 'controlsfx', version: '11.0.1'
     compile group: 'com.github.shadskii', name: 'reactorfx', version: '1.8.0'
 
     //compile group: 'org.springframework', name: 'spring-web', version: springVersion
