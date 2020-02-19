@@ -6,6 +6,7 @@ package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.util.FormattedButton;
+import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
 import io.molr.gui.fx.widgets.progress.Progress;
 import io.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
 import io.molr.mole.core.api.Mole;
@@ -188,6 +189,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateStates(MissionState missionState) {
+        System.out.println(missionState.getAllowedBlockCommandNamesById());
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
@@ -213,7 +215,11 @@ public class MissionPane extends BorderPane {
         lines.entrySet().
                 forEach(e -> {
                     RunState result = missionState.runStateOfBlockId(e.getKey());
+                    System.out.println(e.getKey()+":"+result);
                     e.getValue().runStateProperty().set(result);
+                    String blockId = e.getKey();
+                    ExecutableLine line = e.getValue();
+                    line.breakpointProperty().set(missionState.getBreakpointBlockIds().contains(blockId));  
                 });
 
 
@@ -237,7 +243,7 @@ public class MissionPane extends BorderPane {
         }
 
         if (autoFollow.get()) {
-            collapseChildreanOf(blockTableView.getRoot());
+            //collapseChildreanOf(blockTableView.getRoot());
             for (Strand strand : missionState.allStrands()) {
                 Optional<String> cursorBlockId = missionState.cursorBlockIdIn(strand);
                 if (cursorBlockId.isPresent()) {
@@ -446,7 +452,7 @@ public class MissionPane extends BorderPane {
         box.getChildren().add(showRootCheckbox);
         return box;
     }
-
+    
     private FormattedButton commandButton(StrandCommand command) {
         FormattedButton button = new FormattedButton(command.toString());
         button.getButton().setPrefWidth(200);
@@ -478,8 +484,40 @@ public class MissionPane extends BorderPane {
         progressColumn.setCellValueFactory(nullSafe(ExecutableLine::progressProperty));
         progressColumn.setCellFactory(TextProgressBarTreeTableCell.forTreeTableColumn());
 
+        TreeTableColumn<ExecutableLine, Boolean> breakpointColumn = new TreeTableColumn<>("Breakpoint");
+        breakpointColumn.setPrefWidth(60);
+        breakpointColumn.setCellValueFactory(nullSafe(ExecutableLine::breakpointProperty));
+        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,Boolean>, TreeTableCell<ExecutableLine,Boolean>>() {   
+            @Override
+            public TreeTableCell<ExecutableLine, Boolean> call(TreeTableColumn<ExecutableLine, Boolean> param) {
+                return new BreakpointCell(mole, missionHandle.get());
+            }
+        });
+
+        //https://stackoverflow.com/questions/28351008/javafx-8-tableview-selection-with-checkbox/28417203
+//        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,Boolean>, TreeTableCell<ExecutableLine,Boolean>>() {
+//            
+//            @Override
+//            public TreeTableCell<ExecutableLine, Boolean> call(TreeTableColumn<ExecutableLine, Boolean> param) {
+//                
+//                return new CheckBoxTableCell<ExecutableLine, Boolean>() {
+//                    
+//                };
+//            }
+//        });
+
+        //showRootCheckbox.selectedProperty().bindBidirectional(blockTableView.showRootProperty());
+//        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,Boolean>, TreeTableCell<ExecutableLine,Boolean>>() {
+//
+//            @Override
+//            public TreeTableCell<ExecutableLine, Boolean> call(TreeTableColumn<ExecutableLine, Boolean> param) {
+//                return new TreeTableCell<>();
+//            }
+//            
+//        });      
+        
         blockTableView.getColumns().add(2, cursorColumn);
-        blockTableView.getColumns().addAll(progressColumn, runStateColumn, statusColumn);
+        blockTableView.getColumns().addAll(breakpointColumn, progressColumn, runStateColumn, statusColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
