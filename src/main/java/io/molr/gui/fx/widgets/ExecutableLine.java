@@ -7,11 +7,11 @@ package io.molr.gui.fx.widgets;
 import io.molr.commons.domain.Block;
 import io.molr.commons.domain.Result;
 import io.molr.commons.domain.RunState;
+import io.molr.gui.fx.widgets.breakpoints.BreakpointCellData;
 import io.molr.gui.fx.widgets.progress.Progress;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -34,7 +34,7 @@ public class ExecutableLine {
     private final SimpleObjectProperty<Result> state = new SimpleObjectProperty<>(this, "state", Result.UNDEFINED);
     private final SimpleObjectProperty<Progress> progress = new SimpleObjectProperty<>(this, "progress", Progress.undefined());
     private final SimpleStringProperty cursor = new SimpleStringProperty(this, "cursor");
-    private final SimpleBooleanProperty breakpoint = new SimpleBooleanProperty(this, "breakpoint");
+    private final SimpleObjectProperty<BreakpointCellData> breakpointCellData = new SimpleObjectProperty<>(this, "breakpoint", BreakpointCellData.undefined());
 
     private final ReadOnlyStringProperty name;
     private final ReadOnlyStringProperty id;
@@ -92,8 +92,8 @@ public class ExecutableLine {
         return cursor;
     }
 
-    public SimpleBooleanProperty breakpointProperty() {
-        return this.breakpoint;
+    public SimpleObjectProperty<BreakpointCellData> breakpointProperty() {
+        return this.breakpointCellData;
     }
 
     

@@ -3,7 +3,6 @@ package io.molr.gui.fx.widgets.breakpoints;
 import io.molr.commons.domain.Block;
 import io.molr.commons.domain.BlockCommand;
 import io.molr.commons.domain.MissionHandle;
-import io.molr.commons.domain.RunState;
 import io.molr.gui.fx.widgets.ExecutableLine;
 import io.molr.mole.core.api.Mole;
 import javafx.event.ActionEvent;
@@ -18,11 +17,7 @@ import java.text.MessageFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author krepp
- */
-public class BreakpointCell extends TreeTableCell<ExecutableLine, Boolean>{
+public class BreakpointCell extends TreeTableCell<ExecutableLine, BreakpointCellData>{
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BreakpointCell.class);
     
@@ -37,7 +32,7 @@ public class BreakpointCell extends TreeTableCell<ExecutableLine, Boolean>{
     
     
     @Override
-    protected void updateItem(Boolean item, boolean empty) {
+    protected void updateItem(BreakpointCellData item, boolean empty) {
         super.updateItem(item, empty);
         if(empty) {
             this.setContextMenu(null);
@@ -49,18 +44,16 @@ public class BreakpointCell extends TreeTableCell<ExecutableLine, Boolean>{
         ExecutableLine line = row.getItem();
         
         if(line == null) {
-            System.out.println("line is null");
             return;
         }
-        System.out.println("updateCalled "+item);
+        
+        this.textProperty().set(item.text());
+
         Block block = line.executable();
-        this.textProperty().set(item.toString());
         ContextMenu contextMenu = new ContextMenu();
 
-        RunState runState = line.runStateProperty().get();
-        if(runState == RunState.UNDEFINED) {
+        if(item.allowedCommands().contains(BlockCommand.SET_BREAKPOINT)) {
             MenuItem setBreakpointItem = new MenuItem("SET_BREAKPOINT");
-            //set breakpoint makes no sense if breakpoint is already passed
             setBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
                 
                 @Override
@@ -72,26 +65,21 @@ public class BreakpointCell extends TreeTableCell<ExecutableLine, Boolean>{
             contextMenu.getItems().add(setBreakpointItem);
         }
 
+        if (item.allowedCommands().contains(BlockCommand.UNSET_BREAKPOINT)) {
+            MenuItem unsetBreakpointItem = new MenuItem("UNSET_BREAKPOINT");
+            unsetBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
 
+                @Override
+                public void handle(ActionEvent event) {
+                    LOGGER.info(MessageFormat.format("Unset breakpoint for handle={0} block={1}", block.id(), handle));
+                    mole.instructBlock(handle, block.id(), BlockCommand.UNSET_BREAKPOINT);
+                }
+            });
+            contextMenu.getItems().add(unsetBreakpointItem);
+        }
 
-        MenuItem unsetBreakpointItem = new MenuItem("UNSET_BREAKPOINT");
-        unsetBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-                LOGGER.info(MessageFormat.format("Unset breakpoint for handle={0} block={1}", block.id(), handle));
-                mole.instructBlock(handle, block.id(), BlockCommand.UNSET_BREAKPOINT);     
-            }
-        });
-
-        contextMenu.getItems().add(unsetBreakpointItem);
         setContextMenu(contextMenu);
     }
 
-    // You can choose a logger (needed imports are given in the import section as comments):
-    // for libraries:
-    // private static final Logger LOGGER = LoggerFactory.getLogger(BreakpointCheckbox.class);
-    // for applications:
-    // private static final AppLogger LOGGER = AppLogger.getLogger();
 }
 

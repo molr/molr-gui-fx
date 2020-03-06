@@ -7,6 +7,7 @@ package io.molr.gui.fx.widgets;
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.util.FormattedButton;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
+import io.molr.gui.fx.widgets.breakpoints.BreakpointCellData;
 import io.molr.gui.fx.widgets.progress.Progress;
 import io.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
 import io.molr.mole.core.api.Mole;
@@ -189,7 +190,6 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateStates(MissionState missionState) {
-        System.out.println(missionState.getAllowedBlockCommandNamesById());
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
@@ -215,11 +215,14 @@ public class MissionPane extends BorderPane {
         lines.entrySet().
                 forEach(e -> {
                     RunState result = missionState.runStateOfBlockId(e.getKey());
-                    System.out.println(e.getKey()+":"+result);
                     e.getValue().runStateProperty().set(result);
+
                     String blockId = e.getKey();
+                    Set<BlockCommand> allowedBlockCommands = missionState.allowedBlockCommandsFor(blockId);
+                    boolean breakpoint = missionState.breakpointBlockIds().contains(blockId);
+                    BreakpointCellData breakpointCellData = new BreakpointCellData(allowedBlockCommands, breakpoint);
                     ExecutableLine line = e.getValue();
-                    line.breakpointProperty().set(missionState.getBreakpointBlockIds().contains(blockId));  
+                    line.breakpointProperty().set(breakpointCellData);  
                 });
 
 
@@ -243,7 +246,12 @@ public class MissionPane extends BorderPane {
         }
 
         if (autoFollow.get()) {
-            //collapseChildreanOf(blockTableView.getRoot());
+            /*
+             * TODO the collapseChildrenOf collapses block lines on each MissionState update.
+             * The following expansion depending on cursorBlockIds is not suitable every use case, e.g. breakpoint
+             * updates (e.g. lines are collapsed after SET_BREAKPOINT/UNSET_BREAKPOINT).
+             */
+            collapseChildreanOf(blockTableView.getRoot());
             for (Strand strand : missionState.allStrands()) {
                 Optional<String> cursorBlockId = missionState.cursorBlockIdIn(strand);
                 if (cursorBlockId.isPresent()) {
@@ -484,37 +492,15 @@ public class MissionPane extends BorderPane {
         progressColumn.setCellValueFactory(nullSafe(ExecutableLine::progressProperty));
         progressColumn.setCellFactory(TextProgressBarTreeTableCell.forTreeTableColumn());
 
-        TreeTableColumn<ExecutableLine, Boolean> breakpointColumn = new TreeTableColumn<>("Breakpoint");
+        TreeTableColumn<ExecutableLine, BreakpointCellData> breakpointColumn = new TreeTableColumn<>("Breakpoint");
         breakpointColumn.setPrefWidth(60);
         breakpointColumn.setCellValueFactory(nullSafe(ExecutableLine::breakpointProperty));
-        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,Boolean>, TreeTableCell<ExecutableLine,Boolean>>() {   
+        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,BreakpointCellData>, TreeTableCell<ExecutableLine,BreakpointCellData>>() {   
             @Override
-            public TreeTableCell<ExecutableLine, Boolean> call(TreeTableColumn<ExecutableLine, Boolean> param) {
+            public TreeTableCell<ExecutableLine, BreakpointCellData> call(TreeTableColumn<ExecutableLine, BreakpointCellData> param) {
                 return new BreakpointCell(mole, missionHandle.get());
             }
         });
-
-        //https://stackoverflow.com/questions/28351008/javafx-8-tableview-selection-with-checkbox/28417203
-//        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,Boolean>, TreeTableCell<ExecutableLine,Boolean>>() {
-//            
-//            @Override
-//            public TreeTableCell<ExecutableLine, Boolean> call(TreeTableColumn<ExecutableLine, Boolean> param) {
-//                
-//                return new CheckBoxTableCell<ExecutableLine, Boolean>() {
-//                    
-//                };
-//            }
-//        });
-
-        //showRootCheckbox.selectedProperty().bindBidirectional(blockTableView.showRootProperty());
-//        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,Boolean>, TreeTableCell<ExecutableLine,Boolean>>() {
-//
-//            @Override
-//            public TreeTableCell<ExecutableLine, Boolean> call(TreeTableColumn<ExecutableLine, Boolean> param) {
-//                return new TreeTableCell<>();
-//            }
-//            
-//        });      
         
         blockTableView.getColumns().add(2, cursorColumn);
         blockTableView.getColumns().addAll(breakpointColumn, progressColumn, runStateColumn, statusColumn);
