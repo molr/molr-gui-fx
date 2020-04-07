@@ -113,7 +113,7 @@ public class MissionPane extends BorderPane {
     public void init() {
         instanceInfo = new VBox(10);
         instanceInfo.setPadding(new Insets(10, 10, 10, 10));
-        setTop(new TitledPane("Mission Instance2", instanceInfo));
+        setTop(new TitledPane("Mission Instance", instanceInfo));
 
         blockTableView = new TreeTableView<>();
         blockTableView.setTableMenuButtonVisible(true);
