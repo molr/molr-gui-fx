@@ -26,6 +26,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import reactor.core.publisher.Flux;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,8 @@ public class MissionPane extends BorderPane {
     private final SimpleObjectProperty<MissionRepresentation> lastRepresentation = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
+    
+    private FormattedButton disposeButton;
 
     @Autowired
     private Mole mole;
@@ -168,14 +172,38 @@ public class MissionPane extends BorderPane {
 
     private void configureForInstance(MissionHandle handle) {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
+        disposeButton = new FormattedButton("Dispose", "Instantiate", "Blue");
+        disposeButton.getButton().setDisable(true);
+        disposeButton.getButton().setOnAction(event -> {
+            mole.instruct(handle, MissionCommand.DISPOSE);
+        });
+        instanceInfo.getChildren().add(disposeButton.getButton());
 
-        mole.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
+        Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(fxThread());
+        missionOutputsFlux.subscribe(output->{}, error->{} , this::onOutputsComplete);
+        Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(fxThread());
+        missionStateFlux.subscribe(this::updateStates, error -> {}, this::onStatesComplete);
+
         mole.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
         mole.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
 
         setBottom(createOutput());
+    }
+    
+    private void onOutputsComplete() {
+        /**
+         * TODO use case?
+         */
+    }
+    
+    private void onStatesComplete() {
+        
+        /*
+         * how should we detect and handle, that mission has been disposed in mission pane
+         */
+        this.setDisable(true);
     }
 
     private TitledPane createOutput() {
@@ -190,6 +218,9 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateStates(MissionState missionState) {
+        boolean disableDisposeButton = !missionState.allowedMissionCommands().contains(MissionCommand.DISPOSE);
+        disposeButton.getButton().setDisable(disableDisposeButton);
+        
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
