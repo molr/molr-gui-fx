@@ -6,6 +6,8 @@ package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.util.FormattedButton;
+import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
+import io.molr.gui.fx.widgets.breakpoints.BreakpointCellData;
 import io.molr.gui.fx.widgets.progress.Progress;
 import io.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
 import io.molr.mole.core.api.Mole;
@@ -24,6 +26,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import reactor.core.publisher.Flux;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +76,8 @@ public class MissionPane extends BorderPane {
     private final SimpleObjectProperty<MissionRepresentation> lastRepresentation = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
+    
+    private FormattedButton disposeButton;
 
     @Autowired
     private Mole mole;
@@ -166,14 +172,38 @@ public class MissionPane extends BorderPane {
 
     private void configureForInstance(MissionHandle handle) {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
+        disposeButton = new FormattedButton("Dispose", "Instantiate", "Blue");
+        disposeButton.getButton().setDisable(true);
+        disposeButton.getButton().setOnAction(event -> {
+            mole.instruct(handle, MissionCommand.DISPOSE);
+        });
+        instanceInfo.getChildren().add(disposeButton.getButton());
 
-        mole.statesFor(handle).publishOn(fxThread()).subscribe(this::updateStates);
+        Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(fxThread());
+        missionOutputsFlux.subscribe(output->{}, error->{} , this::onOutputsComplete);
+        Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(fxThread());
+        missionStateFlux.subscribe(this::updateStates, error -> {}, this::onStatesComplete);
+
         mole.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
         mole.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
 
         setBottom(createOutput());
+    }
+    
+    private void onOutputsComplete() {
+        /**
+         * TODO use case?
+         */
+    }
+    
+    private void onStatesComplete() {
+        
+        /*
+         * how should we detect and handle, that mission has been disposed in mission pane
+         */
+        this.setDisable(true);
     }
 
     private TitledPane createOutput() {
@@ -188,6 +218,9 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateStates(MissionState missionState) {
+        boolean disableDisposeButton = !missionState.allowedMissionCommands().contains(MissionCommand.DISPOSE);
+        disposeButton.getButton().setDisable(disableDisposeButton);
+        
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
@@ -214,6 +247,13 @@ public class MissionPane extends BorderPane {
                 forEach(e -> {
                     RunState result = missionState.runStateOfBlockId(e.getKey());
                     e.getValue().runStateProperty().set(result);
+
+                    String blockId = e.getKey();
+                    Set<BlockCommand> allowedBlockCommands = missionState.allowedBlockCommandsFor(blockId);
+                    boolean breakpoint = missionState.breakpointBlockIds().contains(blockId);
+                    BreakpointCellData breakpointCellData = new BreakpointCellData(allowedBlockCommands, breakpoint);
+                    ExecutableLine line = e.getValue();
+                    line.breakpointProperty().set(breakpointCellData);  
                 });
 
 
@@ -237,6 +277,11 @@ public class MissionPane extends BorderPane {
         }
 
         if (autoFollow.get()) {
+            /*
+             * TODO the collapseChildrenOf collapses block lines on each MissionState update.
+             * The following expansion depending on cursorBlockIds is not suitable every use case, e.g. breakpoint
+             * updates (e.g. lines are collapsed after SET_BREAKPOINT/UNSET_BREAKPOINT).
+             */
             collapseChildreanOf(blockTableView.getRoot());
             for (Strand strand : missionState.allStrands()) {
                 Optional<String> cursorBlockId = missionState.cursorBlockIdIn(strand);
@@ -446,7 +491,7 @@ public class MissionPane extends BorderPane {
         box.getChildren().add(showRootCheckbox);
         return box;
     }
-
+    
     private FormattedButton commandButton(StrandCommand command) {
         FormattedButton button = new FormattedButton(command.toString());
         button.getButton().setPrefWidth(200);
@@ -478,8 +523,18 @@ public class MissionPane extends BorderPane {
         progressColumn.setCellValueFactory(nullSafe(ExecutableLine::progressProperty));
         progressColumn.setCellFactory(TextProgressBarTreeTableCell.forTreeTableColumn());
 
+        TreeTableColumn<ExecutableLine, BreakpointCellData> breakpointColumn = new TreeTableColumn<>("Breakpoint");
+        breakpointColumn.setPrefWidth(60);
+        breakpointColumn.setCellValueFactory(nullSafe(ExecutableLine::breakpointProperty));
+        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,BreakpointCellData>, TreeTableCell<ExecutableLine,BreakpointCellData>>() {   
+            @Override
+            public TreeTableCell<ExecutableLine, BreakpointCellData> call(TreeTableColumn<ExecutableLine, BreakpointCellData> param) {
+                return new BreakpointCell(mole, missionHandle.get());
+            }
+        });
+        
         blockTableView.getColumns().add(2, cursorColumn);
-        blockTableView.getColumns().addAll(progressColumn, runStateColumn, statusColumn);
+        blockTableView.getColumns().addAll(breakpointColumn, progressColumn, runStateColumn, statusColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
