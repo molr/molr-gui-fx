@@ -121,16 +121,17 @@ idea {
     }
 }
 
-/*
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        xml.destination new File("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
-    }
+
+def jacoco = project.extensions.getByName("jacoco")
+jacoco.toolVersion = "0.8.4"
+
+def jacocoTestReport = project.tasks.getByName('jacocoTestReport')
+jacocoTestReport.reports {
+    xml.enabled true
+    xml.destination new File("${buildDir}/reports/jacoco/report.xml")
+    html.enabled false
+    csv.enabled false
 }
-*/
 
 
 sourceSets {
