@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 
 import javax.annotation.PostConstruct;
@@ -38,10 +39,10 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Instances")
-@Icon(value= FontAwesomeIcon.SITEMAP, color="blue" )
+@Icon(value = FontAwesomeIcon.SITEMAP, color = "blue")
 @Order(2)
 public class MissionInstancesView extends BorderPane {
-    
+
     private final static Logger LOGGER = LoggerFactory.getLogger(MissionInstancesView.class);
 
     @Autowired
@@ -53,11 +54,11 @@ public class MissionInstancesView extends BorderPane {
     private ListView<MissionInstance> listView;
 
     private final ObservableList<MissionInstance> activeMissions = FXCollections.observableArrayList();
-    
+
     private FormattedButton disposeButton;
-    
+
     private Disposable selectedMissionInstanceStatesSubscription;
-    
+
     @PostConstruct
     public void init() {
         mole.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
@@ -66,7 +67,7 @@ public class MissionInstancesView extends BorderPane {
         setCenter(listView);
 
         FlowPane buttons = new FlowPane();
-        FormattedButton connectButton = new FormattedButton("Connect","Connect","Green");
+        FormattedButton connectButton = new FormattedButton("Connect", "Connect", "Green");
 
         connectButton.getButton().setOnAction(event -> {
             MissionInstance instance = listView.getSelectionModel().getSelectedItem();
@@ -75,7 +76,7 @@ public class MissionInstancesView extends BorderPane {
                     .subscribe(publisher::publishEvent);
         });
         buttons.getChildren().add(connectButton.getButton());
-        
+
         disposeButton = new FormattedButton("Dispose", "Dispose", "Green");
         disposeButton.getButton().setDisable(true);
         disposeButton.getButton().setOnAction(event -> {
@@ -83,23 +84,20 @@ public class MissionInstancesView extends BorderPane {
             mole.instruct(selectedInstance.handle(), MissionCommand.DISPOSE);
         });
         buttons.getChildren().add(disposeButton.getButton());
-        
-        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<>() {
-            @Override
-            public void onChanged(Change<? extends MissionInstance> c) {
-                disposeButton.getButton().setDisable(true);
-                if(c.getList().size()==1) {
-                    MissionInstance selectedInstance = c.getList().get(0);
-                    onSelectedMissionInstanceChange(selectedInstance);
-                }
+
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<MissionInstance>) c -> {
+            disposeButton.getButton().setDisable(true);
+            if (c.getList().size() == 1) {
+                MissionInstance selectedInstance = c.getList().get(0);
+                onSelectedMissionInstanceChange(selectedInstance);
             }
         });
-        
+
         setBottom(buttons);
     }
-    
+
     private void onSelectedMissionInstanceChange(MissionInstance selectedInstance) {
-        if(selectedMissionInstanceStatesSubscription!=null) {
+        if (selectedMissionInstanceStatesSubscription != null) {
             selectedMissionInstanceStatesSubscription.dispose();
         }
         Flux<MissionState> selectedMissionInstanceStatesFlux = mole.statesFor(selectedInstance.handle()).publishOn(fxThread());
@@ -109,7 +107,7 @@ public class MissionInstancesView extends BorderPane {
     private void onSelectedMissionStateUpdate(MissionState missionState) {
         boolean disableDisposeButton = !missionState.allowedMissionCommands().contains(MissionCommand.DISPOSE);
         disposeButton.getButton().setDisable(disableDisposeButton);
-        LOGGER.info((disableDisposeButton? "disable":"enable")+" dispose button on mission state update");
+        LOGGER.info((disableDisposeButton ? "disable" : "enable") + " dispose button on mission state update");
     }
 
     private ListView<MissionInstance> newListView() {
@@ -117,7 +115,6 @@ public class MissionInstancesView extends BorderPane {
         list.setCellFactory(CellFactories.nonNullItemText(MissionInstance::toString));
         return list;
     }
-
 
 
 }
