@@ -33,11 +33,9 @@ apply plugin: 'jacoco'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'org.openjfx.javafxplugin'
 
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 group = "io.molr"
 
@@ -136,9 +134,12 @@ if (!project['CERN_VM']) {
     }
 }
 
+
 if (project['DEPLOYMENT']) {
-    println "Applying deployment scripts for ${project.name}"
-    apply from: './gradle/bintray-deploy.gradle'
+    println "Applying deployment for ${project.name}"
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
+    apply from: 'https://raw.githubusercontent.com/ossgang/gradle-scripts/master/deployment/bintray-deploy.gradle'
 }
 
 javafx {
