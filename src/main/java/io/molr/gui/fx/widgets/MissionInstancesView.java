@@ -1,7 +1,6 @@
 package io.molr.gui.fx.widgets;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import io.molr.commons.domain.AgencyState;
 import io.molr.commons.domain.MissionCommand;
 import io.molr.commons.domain.MissionInstance;
@@ -29,11 +28,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Sets;
+
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 
 import javax.annotation.PostConstruct;
 
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
+
+import java.util.Set;
+import java.util.concurrent.Executors;
 
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
@@ -60,7 +65,8 @@ public class MissionInstancesView extends BorderPane {
     
     @PostConstruct
     public void init() {
-        mole.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
+        //mole.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
+        subscribeToMoleStates();
 
         listView = newListView();
         setCenter(listView);
@@ -96,6 +102,37 @@ public class MissionInstancesView extends BorderPane {
         });
         
         setBottom(buttons);
+    }
+    
+    private void onStatesUpdate(AgencyState agencyState) {
+        activeMissions.setAll(agencyState.activeMissions());
+    }
+    
+    private void subscribeToMoleStates() {
+        LOGGER.info("subscribe to mole states");
+        mole.states().publishOn(fxThread()).subscribe(this::onStatesUpdate, this::onStatesSubscriptionError, this::onStatesSubscriptionComplete);
+    }
+    
+    private void onStatesSubscriptionError(Throwable throwable) {
+        System.out.println("onStatesError\n"+throwable);
+        activeMissions.setAll(Sets.newHashSet());
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                subscribeToMoleStates();
+            }
+        });
+    }
+    
+    private void onStatesSubscriptionComplete() {
+        System.out.println("onStatesComplete");
     }
     
     private void onSelectedMissionInstanceChange(MissionInstance selectedInstance) {

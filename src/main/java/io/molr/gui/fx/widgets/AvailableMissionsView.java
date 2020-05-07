@@ -16,6 +16,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
@@ -25,12 +26,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Sets;
+
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Collections.emptyMap;
@@ -63,7 +70,7 @@ public class AvailableMissionsView extends BorderPane {
         this.missionListView = newListView();
         setCenter(missionListView);
         setBottom(buttonsPane());
-        mole.states().publishOn(fxThread()).subscribe(this::update);
+        subscribeToMoleStates();
 
         missionListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -74,6 +81,53 @@ public class AvailableMissionsView extends BorderPane {
                 }
             }
         });
+    }
+    
+    /**
+     * Maybe encapsulate mole into an auto-reconnect-mole or flux
+     */
+    private void subscribeToMoleStates() {
+        System.out.println("subscribe to mole");
+        mole.states().doOnError(this::onStatesDoOnError).publishOn(fxThread()).subscribe(this::update, this::onStatesSubscribeError, this::onStatesComplete);
+    }
+    
+    private void onStatesDoOnError(Throwable throwable) {
+        System.out.println("doOnError: "+throwable);
+    }
+        
+    private void onStatesSubscribeError(Throwable throwable) {
+        System.out.println("onStatesError\n"+throwable);
+        update(new AgencyState() {
+            
+            @Override
+            public Set<Mission> executableMissions() {
+                return Sets.newHashSet();
+            }
+            
+            @Override
+            public Set<MissionInstance> activeMissions() {
+                return Sets.newHashSet();
+            }
+        });
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+
+            @Override
+            public void run() {
+                System.out.println("run");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                subscribeToMoleStates();
+                System.out.println("Exit");
+            }
+        });
+    }
+    
+    private void onStatesComplete() {
+        System.out.println("onStatesComplete");
     }
 
     private void update(AgencyState state) {
