@@ -1,11 +1,11 @@
 package io.molr.gui.fx.widgets;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import io.molr.commons.domain.AgencyState;
 import io.molr.commons.domain.MissionCommand;
 import io.molr.commons.domain.MissionInstance;
 import io.molr.commons.domain.MissionState;
+import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.commands.ViewMissionInstance;
 import io.molr.gui.fx.perspectives.MissionsPerspective;
 import io.molr.gui.fx.util.CellFactories;
@@ -29,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 
 import javax.annotation.PostConstruct;
 
@@ -61,7 +59,7 @@ public class MissionInstancesView extends BorderPane {
 
     @PostConstruct
     public void init() {
-        mole.states().map(AgencyState::activeMissions).publishOn(FxSchedulers.fxThread()).subscribe(ms -> activeMissions.setAll(ms));
+        mole.states().map(AgencyState::activeMissions).publishOn(FxThreadScheduler.instance()).subscribe(ms -> activeMissions.setAll(ms));
 
         listView = newListView();
         setCenter(listView);
@@ -100,7 +98,7 @@ public class MissionInstancesView extends BorderPane {
         if (selectedMissionInstanceStatesSubscription != null) {
             selectedMissionInstanceStatesSubscription.dispose();
         }
-        Flux<MissionState> selectedMissionInstanceStatesFlux = mole.statesFor(selectedInstance.handle()).publishOn(fxThread());
+        Flux<MissionState> selectedMissionInstanceStatesFlux = mole.statesFor(selectedInstance.handle()).publishOn(FxThreadScheduler.instance());
         selectedMissionInstanceStatesSubscription = selectedMissionInstanceStatesFlux.subscribe(this::onSelectedMissionStateUpdate);
     }
 

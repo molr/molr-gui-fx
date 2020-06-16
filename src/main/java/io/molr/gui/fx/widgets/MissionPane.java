@@ -5,6 +5,7 @@
 package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.*;
+import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.util.FormattedButton;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCellData;
@@ -41,7 +42,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -163,7 +163,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void instantiate(Map<String, Object> params) {
-        mole.instantiate(mission, params).publishOn(fxThread()).subscribe(h -> {
+        mole.instantiate(mission, params).publishOn(FxThreadScheduler.instance()).subscribe(h -> {
             this.missionHandle.set(h);
             configureForInstance(h);
         });
@@ -179,13 +179,13 @@ public class MissionPane extends BorderPane {
         });
         instanceInfo.getChildren().add(disposeButton.getButton());
 
-        Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(fxThread());
+        Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(FxThreadScheduler.instance());
         missionOutputsFlux.subscribe(output->{}, error->{} , this::onOutputsComplete);
-        Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(fxThread());
+        Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(FxThreadScheduler.instance());
         missionStateFlux.subscribe(this::updateStates, error -> {}, this::onStatesComplete);
 
-        mole.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
-        mole.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
+        mole.outputsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateOutput);
+        mole.representationsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
 
