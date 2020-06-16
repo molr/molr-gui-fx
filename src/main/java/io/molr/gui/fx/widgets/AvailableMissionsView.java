@@ -2,6 +2,7 @@ package io.molr.gui.fx.widgets;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import io.molr.commons.domain.*;
+import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.commands.ViewMission;
 import io.molr.gui.fx.commands.ViewMissionInstance;
 import io.molr.gui.fx.perspectives.MissionsPerspective;
@@ -32,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -63,7 +63,7 @@ public class AvailableMissionsView extends BorderPane {
         this.missionListView = newListView();
         setCenter(missionListView);
         setBottom(buttonsPane());
-        mole.states().publishOn(fxThread()).subscribe(this::update);
+        mole.states().publishOn(FxThreadScheduler.instance()).subscribe(this::update);
 
         missionListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
