@@ -30,9 +30,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
+
 import javax.annotation.PostConstruct;
 
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
+
+import java.util.concurrent.Executors;
 
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
@@ -59,7 +63,7 @@ public class MissionInstancesView extends BorderPane {
 
     @PostConstruct
     public void init() {
-        mole.states().map(AgencyState::activeMissions).publishOn(FxThreadScheduler.instance()).subscribe(ms -> activeMissions.setAll(ms));
+        subscribeToMoleStates();
 
         listView = newListView();
         setCenter(listView);
@@ -82,18 +86,51 @@ public class MissionInstancesView extends BorderPane {
             mole.instruct(selectedInstance.handle(), MissionCommand.DISPOSE);
         });
         buttons.getChildren().add(disposeButton.getButton());
-
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<MissionInstance>) c -> {
-            disposeButton.getButton().setDisable(true);
-            if (c.getList().size() == 1) {
-                MissionInstance selectedInstance = c.getList().get(0);
-                onSelectedMissionInstanceChange(selectedInstance);
+        
+        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<MissionInstance>() {
+            @Override
+            public void onChanged(Change<? extends MissionInstance> c) {
+                disposeButton.getButton().setDisable(true);
+                if(c.getList().size()==1) {
+                    MissionInstance selectedInstance = c.getList().get(0);
+                    onSelectedMissionInstanceChange(selectedInstance);
+                }
             }
         });
 
         setBottom(buttons);
     }
-
+    
+    private void onStatesUpdate(AgencyState agencyState) {
+        activeMissions.setAll(agencyState.activeMissions());
+    }
+    
+    private void subscribeToMoleStates() {
+        LOGGER.info("subscribe to mole states");
+        mole.states().publishOn(FxThreadScheduler.instance()).subscribe(this::onStatesUpdate, this::onStatesError, this::onStatesComplete);
+    }
+    
+    private void onStatesError(Throwable throwable) {
+        LOGGER.info("onStatesErrorMissionInstances\n"+throwable);
+        activeMissions.setAll(Sets.newHashSet());
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                    subscribeToMoleStates();
+                } catch (Exception e) {
+                	LOGGER.error("Error while trying to resubscribe to /states", e);
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    
+    private void onStatesComplete() {
+    	//use case?
+    }
+    
     private void onSelectedMissionInstanceChange(MissionInstance selectedInstance) {
         if (selectedMissionInstanceStatesSubscription != null) {
             selectedMissionInstanceStatesSubscription.dispose();

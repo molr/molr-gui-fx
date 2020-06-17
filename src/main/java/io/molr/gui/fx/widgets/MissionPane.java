@@ -12,6 +12,7 @@ import io.molr.gui.fx.widgets.breakpoints.BreakpointCellData;
 import io.molr.gui.fx.widgets.progress.Progress;
 import io.molr.gui.fx.widgets.progress.TextProgressBarTreeTableCell;
 import io.molr.mole.core.api.Mole;
+import io.molr.mole.remote.rest.ConnectException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -26,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.util.Callback;
 import reactor.core.publisher.Flux;
 
@@ -180,16 +182,22 @@ public class MissionPane extends BorderPane {
         instanceInfo.getChildren().add(disposeButton.getButton());
 
         Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(FxThreadScheduler.instance());
-        missionOutputsFlux.subscribe(output->{}, error->{} , this::onOutputsComplete);
+        missionOutputsFlux.subscribe(this::updateOutput, error->{} , this::onOutputsComplete);
+        
         Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(FxThreadScheduler.instance());
-        missionStateFlux.subscribe(this::updateStates, error -> {}, this::onStatesComplete);
+        missionStateFlux.doOnError(ConnectException.class, this::onInstanceConnectionError).subscribe(this::updateStates, error->{}, this::onStatesComplete);
 
-        mole.outputsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateOutput);
         mole.representationsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
 
         setBottom(createOutput());
+    }
+    
+
+    private void onInstanceConnectionError(Throwable error) {
+    	this.setDisabled(true);
+    	this.setCenter(new Text("Mission instance is OFFLINE, the connection has been lost. Please close this tab and try to reconnect manually."));
     }
     
     private void onOutputsComplete() {
@@ -199,11 +207,11 @@ public class MissionPane extends BorderPane {
     }
     
     private void onStatesComplete() {
-        
         /*
          * how should we detect and handle, that mission has been disposed in mission pane
          */
         this.setDisable(true);
+        this.setCenter(new Text("Mission instance is COMPLETE."));
     }
 
     private TitledPane createOutput() {

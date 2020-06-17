@@ -2,6 +2,7 @@ package io.molr.gui.fx.widgets;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import io.molr.commons.domain.*;
+import io.molr.gui.fx.EmptyAgencyStates;
 import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.commands.ViewMission;
 import io.molr.gui.fx.commands.ViewMissionInstance;
@@ -9,6 +10,8 @@ import io.molr.gui.fx.perspectives.MissionsPerspective;
 import io.molr.gui.fx.util.CellFactories;
 import io.molr.gui.fx.util.FormattedButton;
 import io.molr.mole.core.api.Mole;
+import io.molr.mole.remote.rest.ConnectException;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -17,6 +20,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
@@ -26,13 +30,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.retry.Retry;
 
 import javax.annotation.PostConstruct;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import java.util.concurrent.Executors;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -63,7 +72,7 @@ public class AvailableMissionsView extends BorderPane {
         this.missionListView = newListView();
         setCenter(missionListView);
         setBottom(buttonsPane());
-        mole.states().publishOn(FxThreadScheduler.instance()).subscribe(this::update);
+        subscribeToMoleStates();        	
 
         missionListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -74,6 +83,60 @@ public class AvailableMissionsView extends BorderPane {
                 }
             }
         });
+    }
+    
+    /**
+     * Maybe encapsulate mole into an auto-reconnect-mole or flux
+     */
+	private void subscribeToMoleStates() {
+		//	Retry<Object> retryOnConnectException = Retry.anyOf(ConnectException.class).doOnRetry(retryContext -> {
+		//		System.out.println("retry" + retryContext.iteration());
+		//	}).fixedBackoff(Duration.ofMillis(1500)).retryMax(1);//TODO replace by indefinite loop (or better: find a better location for reconnect mechanism)
+		
+		Flux<AgencyState> states = mole.states();
+		//clear missions from view in case of connect exceptions. (more sophisticated solutions may be implemented later, like mark them as being offline etc.)
+		states.doOnError(ConnectException.class, this::clearAgencyStatesOnConnectException)
+				// retry does not work if requests are cached since errors will also be cached and replayed. we need
+				// to discuss if caching in remote mole should be enabled by default. or if the
+				// cache could be relocated
+//				.retryWhen(retryOnConnectException)
+				.publishOn(FxThreadScheduler.instance())
+				.subscribe(this::update, this::onStatesError, this::onStatesComplete);
+	}
+
+	private void clearAgencyStatesOnConnectException(ConnectException connectException) {
+		LOGGER.info("clear agency states on connect exception");
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				update(new EmptyAgencyStates());
+			}
+		});
+	}
+
+	/*
+	 * Here we could handle all errors completing the flux. The current implementation tries to subscribe again without differentiating any error 
+	 */
+    private void onStatesError(Throwable throwable) {
+    	LOGGER.info("/states subscription has been finished by error", throwable);
+        update(new EmptyAgencyStates());
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                    subscribeToMoleStates();	
+                }
+                catch(Exception e) {
+                	LOGGER.info("Exception while trying to recovery from /states subscription");
+                }
+            }
+        });
+    }
+    
+    private void onStatesComplete() {
+        LOGGER.info("/states subscription complete");
     }
 
     private void update(AgencyState state) {
