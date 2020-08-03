@@ -1,10 +1,10 @@
 package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.MissionParameter;
-import io.molr.gui.fx.util.MoreEditors;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.BorderPane;
 import org.controlsfx.control.PropertySheet;
+import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 
 import java.util.Map;
@@ -43,9 +43,9 @@ public class ParameterEditor extends BorderPane {
     private PropertyEditor<?> propertyEditorFor(PropertySheet.Item item) {
         MissionParameterItem parameterItem = (MissionParameterItem) item;
         if (parameterItem.parameter.isRequired()) {
-            return MoreEditors.getPropertyEditor(item);
+            return getPropertyEditor(parameterItem);
         }
-        return new OptionalMissionParameterPropertyEditor<>(item, parameterItem.parameter);
+        return new OptionalMissionParameterPropertyEditor<>(parameterItem, parameterItem.parameter);
     }
 
     public Map<String, Object> parameterValues() {
@@ -58,6 +58,18 @@ public class ParameterEditor extends BorderPane {
         return parameters.stream().map(MissionParameterItem::new).collect(toSet());
     }
 
+    static <T> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
+        if(!item.parameter.allowedValues().isEmpty()) {
+            return (PropertyEditor<T>) Editors.createChoiceEditor(item, item.parameter.allowedValues());
+        }
+        if (Boolean.class.isAssignableFrom(item.getType())) {
+            return (PropertyEditor<T>) Editors.createCheckEditor(item);
+        }
+        if (Number.class.isAssignableFrom(item.getType())) {
+            return (PropertyEditor<T>) Editors.createNumericEditor(item);
+        }
+        return (PropertyEditor<T>) Editors.createTextEditor(item);
+    }
 
     public static class MissionParameterItem implements PropertySheet.Item {
 
@@ -81,6 +93,10 @@ public class ParameterEditor extends BorderPane {
             } else {
                 return "Optional";
             }
+        }
+
+        public MissionParameter<?> getParameter() {
+            return this.parameter;
         }
 
         @Override
