@@ -33,11 +33,9 @@ import org.springframework.stereotype.Component;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.retry.Retry;
 
 import javax.annotation.PostConstruct;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -89,23 +87,16 @@ public class AvailableMissionsView extends BorderPane {
      * Maybe encapsulate mole into an auto-reconnect-mole or flux
      */
 	private void subscribeToMoleStates() {
-		//	Retry<Object> retryOnConnectException = Retry.anyOf(ConnectException.class).doOnRetry(retryContext -> {
-		//		System.out.println("retry" + retryContext.iteration());
-		//	}).fixedBackoff(Duration.ofMillis(1500)).retryMax(1);//TODO replace by indefinite loop (or better: find a better location for reconnect mechanism)
-		
+
 		Flux<AgencyState> states = mole.states();
 		//clear missions from view in case of connect exceptions. (more sophisticated solutions may be implemented later, like mark them as being offline etc.)
 		states.doOnError(ConnectException.class, this::clearAgencyStatesOnConnectException)
-				// retry does not work if requests are cached since errors will also be cached and replayed. we need
-				// to discuss if caching in remote mole should be enabled by default. or if the
-				// cache could be relocated
-//				.retryWhen(retryOnConnectException)
 				.publishOn(FxThreadScheduler.instance())
 				.subscribe(this::update, this::onStatesError, this::onStatesComplete);
 	}
 
 	private void clearAgencyStatesOnConnectException(ConnectException connectException) {
-		LOGGER.info("clear agency states on connect exception");
+		LOGGER.info("clear agency states on connect exception", connectException);
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
