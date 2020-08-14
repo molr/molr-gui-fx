@@ -60,7 +60,6 @@ public class MissionPane extends BorderPane {
     private final Mission mission;
     private final MissionParameterDescription description;
     private final Map<String, ExecutableLine> lines = new HashMap<>();
-    private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
     private List<EventHandler> eventsList = new ArrayList<EventHandler>();
 
     private TreeTableView<ExecutableLine> blockTableView;
@@ -73,7 +72,6 @@ public class MissionPane extends BorderPane {
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
-    private final SimpleObjectProperty<MissionRepresentation> lastRepresentation = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
     
