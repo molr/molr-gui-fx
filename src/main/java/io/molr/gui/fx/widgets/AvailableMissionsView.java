@@ -36,8 +36,6 @@ import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static javafx.scene.control.ButtonType.APPLY;
-import static javafx.scene.control.ButtonType.CANCEL;
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 
 @Component
@@ -156,27 +154,8 @@ public class AvailableMissionsView extends BorderPane {
             return Optional.of(emptyMap());
         }
 
-        Dialog<Map<String, Object>> dialog = parameterDialogFor(mission, description);
+        Dialog<Map<String, Object>> dialog = MolrDialogs.parameterDialogFor(mission, description);
         return dialog.showAndWait();
-    }
-
-    private Dialog<Map<String, Object>> parameterDialogFor(Mission mission, MissionParameterDescription description) {
-        ParameterEditor editor = new ParameterEditor(description.parameters());
-
-        Dialog<Map<String, Object>> dialog1 = new Dialog<>();
-        dialog1.setTitle("Parameters for mission '" + mission.name() + "'.");
-        dialog1.setHeaderText("Please check and complete the parameters for this mission.");
-
-        dialog1.getDialogPane().setContent(editor);
-        dialog1.getDialogPane().getButtonTypes().addAll(APPLY, CANCEL);
-
-        dialog1.setResultConverter(b -> {
-            if (b == APPLY) {
-                return editor.parameterValues();
-            }
-            return null;
-        });
-        return dialog1;
     }
 
     private Mission selectedMission() {

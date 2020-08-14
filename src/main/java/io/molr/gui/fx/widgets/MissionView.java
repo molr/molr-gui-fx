@@ -78,10 +78,10 @@ public abstract class MissionView extends BorderPane {
 
 
     private MissionPane missionPane(Mission mission, MissionParameterDescription description) {
-        return new MissionPane(mole, mission, description);
+        return new MissionPane(mole, mission);
     }
 
     private MissionPane missionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
-        return new MissionPane(mole, mission, description, missionHandle);
+        return new MissionPane(mole, mission, missionHandle);
     }
 }

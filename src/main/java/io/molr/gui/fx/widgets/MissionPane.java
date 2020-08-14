@@ -4,6 +4,7 @@
 
 package io.molr.gui.fx.widgets;
 
+import com.google.common.net.MediaType;
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.util.FormattedButton;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
@@ -51,7 +52,6 @@ public class MissionPane extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(MissionPane.class);
 
     private final Mission mission;
-    private final MissionParameterDescription description;
     private final Map<String, ExecutableLine> lines = new HashMap<>();
     private List<EventHandler> eventsList = new ArrayList<EventHandler>();
 
@@ -72,17 +72,15 @@ public class MissionPane extends BorderPane {
 
     private final Mole mole;
 
-    public MissionPane(Mole mole, Mission mission, MissionParameterDescription description) {
+    public MissionPane(Mole mole, Mission mission) {
         this.mole = requireNonNull(mole, "mole must not be null");
         this.mission = requireNonNull(mission, "mission must not be null");
-        this.description = requireNonNull(description, "description must not be null");
         init();
     }
 
-    public MissionPane(Mole mole, Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
+    public MissionPane(Mole mole, Mission mission, MissionHandle missionHandle) {
         this.mole = requireNonNull(mole, "mole must not be null");
         this.mission = requireNonNull(mission, "mission must not be null");
-        this.description = requireNonNull(description, "description must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
         init();
     }
@@ -143,6 +141,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void configureInstantiable() {
+        MissionParameterDescription description = mole.parameterDescriptionOf(mission).block();
         ParameterEditor parameterEditor = new ParameterEditor(description.parameters());
         instanceInfo.getChildren().add(parameterEditor);
 
