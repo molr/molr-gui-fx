@@ -9,13 +9,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class is intended for users that want to consistently reject the advantages of spring and thus do not want to
- * use spring configurations directly in their gui applications ;-) The usage of this is discouraged!
- * Instead, it is recommended to import the spring {@link MolrFxSupportConfiguration} directly into your own spring
- * configuration. This way, the {@link MolrFxSupport} can be autowired wherever you need it! ;-)
+ * This class is intended for cases spring is not used as core of the respective application.
+ * The usage of this is discouraged! Instead, it is recommended to import the spring {@link MolrFxSupportConfiguration} directly into your own spring
+ * configuration. This way, the {@link MolrFxSupport} can be autowired wherever it is needed!
  * <p>
- * Enough of disclaimer ;-) For those who really want, they can use the {@link #newMolrFxSupport(Class[])} to create a
- * fresh instance, while you have to provide the configuration classes for molr as parameters (e.g. containing moles [and missions if local])
+ * The method {@link #newMolrFxSupport(Class[])} creates a fresh instance
+ * fresh instance, while the configuration classes for molr have to be provided as parameters (e.g. containing moles [and missions if local])
  */
 public final class MolrFxSupportFactory {
 
