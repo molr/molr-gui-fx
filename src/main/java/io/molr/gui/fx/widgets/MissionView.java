@@ -10,6 +10,7 @@ import io.molr.commons.domain.MissionParameterDescription;
 import io.molr.gui.fx.commands.ViewMission;
 import io.molr.gui.fx.commands.ViewMissionInstance;
 import io.molr.gui.fx.perspectives.MissionsPerspective;
+import io.molr.mole.core.api.Mole;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -17,7 +18,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import org.minifx.workbench.annotations.View;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -27,12 +31,15 @@ import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 @Component
 public abstract class MissionView extends BorderPane {
 
+    @Autowired
+    private Mole mole;
+
     private final TabPane tabPane;
 
     public MissionView() {
         tabPane = new TabPane();
         setCenter(tabPane);
-       // addKeyboardShortcuts();
+        // addKeyboardShortcuts();
 
     }
 
@@ -44,20 +51,15 @@ public abstract class MissionView extends BorderPane {
         });
     }
 
-    private void addKeyboardShortcuts(){
+    private void addKeyboardShortcuts() {
         this.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (e.getCode() == KeyCode.F2){
+            if (e.getCode() == KeyCode.F2) {
                 System.out.println("F2");
-            }
-            else
-            {
+            } else {
                 System.out.println(e.getCode() + " was pressed");
             }
         });
     }
-
-
-
 
 
     @EventListener
@@ -74,9 +76,12 @@ public abstract class MissionView extends BorderPane {
         tabPane.getSelectionModel().select(tab);
     }
 
-    @Lookup
-    public abstract MissionPane missionPane(Mission mission, MissionParameterDescription description);
 
-    @Lookup
-    public abstract MissionPane missionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle);
+    private MissionPane missionPane(Mission mission, MissionParameterDescription description) {
+        return new MissionPane(mole, mission, description);
+    }
+
+    private MissionPane missionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
+        return new MissionPane(mole, mission, description, missionHandle);
+    }
 }

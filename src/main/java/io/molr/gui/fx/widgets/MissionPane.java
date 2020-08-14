@@ -46,13 +46,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-@Component
-@Scope(value = "prototype")
-/*
- * NOTE: Since this is a spring prototype, the event listener mechanism of spring cannot be consistently used here,
- * because each event would produce a new prototype! Therefore we use rx streams here which are injected through the
- * ExecutableAdapter
- */
 public class MissionPane extends BorderPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MissionPane.class);
@@ -74,22 +67,24 @@ public class MissionPane extends BorderPane {
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
-    
+
     private FormattedButton disposeButton;
 
-    @Autowired
-    private Mole mole;
+    private final Mole mole;
 
-    public MissionPane(Mission mission, MissionParameterDescription description) {
+    public MissionPane(Mole mole, Mission mission, MissionParameterDescription description) {
+        this.mole = requireNonNull(mole, "mole must not be null");
         this.mission = requireNonNull(mission, "mission must not be null");
         this.description = requireNonNull(description, "description must not be null");
-
+        init();
     }
 
-    public MissionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
+    public MissionPane(Mole mole, Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
+        this.mole = requireNonNull(mole, "mole must not be null");
         this.mission = requireNonNull(mission, "mission must not be null");
         this.description = requireNonNull(description, "description must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
+        init();
     }
 
     private TreeItem<ExecutableLine> createTree(MissionRepresentation representation) {
@@ -107,8 +102,7 @@ public class MissionPane extends BorderPane {
         return executables.stream().map(b -> this.nodeFor(representation, b)).collect(toList());
     }
 
-    @PostConstruct
-    public void init() {
+    private void init() {
         instanceInfo = new VBox(10);
         instanceInfo.setPadding(new Insets(10, 10, 10, 10));
         setTop(new TitledPane("Mission Instance", instanceInfo));
@@ -178,9 +172,12 @@ public class MissionPane extends BorderPane {
         instanceInfo.getChildren().add(disposeButton.getButton());
 
         Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(fxThread());
-        missionOutputsFlux.subscribe(output->{}, error->{} , this::onOutputsComplete);
+        missionOutputsFlux.subscribe(output -> {
+        }, error -> {
+        }, this::onOutputsComplete);
         Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(fxThread());
-        missionStateFlux.subscribe(this::updateStates, error -> {}, this::onStatesComplete);
+        missionStateFlux.subscribe(this::updateStates, error -> {
+        }, this::onStatesComplete);
 
         mole.outputsFor(handle).publishOn(fxThread()).subscribe(this::updateOutput);
         mole.representationsFor(handle).publishOn(fxThread()).subscribe(this::updateRepresentation);
@@ -189,15 +186,15 @@ public class MissionPane extends BorderPane {
 
         setBottom(createOutput());
     }
-    
+
     private void onOutputsComplete() {
         /**
          * TODO use case?
          */
     }
-    
+
     private void onStatesComplete() {
-        
+
         /*
          * how should we detect and handle, that mission has been disposed in mission pane
          */
@@ -218,7 +215,7 @@ public class MissionPane extends BorderPane {
     private void updateStates(MissionState missionState) {
         boolean disableDisposeButton = !missionState.allowedMissionCommands().contains(MissionCommand.DISPOSE);
         disposeButton.getButton().setDisable(disableDisposeButton);
-        
+
         this.lastState.set(missionState);
         Strand lastSelectedStrandNode = selectedStrand();
 
@@ -251,7 +248,7 @@ public class MissionPane extends BorderPane {
                     boolean breakpoint = missionState.breakpointBlockIds().contains(blockId);
                     BreakpointCellData breakpointCellData = new BreakpointCellData(allowedBlockCommands, breakpoint);
                     ExecutableLine line = e.getValue();
-                    line.breakpointProperty().set(breakpointCellData);  
+                    line.breakpointProperty().set(breakpointCellData);
                 });
 
 
@@ -489,7 +486,7 @@ public class MissionPane extends BorderPane {
         box.getChildren().add(showRootCheckbox);
         return box;
     }
-    
+
     private FormattedButton commandButton(StrandCommand command) {
         FormattedButton button = new FormattedButton(command.toString());
         button.getButton().setPrefWidth(200);
@@ -524,13 +521,13 @@ public class MissionPane extends BorderPane {
         TreeTableColumn<ExecutableLine, BreakpointCellData> breakpointColumn = new TreeTableColumn<>("Breakpoint");
         breakpointColumn.setPrefWidth(60);
         breakpointColumn.setCellValueFactory(nullSafe(ExecutableLine::breakpointProperty));
-        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,BreakpointCellData>, TreeTableCell<ExecutableLine,BreakpointCellData>>() {   
+        breakpointColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine, BreakpointCellData>, TreeTableCell<ExecutableLine, BreakpointCellData>>() {
             @Override
             public TreeTableCell<ExecutableLine, BreakpointCellData> call(TreeTableColumn<ExecutableLine, BreakpointCellData> param) {
                 return new BreakpointCell(mole, missionHandle.get());
             }
         });
-        
+
         blockTableView.getColumns().add(2, cursorColumn);
         blockTableView.getColumns().addAll(breakpointColumn, progressColumn, runStateColumn, statusColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
