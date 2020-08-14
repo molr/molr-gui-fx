@@ -4,7 +4,6 @@
 
 package io.molr.gui.fx.widgets;
 
-import com.google.common.net.MediaType;
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.util.FormattedButton;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
@@ -27,18 +26,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import reactor.core.publisher.Flux;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 

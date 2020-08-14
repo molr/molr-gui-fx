@@ -1,11 +1,7 @@
 package io.molr.gui.fx.support;
 
 import io.molr.commons.domain.MissionHandle;
-import io.molr.commons.domain.MissionState;
 import io.molr.mole.core.api.Mole;
-import reactor.core.publisher.Mono;
-
-import java.util.function.Predicate;
 
 import static io.molr.commons.domain.StrandCommand.RESUME;
 import static java.util.Objects.requireNonNull;

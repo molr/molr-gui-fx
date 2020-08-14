@@ -2,10 +2,11 @@ package io.molr.gui.fx;
 
 import io.molr.gui.fx.conf.MolrFxSupportConfiguration;
 import io.molr.gui.fx.support.MolrFxSupport;
-import org.minifx.workbench.conf.MiniFxWorkbenchConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class is intended for users that want to consistently reject the advantages of spring and thus do not want to

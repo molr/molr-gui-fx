@@ -11,11 +11,10 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableRow;
-
-import java.text.MessageFormat;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.MessageFormat;
 
 public class BreakpointCell extends TreeTableCell<ExecutableLine, BreakpointCellData>{
     

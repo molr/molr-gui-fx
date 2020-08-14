@@ -17,9 +17,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
-
 import org.minifx.workbench.annotations.Icon;
 import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.View;
@@ -29,11 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 
+import static freetimelabs.io.reactorfx.schedulers.FxSchedulers.fxThread;
 import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 
 @Component

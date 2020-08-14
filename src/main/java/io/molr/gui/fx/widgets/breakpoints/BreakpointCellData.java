@@ -1,9 +1,9 @@
 package io.molr.gui.fx.widgets.breakpoints;
 
+import io.molr.commons.domain.BlockCommand;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import io.molr.commons.domain.BlockCommand;
 
 public class BreakpointCellData {
     
