@@ -2,7 +2,6 @@ package io.molr.gui.fx.widgets;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import io.molr.commons.domain.*;
-import io.molr.gui.fx.EmptyAgencyStates;
 import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.commands.ViewMission;
 import io.molr.gui.fx.commands.ViewMissionInstance;
@@ -30,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.ImmutableSet;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -100,7 +101,7 @@ public class AvailableMissionsView extends BorderPane {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				update(new EmptyAgencyStates());
+				update(ImmutableAgencyState.of(ImmutableSet.of(), ImmutableSet.of()));
 			}
 		});
 	}
@@ -110,7 +111,7 @@ public class AvailableMissionsView extends BorderPane {
 	 */
     private void onStatesError(Throwable throwable) {
     	LOGGER.info("/states subscription has been finished by error", throwable);
-        update(new EmptyAgencyStates());
+        update(ImmutableAgencyState.of(ImmutableSet.of(), ImmutableSet.of()));
         Executors.newSingleThreadExecutor().submit(new Runnable() {
 
             @Override
