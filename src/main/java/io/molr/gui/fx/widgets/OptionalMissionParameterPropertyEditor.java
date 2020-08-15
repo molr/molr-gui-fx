@@ -1,11 +1,10 @@
 package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.MissionParameter;
-import io.molr.gui.fx.util.MoreEditors;
+import io.molr.gui.fx.widgets.ParameterEditor.MissionParameterItem;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
-import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.PropertyEditor;
 import org.minifx.fxcommons.util.ChangeListeners;
 
@@ -25,12 +24,12 @@ public class OptionalMissionParameterPropertyEditor<T> implements PropertyEditor
     private final PropertyEditor<T> editor;
     private final Node editorContainer;
 
-    public OptionalMissionParameterPropertyEditor(PropertySheet.Item item, MissionParameter<T> parameter) {
+    public OptionalMissionParameterPropertyEditor(MissionParameterItem item, MissionParameter<T> parameter) {
         if (parameter.isRequired()) {
             throw illegalArgumentException("This editor is for optional parameters, {} is not", parameter.placeholder().name());
         }
         checkbox = new CheckBox();
-        editor = MoreEditors.getPropertyEditor(item);
+        editor = ParameterEditor.getPropertyEditor(item);
         editor.setValue(parameter.defaultValue() == null ? defaultValueFor(parameter) : parameter.defaultValue());
 
         editorContainer = makeEditorBox();
