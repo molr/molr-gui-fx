@@ -203,7 +203,7 @@ public class MissionPane extends BorderPane {
         /*
          * how should we detect and handle, that mission has been disposed in mission pane
          */
-        this.setDisable(true);
+        this.setDisable(false);
     }
 
     private TitledPane createOutput() {
@@ -237,6 +237,9 @@ public class MissionPane extends BorderPane {
 
         cursorAndFollow(missionState);
 
+        System.out.println(missionState.blockIdsToResult());
+        System.out.println(missionState.blockIdsToRunState());
+        
         lines.entrySet().
                 forEach(e -> {
                     Result result = missionState.resultOfBlockId(e.getKey());

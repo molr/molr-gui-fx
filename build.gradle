@@ -57,7 +57,7 @@ repositories {
 
 dependencies {
     /* This is finally the only API we should need... ?*/
-    compile group: 'io.molr', name: 'molr-mole-remote', version: molrVersion
+    //compile group: 'io.molr', name: 'molr-mole-remote', version: molrVersion
 
     compile group: 'org.minifx', name: 'minifx-workbench', version: '1.1.1-11'
     compile 'de.jensd:fontawesomefx-commons:11.0'

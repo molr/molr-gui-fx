@@ -1,5 +1,6 @@
 package io.molr.gui.fx.widgets;
 
+import io.molr.commons.domain.ListOfStrings;
 import io.molr.commons.domain.MissionParameter;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.BorderPane;
@@ -7,6 +8,7 @@ import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,6 +81,8 @@ public class ParameterEditor extends BorderPane {
         private MissionParameterItem(MissionParameter<?> parameter) {
             this.parameter = parameter;
             this.value = defaultValueFor(parameter);
+            System.out.println(parameter);
+            System.out.println(parameter.allowedValues());
         }
 
         @Override
@@ -111,11 +115,41 @@ public class ParameterEditor extends BorderPane {
 
         @Override
         public Object getValue() {
+            if(parameter.placeholder().type().equals(ListOfStrings.class)) {
+                if(value==null) {
+                    System.out.println("value is null");
+                    return null;
+                }
+                else {
+                    if(value.getClass()==ListOfStrings.class) {
+                    System.out.println("nonNull:"+value);
+                    String stringValue = "";
+                    ListOfStrings strings = (ListOfStrings)value;
+                    for(String string : strings) {
+                        System.out.println("add "+string);
+                        stringValue += string+",";
+                        System.out.println(stringValue);
+                    }
+                    if(!stringValue.isEmpty()) {
+                        stringValue = stringValue.substring(0, stringValue.length()-1);
+                        System.out.println(stringValue);
+                    }
+                    return stringValue;}
+                }
+                String stringValue = (String)value;
+                if(stringValue.isEmpty()) return "";
+                String[] stringArray = stringValue.split(",");
+                ListOfStrings listOfStrings = new ListOfStrings();
+                listOfStrings.addAll(Arrays.asList(stringArray));
+                return listOfStrings;
+            }
+            System.out.println(parameter.placeholder().type()+" "+value);
             return value;
         }
 
         @Override
         public void setValue(Object newValue) {
+            System.out.println("set: "+newValue);
             this.value = newValue;
         }
 
