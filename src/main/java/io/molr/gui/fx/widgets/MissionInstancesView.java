@@ -1,7 +1,6 @@
 package io.molr.gui.fx.widgets;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import freetimelabs.io.reactorfx.schedulers.FxSchedulers;
 import io.molr.commons.domain.AgencyState;
 import io.molr.commons.domain.MissionCommand;
 import io.molr.commons.domain.MissionInstance;
