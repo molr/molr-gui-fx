@@ -27,18 +27,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import reactor.core.publisher.Flux;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -46,21 +39,12 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-@Component
-@Scope(value = "prototype")
-/*
- * NOTE: Since this is a spring prototype, the event listener mechanism of spring cannot be consistently used here,
- * because each event would produce a new prototype! Therefore we use rx streams here which are injected through the
- * ExecutableAdapter
- */
 public class MissionPane extends BorderPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MissionPane.class);
 
     private final Mission mission;
-    private final MissionParameterDescription description;
     private final Map<String, ExecutableLine> lines = new HashMap<>();
-    private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
     private List<EventHandler> eventsList = new ArrayList<EventHandler>();
 
     private TreeTableView<ExecutableLine> blockTableView;
@@ -73,25 +57,24 @@ public class MissionPane extends BorderPane {
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
-    private final SimpleObjectProperty<MissionRepresentation> lastRepresentation = new SimpleObjectProperty<>();
 
     private final Map<StrandCommand, FormattedButton> commandButtons = new EnumMap<StrandCommand, FormattedButton>(StrandCommand.class);
-    
+
     private FormattedButton disposeButton;
 
-    @Autowired
-    private Mole mole;
+    private final Mole mole;
 
-    public MissionPane(Mission mission, MissionParameterDescription description) {
+    public MissionPane(Mole mole, Mission mission) {
+        this.mole = requireNonNull(mole, "mole must not be null");
         this.mission = requireNonNull(mission, "mission must not be null");
-        this.description = requireNonNull(description, "description must not be null");
-
+        init();
     }
 
-    public MissionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
+    public MissionPane(Mole mole, Mission mission, MissionHandle missionHandle) {
+        this.mole = requireNonNull(mole, "mole must not be null");
         this.mission = requireNonNull(mission, "mission must not be null");
-        this.description = requireNonNull(description, "description must not be null");
         this.missionHandle.set(requireNonNull(missionHandle, "missionInstance must not be null"));
+        init();
     }
 
     private TreeItem<ExecutableLine> createTree(MissionRepresentation representation) {
@@ -109,8 +92,7 @@ public class MissionPane extends BorderPane {
         return executables.stream().map(b -> this.nodeFor(representation, b)).collect(toList());
     }
 
-    @PostConstruct
-    public void init() {
+    private void init() {
         instanceInfo = new VBox(10);
         instanceInfo.setPadding(new Insets(10, 10, 10, 10));
         setTop(new TitledPane("Mission Instance", instanceInfo));
@@ -151,6 +133,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void configureInstantiable() {
+        MissionParameterDescription description = mole.parameterDescriptionOf(mission).block();
         ParameterEditor parameterEditor = new ParameterEditor(description.parameters());
         instanceInfo.getChildren().add(parameterEditor);
 
@@ -180,9 +163,12 @@ public class MissionPane extends BorderPane {
         instanceInfo.getChildren().add(disposeButton.getButton());
 
         Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(FxThreadScheduler.instance());
-        missionOutputsFlux.subscribe(output->{}, error->{} , this::onOutputsComplete);
+        missionOutputsFlux.subscribe(output -> {
+        }, error -> {
+        }, this::onOutputsComplete);
         Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(FxThreadScheduler.instance());
-        missionStateFlux.subscribe(this::updateStates, error -> {}, this::onStatesComplete);
+        missionStateFlux.subscribe(this::updateStates, error -> {
+        }, this::onStatesComplete);
 
         mole.outputsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateOutput);
         mole.representationsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateRepresentation);
@@ -253,7 +239,7 @@ public class MissionPane extends BorderPane {
                     boolean breakpoint = missionState.breakpointBlockIds().contains(blockId);
                     BreakpointCellData breakpointCellData = new BreakpointCellData(allowedBlockCommands, breakpoint);
                     ExecutableLine line = e.getValue();
-                    line.breakpointProperty().set(breakpointCellData);  
+                    line.breakpointProperty().set(breakpointCellData);
                 });
 
 

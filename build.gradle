@@ -1,5 +1,3 @@
-import org.gradle.api.JavaVersion
-
 buildscript {
     project.ext['CERN_VM'] = System.getProperty('CERN_TECHNET_VM') ?: System.getenv('CERN_TECHNET_VM') ?: System.getProperty('CERN_VM') ?: System.getenv('CERN_VM') ?: false
     project.ext['DEPLOYMENT'] = System.getProperty('deployment') ?: false
