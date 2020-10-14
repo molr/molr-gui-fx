@@ -1,3 +1,9 @@
+[![Latest release](https://img.shields.io/github/release/molr/molr-gui-fx.svg?maxAge=1000)](https://github.com/molr/molr/releases)
+[ ![Download](https://api.bintray.com/packages/molr/molr-repo/molr-gui-fx/images/download.svg) ](https://bintray.com/molr/molr-repo/molr-mole-core/_latestVersion)
+[![Maven Central](https://img.shields.io/maven-central/v/io.molr/molr-gui-fx)](https://search.maven.org/artifact/io.molr/molr-gui-fx)
+[![Build Status](https://travis-ci.com/molr/molr-gui-fx.svg?branch=master)](https://travis-ci.com/molr/molr-gui-fx)
+[![GitHub license](https://img.shields.io/github/license/molr/molr.svg)](https://github.com/molr/molr-gui-fx/blob/master/LICENSE)
+
 # molr-gui-fx
 
 # General documentation 
