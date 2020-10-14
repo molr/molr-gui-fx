@@ -45,7 +45,3 @@ support.debug(PARAMETRIZED_MISSION, "Hello World", 3, 200).inNewStage();
 A demo of all this functionality can be found in the following classes:
 * MolrFxSupportDemoApplication
 * MolrFxSupportMinimalSpringDemo [note: for some reason I did not get this one to run without the minifx launcher ... despite it *should*
-
-
-# Instructions
-Make sure to have the molr projects linked in your IDE. Some features may not be released yet. (e.g. via `Composite Build Configuration` feature in IntelliJ)
