@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.molr.commons.domain.Placeholder.aString;
@@ -49,7 +50,7 @@ public final class UiCreation {
         List<Button> stubButtons = ImmutableList.of(//
                 button("debug stub1", () -> support.debug(CONTEXTUAL_MISSION, "anyDevice").inNewStage()),//
                 button("run stub1", () -> support.debug(CONTEXTUAL_MISSION, "anotherDevice").inNewStage().ifPresent(SimpleMissionControl::resume)),
-                button("debug stub3", () -> support.debug(PARAMETRIZED_MISSION, "Hello World", 3, 200).inNewStage()),
+                button("debug stub3", () -> support.debug(PARAMETRIZED_MISSION, "Hello World", 5, 200).inNewStage()),
                 button("run stub3", () -> support.debug(PARAMETRIZED_MISSION, "Hello Molr", 6, 100).inNewStage().ifPresent(SimpleMissionControl::resume))
         );
 

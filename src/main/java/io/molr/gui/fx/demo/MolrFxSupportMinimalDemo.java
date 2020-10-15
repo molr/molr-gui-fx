@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Configuration;
 import static org.minifx.fxcommons.SingleSceneSpringJavaFxApplication.applicationLauncher;
 
 @Configuration
-public class MolrFxSupportMinimalSpringDemo {
+public class MolrFxSupportMinimalDemo {
 
     public static void main(String... args) {
-        applicationLauncher().configurationClasses(MolrFxSupportMinimalSpringDemo.class).launch();
+        applicationLauncher().configurationClasses(MolrFxSupportMinimalDemo.class).launch();
     }
 
     @Bean

@@ -14,13 +14,13 @@ import static org.minifx.fxcommons.SingleSceneSpringJavaFxApplication.applicatio
 
 @Configuration
 @Import({DemoRunnableLeafsConfiguration.class, RunnableLeafMoleConfiguration.class, MolrFxSupportConfiguration.class})
-public class MolrFxSupportDemoApplication {
+public class MolrFxSupportDemoSpringApplication {
 
     @Autowired
     private MolrFxSupport support;
 
     public static void main(String... args) {
-        applicationLauncher().configurationClasses(MolrFxSupportDemoApplication.class).launch();
+        applicationLauncher().configurationClasses(MolrFxSupportDemoSpringApplication.class).launch();
     }
 
     @Bean
