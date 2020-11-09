@@ -78,6 +78,10 @@ public class MissionPane extends BorderPane {
     }
 
     private TreeItem<ExecutableLine> createTree(MissionRepresentation representation) {
+    	/*
+    	 * clear existing lines since existing lines will not be overridden
+    	 */
+    	lines.clear();
         return nodeFor(representation, representation.rootBlock());
     }
 
@@ -189,7 +193,7 @@ public class MissionPane extends BorderPane {
         /*
          * how should we detect and handle, that mission has been disposed in mission pane
          */
-        this.setDisable(true);
+        this.setDisable(false);
     }
 
     private TitledPane createOutput() {
