@@ -67,22 +67,22 @@ public class ParameterEditor extends BorderPane {
         return parameters.stream().map(MissionParameterItem::new).collect(toSet());
     }
 
+	@SuppressWarnings("unchecked")
 	static <T> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
-		System.out.println("itemType: " + item.getType());
-		if (item.getType().equals(ListOfStrings.class)) {
-			MissionParameter<ListOfStrings> param = (MissionParameter<ListOfStrings>) item.getParameter();
+		boolean isCollectionType = Collection.class.isAssignableFrom(item.getType());
+		if (isCollectionType) {
+			MissionParameter<T> param = (MissionParameter<T>) item.getParameter();
 			if(param.allowedValues()!=null) {
 				if(param.allowedValues().size()>0) {
-					ListOfStrings strings = param.allowedValues().iterator().next();
-					item.getParameter().allowedValues().iterator().next();
-					return (PropertyEditor<T>) collectionItemEditor(item, strings);
+					Collection<?> allowedValues = (Collection<?>) item.getParameter().allowedValues().iterator().next();
+					return (PropertyEditor<T>) collectionItemEditor(item, allowedValues);
 				}
 				else {
-					System.out.println("allowed empty "+item);
+					throw new IllegalArgumentException("allowedValues must not be empty " + item);
 				}
 			}
 			else {
-				System.out.println("allowed null "+item);
+				throw new IllegalArgumentException("allowedValues must not be null for "+item);
 			}
 		}
 		if (!item.parameter.allowedValues().isEmpty()) {
