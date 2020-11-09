@@ -1,6 +1,5 @@
 package io.molr.gui.fx.widgets;
 
-import io.molr.commons.domain.ListOfStrings;
 import io.molr.commons.domain.MissionParameter;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
@@ -15,6 +14,7 @@ import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -68,13 +68,13 @@ public class ParameterEditor extends BorderPane {
     }
 
 	@SuppressWarnings("unchecked")
-	static <T> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
+	static <T, U> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
 		boolean isCollectionType = Collection.class.isAssignableFrom(item.getType());
 		if (isCollectionType) {
 			MissionParameter<T> param = (MissionParameter<T>) item.getParameter();
 			if(param.allowedValues()!=null) {
 				if(param.allowedValues().size()>0) {
-					Collection<?> allowedValues = (Collection<?>) item.getParameter().allowedValues().iterator().next();
+					Collection<U> allowedValues = (Collection<U>) item.getParameter().allowedValues().iterator().next();
 					return (PropertyEditor<T>) collectionItemEditor(item, allowedValues);
 				}
 				else {
@@ -108,7 +108,7 @@ public class ParameterEditor extends BorderPane {
 			@Override
 			public void setValue(Collection<T> values) {
 				values.forEach(value -> {
-						getEditor().getCheckModel().check(value);
+					getEditor().getCheckModel().check(value);
 				});
 			}
 
@@ -118,7 +118,11 @@ public class ParameterEditor extends BorderPane {
 				ObservableList<T> checkedItems = getEditor().getCheckModel().getCheckedItems();
 				return new SimpleListProperty(checkedItems);
 			}
-
+			
+			@Override
+			public Collection<T> getValue() {
+				return new ArrayList<>(super.getValue());
+			}
 		};
 	}
 
