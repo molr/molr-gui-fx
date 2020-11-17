@@ -14,11 +14,11 @@ public class MolrFxGuiMain {
 
     public static void main(String[] args) {
         if (System.getProperty("spring.profiles.default") == null) {
-            System.setProperty("spring.profiles.default", "demo");
+            System.setProperty("spring.profiles.default", "localMole");
         }
 
         LOGGER.info("Launching gui...");
-        MiniFx.launcher(LocalRunnableLeafsMoleConfiguration.class).launch(args);
+        MiniFx.launcher(LocalRunnableLeafsMoleConfiguration.class, RemoteMoleConfiguration.class).launch(args);
     }
 
 }
