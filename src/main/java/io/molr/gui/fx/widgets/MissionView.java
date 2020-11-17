@@ -26,7 +26,7 @@ import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
 @View(at = CENTER, in = MissionsPerspective.class)
 @Component
-public abstract class MissionView extends BorderPane {
+public class MissionView extends BorderPane {
 
     @Autowired
     private Mole mole;

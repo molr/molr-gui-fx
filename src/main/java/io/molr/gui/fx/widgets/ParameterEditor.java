@@ -1,12 +1,21 @@
 package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.MissionParameter;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.layout.BorderPane;
+
+import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.PropertySheet;
+import org.controlsfx.control.PropertySheet.Item;
+import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -58,71 +67,117 @@ public class ParameterEditor extends BorderPane {
         return parameters.stream().map(MissionParameterItem::new).collect(toSet());
     }
 
-    static <T> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
-        if(!item.parameter.allowedValues().isEmpty()) {
-            return (PropertyEditor<T>) Editors.createChoiceEditor(item, item.parameter.allowedValues());
-        }
-        if (Boolean.class.isAssignableFrom(item.getType())) {
-            return (PropertyEditor<T>) Editors.createCheckEditor(item);
-        }
-        if (Number.class.isAssignableFrom(item.getType())) {
-            return (PropertyEditor<T>) Editors.createNumericEditor(item);
-        }
-        return (PropertyEditor<T>) Editors.createTextEditor(item);
-    }
+	@SuppressWarnings("unchecked")
+	static <T, U> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
+		boolean isCollectionType = Collection.class.isAssignableFrom(item.getType());
+		if (isCollectionType) {
+			MissionParameter<T> param = (MissionParameter<T>) item.getParameter();
+			if(param.allowedValues()!=null) {
+				if(param.allowedValues().size()>0) {
+					Collection<U> allowedValues = (Collection<U>) item.getParameter().allowedValues().iterator().next();
+					return (PropertyEditor<T>) collectionItemEditor(item, allowedValues);
+				}
+				else {
+					throw new IllegalArgumentException("allowedValues must not be empty " + item);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("allowedValues must not be null for "+item);
+			}
+		}
+		if (!item.parameter.allowedValues().isEmpty()) {
+			return (PropertyEditor<T>) Editors.createChoiceEditor(item, item.parameter.allowedValues());
+		}
+		if (Boolean.class.isAssignableFrom(item.getType())) {
+			return (PropertyEditor<T>) Editors.createCheckEditor(item);
+		}
+		if (Number.class.isAssignableFrom(item.getType())) {
+			return (PropertyEditor<T>) Editors.createNumericEditor(item);
+		}
+		return (PropertyEditor<T>) Editors.createTextEditor(item);
+	}
 
-    public static class MissionParameterItem implements PropertySheet.Item {
+	public static final <T> PropertyEditor<?> collectionItemEditor(Item property, final Collection<T> choices) {
 
-        private final MissionParameter<?> parameter;
-        private Object value;
+		CheckListView<T> checkListView = new CheckListView<T>();
+		checkListView.setItems(FXCollections.observableArrayList(choices));
+		checkListView.setMaxSize(0, 100);
 
-        private MissionParameterItem(MissionParameter<?> parameter) {
-            this.parameter = parameter;
-            this.value = defaultValueFor(parameter);
-        }
+		return new AbstractPropertyEditor<Collection<T>, CheckListView<T>>(property, checkListView) {
 
-        @Override
-        public Class<?> getType() {
-            return parameter.placeholder().type();
-        }
+			@Override
+			public void setValue(Collection<T> values) {
+				values.forEach(value -> {
+					getEditor().getCheckModel().check(value);
+				});
+			}
 
-        @Override
-        public String getCategory() {
-            if (parameter.isRequired()) {
-                return "Mandatory";
-            } else {
-                return "Optional";
-            }
-        }
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			protected ObservableValue<Collection<T>> getObservableValue() {
+				ObservableList<T> checkedItems = getEditor().getCheckModel().getCheckedItems();
+				return new SimpleListProperty(checkedItems);
+			}
+			
+			@Override
+			public Collection<T> getValue() {
+				return new ArrayList<>(super.getValue());
+			}
+		};
+	}
 
-        public MissionParameter<?> getParameter() {
-            return this.parameter;
-        }
+	public static class MissionParameterItem implements PropertySheet.Item {
 
-        @Override
-        public String getName() {
-            return parameter.placeholder().name();
-        }
+		private final MissionParameter<?> parameter;
+		private Object value;
 
-        @Override
-        public String getDescription() {
-            return "Specify value for " + parameter.placeholder().name();
-        }
+		private MissionParameterItem(MissionParameter<?> parameter) {
+			this.parameter = parameter;
+			this.value = defaultValueFor(parameter);
+		}
 
-        @Override
-        public Object getValue() {
-            return value;
-        }
+		@Override
+		public Class<?> getType() {
+			return parameter.placeholder().type();
+		}
 
-        @Override
-        public void setValue(Object newValue) {
-            this.value = newValue;
-        }
+		@Override
+		public String getCategory() {
+			if (parameter.isRequired()) {
+				return "Mandatory";
+			} else {
+				return "Optional";
+			}
+		}
 
-        @Override
-        public Optional<ObservableValue<? extends Object>> getObservableValue() {
-            return Optional.empty();
-        }
-    }
+		public MissionParameter<?> getParameter() {
+			return this.parameter;
+		}
+
+		@Override
+		public String getName() {
+			return parameter.placeholder().name();
+		}
+
+		@Override
+		public String getDescription() {
+			return "Specify value for " + parameter.placeholder().name();
+		}
+
+		@Override
+		public Object getValue() {
+			return value;
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			this.value = newValue;
+		}
+
+		@Override
+		public Optional<ObservableValue<? extends Object>> getObservableValue() {
+			return Optional.empty();
+		}
+	}
 
 }
