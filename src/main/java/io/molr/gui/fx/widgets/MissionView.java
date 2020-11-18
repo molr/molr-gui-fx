@@ -12,6 +12,7 @@ import io.molr.gui.fx.commands.ViewMissionInstance;
 import io.molr.gui.fx.perspectives.MissionsPerspective;
 import io.molr.mole.core.api.Mole;
 import javafx.application.Platform;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
@@ -68,7 +69,9 @@ public class MissionView extends BorderPane {
     }
 
     private void addTab(Mission mission, MissionPane seqPane) {
-        Tab tab = new Tab(mission.name(), seqPane);
+    	ScrollPane tabScrollView = new ScrollPane(seqPane);
+    	tabScrollView.setFitToWidth(true);
+        Tab tab = new Tab(mission.name(), tabScrollView);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
     }
