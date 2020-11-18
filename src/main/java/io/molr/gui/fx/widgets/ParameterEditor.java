@@ -5,7 +5,13 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.PropertySheet;
@@ -98,24 +104,43 @@ public class ParameterEditor extends BorderPane {
 	}
 
 	public static final <T> PropertyEditor<?> collectionItemEditor(Item property, final Collection<T> choices) {
-
-		CheckListView<T> checkListView = new CheckListView<T>();
+		
+		final CheckListView<T> checkListView = new CheckListView<T>();
 		checkListView.setItems(FXCollections.observableArrayList(choices));
-		checkListView.setMaxSize(0, 100);
+		
+	    HBox buttonPane = new HBox();
+	    buttonPane.setPadding(new Insets(10, 10, 10, 10));
+	    buttonPane.setSpacing(10);
 
-		return new AbstractPropertyEditor<Collection<T>, CheckListView<T>>(property, checkListView) {
+		Button selectAll = new Button("select all");
+		selectAll.setOnAction(actionEvent -> {
+			checkListView.getCheckModel().checkAll();
+		});
+		buttonPane.getChildren().add(selectAll);
+		
+		Button deselectAll = new Button("deselect all");
+		deselectAll.setOnAction(actionEvent->{
+			checkListView.getCheckModel().clearChecks();
+		});
+		buttonPane.getChildren().add(deselectAll);
+		
+		Pane editorPane = new VBox();
+		editorPane.getChildren().add(checkListView);
+		editorPane.getChildren().add(buttonPane);
+
+		return new AbstractPropertyEditor<Collection<T>, Node>(property, editorPane) {
 
 			@Override
 			public void setValue(Collection<T> values) {
 				values.forEach(value -> {
-					getEditor().getCheckModel().check(value);
+					checkListView.getCheckModel().check(value);
 				});
 			}
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			protected ObservableValue<Collection<T>> getObservableValue() {
-				ObservableList<T> checkedItems = getEditor().getCheckModel().getCheckedItems();
+				ObservableList<T> checkedItems = checkListView.getCheckModel().getCheckedItems();
 				return new SimpleListProperty(checkedItems);
 			}
 			
