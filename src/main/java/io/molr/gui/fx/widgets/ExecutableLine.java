@@ -35,6 +35,7 @@ public class ExecutableLine {
     private final SimpleObjectProperty<Progress> progress = new SimpleObjectProperty<>(this, "progress", Progress.undefined());
     private final SimpleStringProperty cursor = new SimpleStringProperty(this, "cursor");
     private final SimpleObjectProperty<BreakpointCellData> breakpointCellData = new SimpleObjectProperty<>(this, "breakpoint", BreakpointCellData.undefined());
+    private final SimpleObjectProperty<BreakpointCellData> ignoreCellData = new SimpleObjectProperty<>(this, "ignore", BreakpointCellData.undefined());
 
     private final ReadOnlyStringProperty name;
     private final ReadOnlyStringProperty id;
@@ -96,5 +97,8 @@ public class ExecutableLine {
         return this.breakpointCellData;
     }
 
+    public SimpleObjectProperty<BreakpointCellData> ignoreProperty() {
+        return this.ignoreCellData;
+    }
     
 }

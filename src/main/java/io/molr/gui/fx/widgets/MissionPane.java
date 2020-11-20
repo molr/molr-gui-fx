@@ -7,6 +7,7 @@ package io.molr.gui.fx.widgets;
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.util.FormattedButton;
+import io.molr.gui.fx.widgets.breakpoints.BlockAttributeCell;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCellData;
 import io.molr.gui.fx.widgets.progress.Progress;
@@ -244,6 +245,10 @@ public class MissionPane extends BorderPane {
                     BreakpointCellData breakpointCellData = new BreakpointCellData(allowedBlockCommands, breakpoint);
                     ExecutableLine line = e.getValue();
                     line.breakpointProperty().set(breakpointCellData);
+                    
+                    boolean ignoreBlock = missionState.ignoreBlockIds().contains(blockId);
+                    BreakpointCellData ignoreCellData = new BreakpointCellData(allowedBlockCommands, ignoreBlock);
+                    e.getValue().ignoreProperty().set(ignoreCellData);
                 });
 
 
@@ -523,8 +528,18 @@ public class MissionPane extends BorderPane {
             }
         });
         
+        TreeTableColumn<ExecutableLine, BreakpointCellData> ignoreColumn = new TreeTableColumn<>("Ignore");
+        ignoreColumn.setPrefWidth(60);
+        ignoreColumn.setCellValueFactory(nullSafe(ExecutableLine::ignoreProperty));
+        ignoreColumn.setCellFactory(new Callback<TreeTableColumn<ExecutableLine,BreakpointCellData>, TreeTableCell<ExecutableLine,BreakpointCellData>>() {   
+            @Override
+            public TreeTableCell<ExecutableLine, BreakpointCellData> call(TreeTableColumn<ExecutableLine, BreakpointCellData> param) {
+                return new BlockAttributeCell(mole, missionHandle.get(), BlockCommand.SET_IGNORE, BlockCommand.UNSET_IGNORE);
+            }
+        });
+        
         blockTableView.getColumns().add(2, cursorColumn);
-        blockTableView.getColumns().addAll(breakpointColumn, progressColumn, runStateColumn, statusColumn);
+        blockTableView.getColumns().addAll(ignoreColumn, breakpointColumn, progressColumn, runStateColumn, statusColumn);
         blockTableView.getColumns().forEach(c -> c.setSortable(false));
     }
 
