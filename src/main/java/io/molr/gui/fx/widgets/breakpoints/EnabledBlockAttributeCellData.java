@@ -5,14 +5,14 @@ import io.molr.commons.domain.BlockCommand;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BreakpointCellData {
+public class EnabledBlockAttributeCellData {
     
     private static final String TEXT_BREAKPOINT = "X";
     private static final String TEXT_NO_BREAKPOINT = "";
     private final Set<BlockCommand> allowedCommands;
     private final boolean breakpoint;
     
-    public BreakpointCellData(Set<BlockCommand> allowedCommands, boolean breakpoint) {
+    public EnabledBlockAttributeCellData(Set<BlockCommand> allowedCommands, boolean breakpoint) {
         this.allowedCommands = allowedCommands;
         this.breakpoint = breakpoint;
     }
@@ -32,8 +32,8 @@ public class BreakpointCellData {
         return TEXT_NO_BREAKPOINT;
     }
     
-    public static BreakpointCellData undefined() {
-        return new BreakpointCellData(new HashSet<>(), false);
+    public static EnabledBlockAttributeCellData undefined() {
+        return new EnabledBlockAttributeCellData(new HashSet<>(), false);
     }
 
 }

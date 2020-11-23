@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 
-public class BlockAttributeCell extends TreeTableCell<ExecutableLine, BreakpointCellData>{
+public class BlockAttributeCell extends TreeTableCell<ExecutableLine, EnabledBlockAttributeCellData>{
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockAttributeCell.class);
     
@@ -36,7 +36,7 @@ public class BlockAttributeCell extends TreeTableCell<ExecutableLine, Breakpoint
     
     
     @Override
-    protected void updateItem(BreakpointCellData item, boolean empty) {
+    protected void updateItem(EnabledBlockAttributeCellData item, boolean empty) {
 //    	System.out.println("update "+item.allowedCommands());
         super.updateItem(item, empty);
         if(empty) {
