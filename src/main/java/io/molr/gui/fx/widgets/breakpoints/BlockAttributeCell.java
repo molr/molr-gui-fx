@@ -58,7 +58,7 @@ public class BlockAttributeCell extends TreeTableCell<ExecutableLine, Breakpoint
         ContextMenu contextMenu = new ContextMenu();
         System.out.println("attributeCell "+item.allowedCommands());
         if(item.allowedCommands().contains(setCommand)) {
-            MenuItem setBreakpointItem = new MenuItem("set");
+            MenuItem setBreakpointItem = new MenuItem(setCommand.name());
             setBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
                 
                 @Override
@@ -71,7 +71,7 @@ public class BlockAttributeCell extends TreeTableCell<ExecutableLine, Breakpoint
         }
 
         if (item.allowedCommands().contains(unsetCommand)) {
-            MenuItem unsetBreakpointItem = new MenuItem("unset");
+            MenuItem unsetBreakpointItem = new MenuItem(unsetCommand.name());
             unsetBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
