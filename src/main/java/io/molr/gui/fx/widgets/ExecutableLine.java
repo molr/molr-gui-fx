@@ -30,7 +30,7 @@ public class ExecutableLine {
 
     private final Block block;
     private final SimpleObjectProperty<RunState> runState = new SimpleObjectProperty<>(this, "runState",
-            RunState.UNDEFINED);
+            RunState.NOT_STARTED);
     private final SimpleObjectProperty<Result> state = new SimpleObjectProperty<>(this, "state", Result.UNDEFINED);
     private final SimpleObjectProperty<Progress> progress = new SimpleObjectProperty<>(this, "progress", Progress.undefined());
     private final SimpleStringProperty cursor = new SimpleStringProperty(this, "cursor");
@@ -51,7 +51,7 @@ public class ExecutableLine {
             Result result = resultProperty().getValue();
 
             RunState rs = runStateProperty().getValue();
-            if (RunState.UNDEFINED == rs) {
+            if (RunState.NOT_STARTED == rs) {
                 return new Progress(0.0, "", result);
             } else if (FINISHED == rs) {
                 return new Progress(1.0, "" + Objects.toString(rs).toLowerCase(), result);
