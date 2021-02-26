@@ -16,16 +16,21 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 
-public class BreakpointCell extends TreeTableCell<ExecutableLine, EnabledBlockAttributeCellData>{
+public class BlockAttributeCell extends TreeTableCell<ExecutableLine, EnabledBlockAttributeCellData>{
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(BreakpointCell.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockAttributeCell.class);
     
     private Mole mole;
     private MissionHandle handle;
     
-    public BreakpointCell(Mole mole, MissionHandle handle) {
+    private final BlockCommand setCommand;
+    private final BlockCommand unsetCommand;
+    
+    public BlockAttributeCell(Mole mole, MissionHandle handle, BlockCommand setCommand, BlockCommand unsetCommand) {
         this.mole = mole;
         this.handle = handle;
+        this.setCommand = setCommand;
+        this.unsetCommand = unsetCommand;
     }
     
     
@@ -50,28 +55,27 @@ public class BreakpointCell extends TreeTableCell<ExecutableLine, EnabledBlockAt
 
         Block block = line.executable();
         ContextMenu contextMenu = new ContextMenu();
-
-        if(item.allowedCommands().contains(BlockCommand.SET_BREAKPOINT)) {
-            MenuItem setBreakpointItem = new MenuItem("SET_BREAKPOINT");
+        if(item.allowedCommands().contains(setCommand)) {
+            MenuItem setBreakpointItem = new MenuItem(setCommand.name());
             setBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
                 
                 @Override
                 public void handle(ActionEvent event) {
                       LOGGER.info(MessageFormat.format("Set breakpoint for handle={0} block={1}", block.id(), handle));
-                      mole.instructBlock(handle, block.id(), BlockCommand.SET_BREAKPOINT);
+                      mole.instructBlock(handle, block.id(), setCommand);
                 }
             });
             contextMenu.getItems().add(setBreakpointItem);
         }
 
-        if (item.allowedCommands().contains(BlockCommand.UNSET_BREAKPOINT)) {
-            MenuItem unsetBreakpointItem = new MenuItem("UNSET_BREAKPOINT");
+        if (item.allowedCommands().contains(unsetCommand)) {
+            MenuItem unsetBreakpointItem = new MenuItem(unsetCommand.name());
             unsetBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
                 public void handle(ActionEvent event) {
                     LOGGER.info(MessageFormat.format("Unset breakpoint for handle={0} block={1}", block.id(), handle));
-                    mole.instructBlock(handle, block.id(), BlockCommand.UNSET_BREAKPOINT);
+                    mole.instructBlock(handle, block.id(), unsetCommand);
                 }
             });
             contextMenu.getItems().add(unsetBreakpointItem);
