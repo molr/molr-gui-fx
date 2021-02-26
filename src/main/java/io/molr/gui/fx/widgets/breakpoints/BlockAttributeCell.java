@@ -37,7 +37,6 @@ public class BlockAttributeCell extends TreeTableCell<ExecutableLine, EnabledBlo
     
     @Override
     protected void updateItem(EnabledBlockAttributeCellData item, boolean empty) {
-//    	System.out.println("update "+item.allowedCommands());
         super.updateItem(item, empty);
         if(empty) {
             this.setContextMenu(null);
@@ -56,7 +55,6 @@ public class BlockAttributeCell extends TreeTableCell<ExecutableLine, EnabledBlo
 
         Block block = line.executable();
         ContextMenu contextMenu = new ContextMenu();
-        System.out.println("attributeCell "+item.allowedCommands());
         if(item.allowedCommands().contains(setCommand)) {
             MenuItem setBreakpointItem = new MenuItem(setCommand.name());
             setBreakpointItem.setOnAction(new EventHandler<ActionEvent>() {
