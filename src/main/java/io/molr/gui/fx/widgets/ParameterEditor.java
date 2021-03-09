@@ -35,60 +35,73 @@ import static org.controlsfx.control.PropertySheet.Mode.CATEGORY;
 
 public class ParameterEditor extends BorderPane {
 
-    private final Set<MissionParameterItem> parameterItems;
+	private static PropertyEditorFactory customPropertyEditorFactory;
+	
+	private final Set<MissionParameterItem> parameterItems;
 
-    public ParameterEditor(Set<MissionParameter<?>> parameters) {
-        requireNonNull(parameters, "parameters must not be null");
-        this.parameterItems = itemsFrom(parameters);
-        init();
-    }
+	public ParameterEditor(Set<MissionParameter<?>> parameters) {
+		requireNonNull(parameters, "parameters must not be null");
+		this.parameterItems = itemsFrom(parameters);
+		init();
+	}
 
-    private void init() {
-        PropertySheet sheet = new PropertySheet();
-        sheet.getItems().addAll(this.parameterItems);
-        sheet.setMode(CATEGORY);
-        sheet.setModeSwitcherVisible(true);
-        sheet.setSearchBoxVisible(true);
+	private void init() {
+		PropertySheet sheet = new PropertySheet();
+		sheet.getItems().addAll(this.parameterItems);
+		sheet.setMode(CATEGORY);
+		sheet.setModeSwitcherVisible(true);
+		sheet.setSearchBoxVisible(true);
 
-        sheet.setPropertyEditorFactory(this::propertyEditorFor);
+		sheet.setPropertyEditorFactory(this::propertyEditorFor);
 
-        setCenter(sheet);
-    }
+		setCenter(sheet);
+	}
 
-    private PropertyEditor<?> propertyEditorFor(PropertySheet.Item item) {
-        MissionParameterItem parameterItem = (MissionParameterItem) item;
-        if (parameterItem.parameter.isRequired()) {
-            return getPropertyEditor(parameterItem);
-        }
-        return new OptionalMissionParameterPropertyEditor<>(parameterItem, parameterItem.parameter);
-    }
+	private PropertyEditor<?> propertyEditorFor(PropertySheet.Item item) {
+		MissionParameterItem parameterItem = (MissionParameterItem) item;
+		if (parameterItem.parameter.isRequired()) {
+			return getPropertyEditor(parameterItem);
+		}
+		return new OptionalMissionParameterPropertyEditor<>(parameterItem, parameterItem.parameter);
+	}
 
-    public Map<String, Object> parameterValues() {
-        return parameterItems.stream()
-                .filter(item -> !Objects.isNull(item.getValue()))
-                .collect(toMap(item -> item.parameter.placeholder().name(), MissionParameterItem::getValue));
-    }
+	public Map<String, Object> parameterValues() {
+		return parameterItems.stream().filter(item -> !Objects.isNull(item.getValue()))
+				.collect(toMap(item -> item.parameter.placeholder().name(), MissionParameterItem::getValue));
+	}
 
-    private static Set<MissionParameterItem> itemsFrom(Set<MissionParameter<?>> parameters) {
-        return parameters.stream().map(MissionParameterItem::new).collect(toSet());
-    }
+	private static Set<MissionParameterItem> itemsFrom(Set<MissionParameter<?>> parameters) {
+		return parameters.stream().map(MissionParameterItem::new).collect(toSet());
+	}
 
+	public static void registerCustomPropertyEditorFactory(PropertyEditorFactory factoryToBeRegistered) {
+		if(customPropertyEditorFactory!=null) {
+			throw new IllegalStateException("Custom property editor already registered.");
+		}
+		customPropertyEditorFactory = factoryToBeRegistered;
+	}
+	
 	@SuppressWarnings("unchecked")
 	static <T, U> PropertyEditor<T> getPropertyEditor(MissionParameterItem item) {
+		if(customPropertyEditorFactory!=null) {
+			Optional<PropertyEditor<T>> customEditor = customPropertyEditorFactory.editorForItem(item);
+			if(customEditor.isPresent()) {
+				return customEditor.get();
+			}
+		}
+		
 		boolean isCollectionType = Collection.class.isAssignableFrom(item.getType());
 		if (isCollectionType) {
 			MissionParameter<T> param = (MissionParameter<T>) item.getParameter();
-			if(param.allowedValues()!=null) {
-				if(param.allowedValues().size()>0) {
+			if (param.allowedValues() != null) {
+				if (param.allowedValues().size() > 0) {
 					Collection<U> allowedValues = (Collection<U>) item.getParameter().allowedValues().iterator().next();
 					return (PropertyEditor<T>) collectionItemEditor(item, allowedValues);
-				}
-				else {
+				} else {
 					throw new IllegalArgumentException("allowedValues must not be empty " + item);
 				}
-			}
-			else {
-				throw new IllegalArgumentException("allowedValues must not be null for "+item);
+			} else {
+				throw new IllegalArgumentException("allowedValues must not be null for " + item);
 			}
 		}
 		if (!item.parameter.allowedValues().isEmpty()) {
@@ -104,26 +117,26 @@ public class ParameterEditor extends BorderPane {
 	}
 
 	public static final <T> PropertyEditor<?> collectionItemEditor(Item property, final Collection<T> choices) {
-		
+
 		final CheckListView<T> checkListView = new CheckListView<T>();
 		checkListView.setItems(FXCollections.observableArrayList(choices));
-		
-	    HBox buttonPane = new HBox();
-	    buttonPane.setPadding(new Insets(10, 10, 10, 10));
-	    buttonPane.setSpacing(10);
+
+		HBox buttonPane = new HBox();
+		buttonPane.setPadding(new Insets(10, 10, 10, 10));
+		buttonPane.setSpacing(10);
 
 		Button selectAll = new Button("select all");
 		selectAll.setOnAction(actionEvent -> {
 			checkListView.getCheckModel().checkAll();
 		});
 		buttonPane.getChildren().add(selectAll);
-		
+
 		Button deselectAll = new Button("deselect all");
-		deselectAll.setOnAction(actionEvent->{
+		deselectAll.setOnAction(actionEvent -> {
 			checkListView.getCheckModel().clearChecks();
 		});
 		buttonPane.getChildren().add(deselectAll);
-		
+
 		Pane editorPane = new VBox();
 		editorPane.getChildren().add(checkListView);
 		editorPane.getChildren().add(buttonPane);
@@ -138,12 +151,13 @@ public class ParameterEditor extends BorderPane {
 			}
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
+
 			@Override
 			protected ObservableValue<Collection<T>> getObservableValue() {
 				ObservableList<T> checkedItems = checkListView.getCheckModel().getCheckedItems();
 				return new SimpleListProperty(checkedItems);
 			}
-			
+
 			@Override
 			public Collection<T> getValue() {
 				return new ArrayList<>(super.getValue());
