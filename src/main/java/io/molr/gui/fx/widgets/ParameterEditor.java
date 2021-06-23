@@ -8,6 +8,12 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -26,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.molr.commons.util.MissionParameters.defaultValueFor;
 import static java.util.Objects.requireNonNull;
@@ -98,7 +105,8 @@ public class ParameterEditor extends BorderPane {
 					Collection<U> allowedValues = (Collection<U>) item.getParameter().allowedValues().iterator().next();
 					return (PropertyEditor<T>) collectionItemEditor(item, allowedValues);
 				} else {
-					throw new IllegalArgumentException("allowedValues must not be empty " + item);
+					Collection<U> allowed = new ArrayList<>();
+					return (PropertyEditor<T>) customListItemEditor(item, allowed);
 				}
 			} else {
 				throw new IllegalArgumentException("allowedValues must not be null for " + item);
@@ -122,8 +130,7 @@ public class ParameterEditor extends BorderPane {
 		checkListView.setItems(FXCollections.observableArrayList(choices));
 
 		HBox buttonPane = new HBox();
-		buttonPane.setPadding(new Insets(10, 10, 10, 10));
-		buttonPane.setSpacing(10);
+		configureDefaultPaddingSpacing(buttonPane);
 
 		Button selectAll = new Button("select all");
 		selectAll.setOnAction(actionEvent -> {
@@ -163,6 +170,93 @@ public class ParameterEditor extends BorderPane {
 				return new ArrayList<>(super.getValue());
 			}
 		};
+	}
+
+	public static final <T> PropertyEditor<?> customListItemEditor(Item property, final Collection<T> choices) {		
+		
+		ObservableList<String> observableChoices = FXCollections.observableArrayList(choices.stream().map(choice->choice.toString()).collect(Collectors.toList()));
+
+		ListView<String> elements = new ListView<>(observableChoices);
+		elements.setCellFactory(listView->{
+			ListCell<String> cell = new ListCell<>();
+			ContextMenu elementContextMenu = new ContextMenu();
+			
+			MenuItem deleteItem = new MenuItem();
+			deleteItem.textProperty().set("delete");
+			deleteItem.setOnAction(event->{
+				observableChoices.remove(cell.indexProperty().get());
+			});
+			elementContextMenu.getItems().add(deleteItem);
+			
+			
+			cell.textProperty().bind(cell.itemProperty());
+			
+			cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty)->{
+				if(isNowEmpty) {
+					cell.setContextMenu(null);
+				}
+				else {
+					cell.setContextMenu(elementContextMenu);
+				}
+			});
+			
+			return cell;
+		});
+				
+		HBox buttonPane = new HBox();
+		configureDefaultPaddingSpacing(buttonPane);
+
+		Button deleteAllButton = new Button("clear list");
+		deleteAllButton.setOnAction(actionEvent -> {
+			observableChoices.clear();
+		});
+		buttonPane.getChildren().add(deleteAllButton);
+
+		HBox newItemBox = new HBox();
+		configureDefaultPaddingSpacing(newItemBox);
+		Label newItemLabel = new Label("Item:");
+		TextField newItemField = new TextField();
+		newItemBox.getChildren().add(newItemLabel);
+		newItemBox.getChildren().add(newItemField);
+		Button addNewItemButton = new Button("add item");
+		addNewItemButton.setOnAction(actionEvent -> {
+			String itemToAdd = newItemField.getText();
+			observableChoices.add(itemToAdd);
+		});
+		newItemBox.getChildren().add(addNewItemButton);
+
+		Pane editorPane = new VBox();
+		editorPane.getChildren().add(elements);
+		editorPane.getChildren().add(newItemBox);
+		editorPane.getChildren().add(buttonPane);
+
+		return new AbstractPropertyEditor<Collection<T>, Node>(property, editorPane) {
+
+			@Override
+			public void setValue(Collection<T> values) {
+				if(values==null) {
+					return;
+				}
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			protected ObservableValue<Collection<T>> getObservableValue() {
+				return new SimpleListProperty(observableChoices);
+			}
+
+			@Override
+			public Collection<T> getValue() {
+				//super.getValue results in calling getObservableValue above
+				return new ArrayList<>(super.getValue());
+			}
+		};
+
+	}
+
+	private static void configureDefaultPaddingSpacing(HBox buttonPane) {
+		buttonPane.setPadding(new Insets(10, 10, 10, 10));
+		buttonPane.setSpacing(10);
 	}
 
 	public static class MissionParameterItem implements PropertySheet.Item {
