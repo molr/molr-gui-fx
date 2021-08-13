@@ -1,6 +1,6 @@
 package io.molr.gui.fx.widgets;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import static org.controlsfx.glyphfont.FontAwesome.Glyph.PLUS_CIRCLE;
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.FxThreadScheduler;
 import io.molr.gui.fx.commands.ViewMission;
@@ -42,7 +42,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 @Order(1)
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Available")
-@Icon(value = FontAwesomeIcon.PLUS_CIRCLE, color = "green")
+@Icon(value = PLUS_CIRCLE, color = "green")
 public class AvailableMissionsView extends BorderPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvailableMissionsView.class);

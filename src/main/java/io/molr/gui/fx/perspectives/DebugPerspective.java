@@ -5,7 +5,7 @@ import org.minifx.workbench.annotations.Name;
 import org.minifx.workbench.annotations.NoGutters;
 import org.minifx.workbench.domain.Perspective;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.DRIBBBLE;
+import static org.controlsfx.glyphfont.FontAwesome.Glyph.DRIBBBLE;
 
 @Name("Debug")
 @Icon(DRIBBBLE)
