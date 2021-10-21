@@ -1,0 +1,11 @@
+io.molr.gui.fx
+io.molr.gui.fx.app
+io.molr.gui.fx.commands
+io.molr.gui.fx.conf
+io.molr.gui.fx.demo
+io.molr.gui.fx.perspectives
+io.molr.gui.fx.support
+io.molr.gui.fx.util
+io.molr.gui.fx.widgets
+io.molr.gui.fx.widgets.breakpoints
+io.molr.gui.fx.widgets.progress
