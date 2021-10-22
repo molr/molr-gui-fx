@@ -1,6 +1,6 @@
 package io.molr.gui.fx.widgets;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import static org.controlsfx.glyphfont.FontAwesome.Glyph.SITEMAP;
 import io.molr.commons.domain.AgencyState;
 import io.molr.commons.domain.MissionCommand;
 import io.molr.commons.domain.MissionInstance;
@@ -37,7 +37,7 @@ import static org.minifx.workbench.domain.PerspectivePos.LEFT;
 @Component
 @View(at = LEFT, in = MissionsPerspective.class)
 @Name("Instances")
-@Icon(value = FontAwesomeIcon.SITEMAP, color = "blue")
+@Icon(value = SITEMAP, color = "blue")
 @Order(2)
 public class MissionInstancesView extends BorderPane {
 

@@ -1,42 +1,35 @@
 package io.molr.gui.fx.util;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 import static javafx.scene.paint.Color.*;
-
-//import javafx.scene.paint.Color;
 
 public class FormattedButton {
 
     Button butt;
     KeyCode associatedKeyCode = null;
 
-
     public FormattedButton(String buttonText, String buttonGraphic, String colour, int fontSize, KeyCode kc){
         butt = new Button();
         butt.setText(buttonText);
     }
-
+    
     public FormattedButton(String buttonText, String buttonGraphic, String colour){
-        Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
-        nodeIcon.setFill(getColour(colour));
         butt = new Button();
         butt.setText(buttonText);
-        butt.setGraphic(nodeIcon);
+        butt.setGraphic(glyphFor(buttonGraphic, colour));
     }
 
     public FormattedButton(String buttonText, String buttonGraphic){
-        Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
-        butt = new Button();
-        butt.setText(buttonText);
-        butt.setGraphic(nodeIcon);
+        this(buttonText, buttonGraphic, "Black");
     }
 
     public FormattedButton(String buttonText){
@@ -48,11 +41,16 @@ public class FormattedButton {
         return butt;
     }
 
+	private Glyph glyphFor(String buttonGraphic, String color) {
+    	GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
+    	Glyph glyph = fontAwesome.create(getFontAwesomeIcon(buttonGraphic)).color(getColour(color));
+    	return glyph;
+	}
+	 
+    
     private void getButton(String buttonText, String buttonGraphic, String colour, KeyCode kc){
-        Text nodeIcon = FontAwesomeIconFactory.get().createIcon(getFontAwesomeIcon(buttonGraphic));
-        nodeIcon.setFill(getColour(colour));
         butt.setText(buttonText);
-        butt.setGraphic(nodeIcon);
+        butt.setGraphic(glyphFor(buttonGraphic, colour));
         butt.setTooltip(new Tooltip(kc.getName()));
        // assignKeyboardShortcut(kc);
         associatedKeyCode = kc;
@@ -87,52 +85,50 @@ public class FormattedButton {
         }
     }
 
-    private FontAwesomeIcon getFontAwesomeIcon(String icon) {
-
+    private FontAwesome.Glyph getFontAwesomeIcon(String icon) {
+    	System.out.println("calledWithIcon>"+icon);
         switch (icon) {
             case "Show":
-                return CHECK;
+                return FontAwesome.Glyph.CHECK;
             case "Instantiate":
-                return BULLSEYE;
+                return FontAwesome.Glyph.BULLSEYE;
             case "Debug":
-                return BUG;
+                return FontAwesome.Glyph.BUG;
             case "Instances":
-                return AMAZON;
+                return FontAwesome.Glyph.SITEMAP;
             case "Missons":
-                return USER_SECRET;
+                return FontAwesome.Glyph.USER_SECRET;
             case "Start":
-                return PLAY;
+                return FontAwesome.Glyph.PLAY;
             case "Step Into":
-                return SIGN_IN;
+                return FontAwesome.Glyph.SIGN_IN;
             case "Step Over":
-                return SIGN_OUT;
+                return FontAwesome.Glyph.SIGN_OUT;
             case "Step":
-                return SIGN_OUT;
+                return FontAwesome.Glyph.SIGN_OUT;
             case "Stop":
-                return STOP;
+                return FontAwesome.Glyph.STOP;
             case "Pause":
-                return PAUSE;
+                return FontAwesome.Glyph.PAUSE;
             case "Skip":
-                return ANGLE_DOUBLE_DOWN;
+                return FontAwesome.Glyph.ANGLE_DOUBLE_DOWN;
             case "Connect":
-                return PLUG;
+                return FontAwesome.Glyph.PLUG;
             case "PAUSE":
-                return PAUSE;
+                return FontAwesome.Glyph.PAUSE;
             case "STEP_OVER":
-                return SIGN_OUT;
+                return FontAwesome.Glyph.SIGN_OUT;
             case "STEP_INTO":
-                return SIGN_IN;
+                return FontAwesome.Glyph.SIGN_IN;
             case "SKIP":
-                return ANGLE_DOUBLE_DOWN;
+                return FontAwesome.Glyph.ANGLE_DOUBLE_DOWN;
             case "RESUME":
-                return PLAY;
+                return FontAwesome.Glyph.PLAY;
             default:
-                return BEER;
+                return FontAwesome.Glyph.BEER;
 
         }
     }
-
-
 
     private Color getColour(String colour) {
         switch (colour) {
@@ -154,6 +150,5 @@ public class FormattedButton {
                 return Color.BLACK;
         }
     }
-
 
 }
