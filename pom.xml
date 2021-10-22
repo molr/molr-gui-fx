@@ -30,7 +30,6 @@
     </developer>
   </developers>
   
-  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <revision>0.3.14-SNAPSHOT</revision>
@@ -39,14 +38,18 @@
     <spring.boot.version>2.2.10.RELEASE</spring.boot.version>
     <reactor.version>3.3.10.RELEASE</reactor.version>
   </properties>
-  
+
   <distributionManagement>
     <snapshotRepository>
-      <id>csco</id>
-      <name>GSI CSCO snapshot</name>
-      <url>https://artifacts.acc.gsi.de/nexus/content/repositories/csco-snapshot</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>io.molr</groupId>
