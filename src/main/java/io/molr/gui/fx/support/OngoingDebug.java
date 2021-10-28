@@ -2,6 +2,7 @@ package io.molr.gui.fx.support;
 
 import io.molr.commons.domain.Mission;
 import io.molr.commons.domain.MissionHandle;
+import io.molr.gui.fx.widgets.MissionInstanceSetupAndControlPane;
 import io.molr.gui.fx.widgets.MissionPane;
 import io.molr.mole.core.api.Mole;
 import javafx.scene.Scene;
@@ -37,7 +38,7 @@ public class OngoingDebug {
         }
         MissionHandle handle = instantiate(parameters.get());
 
-        MissionPane pane = new MissionPane(mole, mission, handle);
+        MissionInstanceSetupAndControlPane pane = new MissionInstanceSetupAndControlPane(mole, mission, handle);
         Scene scene = new Scene(pane);
         Stage stage = new Stage();
         stage.setScene(scene);

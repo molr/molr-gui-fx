@@ -18,6 +18,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+
 import org.minifx.workbench.annotations.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -25,6 +27,9 @@ import org.springframework.stereotype.Component;
 
 import static org.minifx.workbench.domain.PerspectivePos.CENTER;
 
+/**
+ * Tab pane filled with tabs to setup and control mission instances
+ */
 @View(at = CENTER, in = MissionsPerspective.class)
 @Component
 public class MissionView extends BorderPane {
@@ -44,7 +49,7 @@ public class MissionView extends BorderPane {
     @EventListener
     public void update(ViewMission viewMission) {
         Platform.runLater(() -> {
-            MissionPane seqPane = missionPane(viewMission.mission(), viewMission.description());
+            MissionInstanceSetupAndControlPane seqPane = missionPane(viewMission.mission(), viewMission.description());
             addTab(viewMission.mission(), seqPane);
         });
     }
@@ -63,12 +68,12 @@ public class MissionView extends BorderPane {
     @EventListener
     public void update(ViewMissionInstance viewMissionInstance) {
         Platform.runLater(() -> {
-            MissionPane missionPane = missionPane(viewMissionInstance.missionInstance().mission(), viewMissionInstance.description(), viewMissionInstance.missionInstance().handle());
+        	MissionInstanceSetupAndControlPane missionPane = missionPane(viewMissionInstance.missionInstance().mission(), viewMissionInstance.description(), viewMissionInstance.missionInstance().handle());
             addTab(viewMissionInstance.missionInstance().mission(), missionPane);
         });
     }
 
-    private void addTab(Mission mission, MissionPane seqPane) {
+    private void addTab(Mission mission, Pane seqPane) {
     	ScrollPane tabScrollView = new ScrollPane(seqPane);
     	tabScrollView.setFitToWidth(true);
         Tab tab = new Tab(mission.name(), tabScrollView);
@@ -77,11 +82,14 @@ public class MissionView extends BorderPane {
     }
 
 
-    private MissionPane missionPane(Mission mission, MissionParameterDescription description) {
-        return new MissionPane(mole, mission);
+    /*
+     * Was missionPane
+     */
+    private MissionInstanceSetupAndControlPane missionPane(Mission mission, MissionParameterDescription description) {
+        return new MissionInstanceSetupAndControlPane(mole, mission);
     }
 
-    private MissionPane missionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
-        return new MissionPane(mole, mission, missionHandle);
+    private MissionInstanceSetupAndControlPane missionPane(Mission mission, MissionParameterDescription description, MissionHandle missionHandle) {
+        return new MissionInstanceSetupAndControlPane(mole, mission, missionHandle);
     }
 }

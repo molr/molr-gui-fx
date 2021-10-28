@@ -55,6 +55,15 @@ public class AvailableMissionsView extends BorderPane {
 
     private ListView<Mission> missionListView;
     private ObservableList<Mission> missions = FXCollections.observableArrayList();
+    
+    private boolean showDebugButton = true;
+    
+    public AvailableMissionsView() {
+	}
+    
+    public AvailableMissionsView(boolean showDebugButton) {
+    	this.showDebugButton = showDebugButton;
+    }
 
     @PostConstruct
     public void init() {
@@ -68,7 +77,7 @@ public class AvailableMissionsView extends BorderPane {
             public void handle(MouseEvent event) {
                 if (event.getClickCount() == 2) {
                     //Mission mission = selectedMission();
-                    instantiateSelectedMission();
+                    showSelectedMission();
                 }
             }
         });
@@ -90,14 +99,19 @@ public class AvailableMissionsView extends BorderPane {
 
         FormattedButton showButton = new FormattedButton("Show", "Show", "Green");
         showButton.getButton().setOnAction(event -> showSelectedMission());
+        
+        buttons.getChildren().add(showButton.getButton());
 
-        FormattedButton instantiateButton = new FormattedButton("Instantiate", "Instantiate", "Blue");
-        instantiateButton.getButton().setOnAction(event -> instantiateSelectedMission());
+        if(showDebugButton) {
+            FormattedButton instantiateButton = new FormattedButton("Instantiate", "Instantiate", "Blue");
+            instantiateButton.getButton().setOnAction(event -> instantiateSelectedMission());
+            
+            FormattedButton debugButton = new FormattedButton("Debug", "Debug", "Cyan");
+            debugButton.getButton().setOnAction(event -> debugMission());
+            
+            buttons.getChildren().addAll(instantiateButton.getButton(), debugButton.getButton());
+        }
 
-        FormattedButton debugButton = new FormattedButton("Debug", "Debug", "Cyan");
-        debugButton.getButton().setOnAction(event -> debugMission());
-
-        buttons.getChildren().addAll(showButton.getButton(), instantiateButton.getButton(), debugButton.getButton());
         return buttons;
     }
 
