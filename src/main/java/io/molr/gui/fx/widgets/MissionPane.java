@@ -6,7 +6,6 @@ package io.molr.gui.fx.widgets;
 
 import io.molr.commons.domain.*;
 import io.molr.gui.fx.FxThreadScheduler;
-import io.molr.gui.fx.util.FormattedButton;
 import io.molr.gui.fx.widgets.breakpoints.BlockAttributeCell;
 import io.molr.gui.fx.widgets.breakpoints.BreakpointCell;
 import io.molr.gui.fx.widgets.breakpoints.EnabledBlockAttributeCellData;
@@ -17,7 +16,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -47,16 +45,13 @@ public class MissionPane extends BorderPane {
 
     private BooleanProperty autoFollow = new SimpleBooleanProperty(true);
 
-    private VBox instanceInfo;
     private final AtomicReference<MissionHandle> missionHandle = new AtomicReference<>();
 
     private final SimpleObjectProperty<MissionState> lastState = new SimpleObjectProperty<>();
 
-    private FormattedButton disposeButton;
-
     private final Mole mole;
 
-    MonoProcessor<MissionHandle> handleProcessor = MonoProcessor.create();
+    private final MonoProcessor<MissionHandle> handleProcessor = MonoProcessor.create();
     
     Mono<MissionHandle> missionHandle() {
     	return handleProcessor;
@@ -89,9 +84,6 @@ public class MissionPane extends BorderPane {
     }
 
     private void init() {
-        instanceInfo = new VBox(10);
-        instanceInfo.setPadding(new Insets(10, 10, 10, 10));
-        setTop(new TitledPane("Mission Instance", instanceInfo));
 
         blockTableView = new TreeTableView<>();
         blockTableView.setTableMenuButtonVisible(true);
@@ -118,26 +110,12 @@ public class MissionPane extends BorderPane {
 
         blockTableView.getColumns().addAll(idColumn, executableColumn);
 
-        MissionHandle handle = missionHandle.get();
-        if (handle != null) {
-            configureForInstance(handle);
-        } else {
-        	throw new IllegalStateException("mission instance handle must not be null");
-            //configureInstantiable();
-        }
+        configureForInstance(missionHandle.get());
 
         updateRepresentation(mole.representationOf(this.mission).block());
     }
 
     private void configureForInstance(MissionHandle handle) {
-        instanceInfo.getChildren().setAll(new Label(handle.toString()));
-        disposeButton = new FormattedButton("Dispose", "Instantiate", "Blue");
-        disposeButton.getButton().setDisable(true);
-        disposeButton.getButton().setOnAction(event -> {
-            mole.instruct(handle, MissionCommand.DISPOSE);
-        });
-        instanceInfo.getChildren().add(disposeButton.getButton());
-
         Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(FxThreadScheduler.instance());
         missionStateFlux.subscribe(this::updateStates, error -> {
         }, this::onStatesComplete);
@@ -162,9 +140,7 @@ public class MissionPane extends BorderPane {
     }
 
     private void updateStates(MissionState missionState) {
-        boolean disableDisposeButton = !missionState.allowedMissionCommands().contains(MissionCommand.DISPOSE);
-        disposeButton.getButton().setDisable(disableDisposeButton);
-        
+       
         this.lastState.set(missionState);
 
         cursorAndFollow(missionState);
@@ -191,9 +167,6 @@ public class MissionPane extends BorderPane {
                     EnabledBlockAttributeCellData ignoreCellData = new EnabledBlockAttributeCellData(allowedBlockCommands, ignoreBlock);
                     e.getValue().ignoreProperty().set(ignoreCellData);
                 });
-
-
-//        updateButtonStates();
     }
 
     private void cursorAndFollow(MissionState missionState) {

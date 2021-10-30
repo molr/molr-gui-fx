@@ -12,6 +12,8 @@ public class MissionInstanceSetupAndControlPane extends BorderPane{
 		MissionInstantiationPane instantiationPane = new MissionInstantiationPane(mole, mission);
 		this.setCenter(instantiationPane);
 		instantiationPane.missionHandle().publishOn(FxThreadScheduler.instance()).subscribe(missionHandle->{
+			
+			setTop(new MissionCommandPane(mole, missionHandle));
 			this.setCenter(new MissionPane(mole, mission, missionHandle));
 			addStrandCommandPane(mole, missionHandle);
 			this.setBottom(new OutputPane(mole, missionHandle));
