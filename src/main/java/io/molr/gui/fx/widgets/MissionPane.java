@@ -45,8 +45,6 @@ public class MissionPane extends BorderPane {
 
     private TreeTableView<ExecutableLine> blockTableView;
 
-    private TextArea output;
-
     private BooleanProperty autoFollow = new SimpleBooleanProperty(true);
 
     private VBox instanceInfo;
@@ -62,12 +60,6 @@ public class MissionPane extends BorderPane {
     
     Mono<MissionHandle> missionHandle() {
     	return handleProcessor;
-    }
-    
-    MissionPane(Mole mole, Mission mission) {
-        this.mole = requireNonNull(mole, "mole must not be null");
-        this.mission = requireNonNull(mission, "mission must not be null");
-        init();
     }
 
     MissionPane(Mole mole, Mission mission, MissionHandle missionHandle) {
@@ -130,33 +122,12 @@ public class MissionPane extends BorderPane {
         if (handle != null) {
             configureForInstance(handle);
         } else {
-            configureInstantiable();
+        	throw new IllegalStateException("mission instance handle must not be null");
+            //configureInstantiable();
         }
 
         updateRepresentation(mole.representationOf(this.mission).block());
     }
-
-    private void configureInstantiable() {
-        MissionParameterDescription description = mole.parameterDescriptionOf(mission).block();
-        ParameterEditor parameterEditor = new ParameterEditor(description.parameters());
-        instanceInfo.getChildren().add(parameterEditor);
-
-        FormattedButton instantiateButton = new FormattedButton("Instantiate", "Instantiate", "Blue");
-        instantiateButton.getButton().setOnAction(event -> {
-            instantiateButton.getButton().setDisable(true);
-            this.instantiate(parameterEditor.parameterValues());
-        });
-        instanceInfo.getChildren().add(instantiateButton.getButton());
-    }
-
-    private void instantiate(Map<String, Object> params) {
-        mole.instantiate(mission, params).publishOn(FxThreadScheduler.instance()).subscribe(h -> {
-            this.missionHandle.set(h);
-            configureForInstance(h);
-            handleProcessor.onNext(h);
-        });
-    }
-
 
     private void configureForInstance(MissionHandle handle) {
         instanceInfo.getChildren().setAll(new Label(handle.toString()));
@@ -167,26 +138,13 @@ public class MissionPane extends BorderPane {
         });
         instanceInfo.getChildren().add(disposeButton.getButton());
 
-        Flux<MissionOutput> missionOutputsFlux = mole.outputsFor(handle).publishOn(FxThreadScheduler.instance());
-        missionOutputsFlux.subscribe(output -> {
-        }, error -> {
-        }, this::onOutputsComplete);
         Flux<MissionState> missionStateFlux = mole.statesFor(handle).publishOn(FxThreadScheduler.instance());
         missionStateFlux.subscribe(this::updateStates, error -> {
         }, this::onStatesComplete);
 
-        mole.outputsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateOutput);
         mole.representationsFor(handle).publishOn(FxThreadScheduler.instance()).subscribe(this::updateRepresentation);
 
         addInstanceColumns();
-
-        setBottom(createOutput());
-    }
-    
-    private void onOutputsComplete() {
-        /**
-         * TODO use case?
-         */
     }
     
     private void onStatesComplete() {
@@ -195,11 +153,6 @@ public class MissionPane extends BorderPane {
          * how should we detect and handle, that mission has been disposed in mission pane
          */
         this.setDisable(false);
-    }
-
-    private TitledPane createOutput() {
-        this.output = new TextArea();
-        return new TitledPane("Output", this.output);
     }
 
     private void updateRepresentation(MissionRepresentation representation) {
@@ -309,11 +262,6 @@ public class MissionPane extends BorderPane {
             }
         }
     }
-
-    private void updateOutput(MissionOutput output) {
-        this.output.setText(output.pretty());
-    }
-
 
     private HBox createBlockTableOptions() {
         HBox box = new HBox(10);

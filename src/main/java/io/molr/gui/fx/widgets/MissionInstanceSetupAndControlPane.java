@@ -9,10 +9,12 @@ import javafx.scene.layout.BorderPane;
 public class MissionInstanceSetupAndControlPane extends BorderPane{
 	
 	public MissionInstanceSetupAndControlPane(Mole mole, Mission mission) {
-		MissionPane missionPane = new MissionPane(mole, mission);
-		this.setCenter(missionPane);
-		missionPane.missionHandle().publishOn(FxThreadScheduler.instance()).subscribe(missionHandle->{
+		MissionInstantiationPane instantiationPane = new MissionInstantiationPane(mole, mission);
+		this.setCenter(instantiationPane);
+		instantiationPane.missionHandle().publishOn(FxThreadScheduler.instance()).subscribe(missionHandle->{
+			this.setCenter(new MissionPane(mole, mission, missionHandle));
 			addStrandCommandPane(mole, missionHandle);
+			this.setBottom(new OutputPane(mole, missionHandle));
 		});
 	}
 
